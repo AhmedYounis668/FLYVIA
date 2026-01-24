@@ -8,6 +8,8 @@ import {
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import { useLanguage } from './LanguageProvider'; // استيراد الـ hook
+import { useDispatch } from 'react-redux';
+import { Add_Client_Action } from '../Redux/Actions/ClientAction';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -102,15 +104,27 @@ export const ContactUs = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const dispatch=useDispatch();
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Form validation
-    if (!formData.name || !formData.email || !formData.message) {
-      alert(t('requiredFields'));
+    if (!formData.name || !formData.phone) {
+      alert(t('Enter Your Name Please and Your Phone Number With Country Code Please'));
       return;
     }
+      
+    await dispatch(Add_Client_Action({
+    name:formData.name,
+    email:formData.email||'No Email',
+    phone:formData.phone,
+    whatsappNumber:formData.phone,
+    jobTitle:formData.subject,
+    message:'register from send a message' +' '+ formData.message||'No Message',
+    countryName:'No Country',
     
+    
+    }))
     setIsSubmitting(true);
     
     // Simulate API call
@@ -464,6 +478,22 @@ export const ContactUs = () => {
                     dir={currentLang === 'AR' ? 'rtl' : 'ltr'}
                   />
                 </Form.Group>
+
+
+
+
+                 <Form.Group controlId="formPhone">
+  <Form.Label>{t('phoneTitle')}</Form.Label>
+  <Form.Control
+    type="tel"  // ← تغيير من "phone" إلى "tel"
+    name="phone"  // ← تغيير من "Phone" إلى "phone" (حروف صغيرة)
+    value={formData.phone}
+    onChange={handleChange}
+    placeholder={t('phoneDetails')}
+    required
+    dir={currentLang === 'AR' ? 'rtl' : 'ltr'}
+  />
+</Form.Group>
 
                 <Form.Group controlId="formSubject">
                   <Form.Label>{t('subjectLabel')}</Form.Label>

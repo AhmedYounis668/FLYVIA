@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Form } from 'react-bootstrap';
 import { 
   FaPhone, FaEnvelope, FaMapMarkerAlt, FaPaperPlane,
   FaFacebook, FaTwitter, FaLinkedin, FaInstagram,
@@ -8,13 +8,15 @@ import {
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import { useLanguage } from './LanguageProvider'; // استيراد الـ hook
+import { useDispatch } from 'react-redux';
+import { Add_Client_Action } from '../Redux/Actions/ClientAction';
 
 gsap.registerPlugin(ScrollTrigger);
 
 export const Footer = () => {
   const { currentLang } = useLanguage(); // استخدام الـ hook
   
-  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   
@@ -46,7 +48,7 @@ export const Footer = () => {
       email: "info@flyvia.com",
       stayUpdated: "Stay Updated",
       newsletterText: "Subscribe to our newsletter for the latest updates and insights.",
-      enterEmail: "Enter your email",
+      enterphone: "Enter your Phone",
       subscribe: "Subscribe",
       thankYouSubscribe: "Thank you for subscribing!",
       copyright: `© ${new Date().getFullYear()} FLYVIA. All rights reserved.`,
@@ -77,7 +79,7 @@ export const Footer = () => {
       email: "info@flyvia.com",
       stayUpdated: "ابق على اطلاع",
       newsletterText: "اشترك في نشرتنا الإخبارية للحصول على آخر التحديثات والرؤى.",
-      enterEmail: "أدخل بريدك الإلكتروني",
+      enterphone: "أدخل رقم الهاتف ",
       subscribe: "اشترك",
       thankYouSubscribe: "شكراً لك على الاشتراك!",
       copyright: `© ${new Date().getFullYear()} FLYVIA. جميع الحقوق محفوظة.`,
@@ -119,11 +121,29 @@ export const Footer = () => {
     { icon: <FaYoutube />, href: '#', label: 'YouTube' }
   ];
 
-  const handleSubscribe = (e) => {
+        const dispatch=useDispatch()
+
+        const phonechange=(e)=>{
+          setPhone(e.target.value)
+        }
+  const handleSubscribe =async (e) => {
     e.preventDefault();
-    if (email.trim()) {
-      console.log('Newsletter subscription:', email);
+    if (phone.trim()) {
+      console.log('Phone Newsletter subscription:', phone);
       
+
+   
+await dispatch(Add_Client_Action({
+name:'No Name',
+email:'No Email',
+phone:phone,
+whatsappNumber:phone,
+jobTitle:'No Job Title',
+message:'Register From Footer',
+countryName:'No Country',
+
+
+}))
       // Animation for success
       gsap.fromTo('.newsletter-success',
         { y: -20, opacity: 0 },
@@ -131,7 +151,7 @@ export const Footer = () => {
       );
       
       setSubscribed(true);
-      setEmail('');
+      setPhone('');
       
       // Reset after 3 seconds
       setTimeout(() => {
@@ -273,6 +293,88 @@ export const Footer = () => {
     };
   }, [currentLang]); // أضف currentLang كـ dependency
 
+
+
+
+  // دالة التنقل إلى قسم ContactUs
+const scrollToContact = () => {
+  const contactSection = document.getElementById('contact');
+  
+  if (contactSection) {
+    // إغلاق الفوتر أولاً إذا كان مفتوحاً (إذا كان responsive)
+    const footer = document.querySelector('.footer');
+    if (footer) {
+      footer.style.transition = 'all 0.5s ease';
+      footer.style.opacity = '0.8';
+    }
+    
+    // تنقل سلس مع offset للرأس الثابت
+    const headerHeight = 80; // ارتفاع الهيدر
+    const elementPosition = contactSection.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+    
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth'
+    });
+    
+    // تأثيرات GSAP عند الوصول
+    setTimeout(() => {
+      // إبراز القسم
+      gsap.fromTo(contactSection,
+        {
+          boxShadow: '0 0 0 5px rgba(255, 64, 129, 0.3)',
+          scale: 1.01
+        },
+        {
+          boxShadow: '0 0 0 0 rgba(255, 64, 129, 0)',
+          scale: 1,
+          duration: 1.5,
+          ease: 'power2.out'
+        }
+      );
+      
+      // إبراز النموذج
+      const form = contactSection.querySelector('.contact-form-container-compact');
+      if (form) {
+        gsap.fromTo(form,
+          {
+            border: '2px solid rgba(255, 64, 129, 0.5)',
+            backgroundColor: 'rgba(255, 64, 129, 0.05)'
+          },
+          {
+            border: '2px solid transparent',
+            backgroundColor: 'transparent',
+            duration: 2,
+            ease: 'power2.out'
+          }
+        );
+      }
+      
+      // إعادة الفوتر لحالته الطبيعية
+      if (footer) {
+        footer.style.opacity = '1';
+      }
+    }, 1000);
+  } else {
+    // إذا لم يتم العثور على القسم
+    console.warn('Contact section not found. Make sure ContactUs component has id="contact"');
+    
+    // حاول البحث بطرق أخرى
+    const sections = document.querySelectorAll('section');
+    const contactSections = Array.from(sections).filter(section => 
+      section.textContent.toLowerCase().includes('contact') ||
+      section.querySelector('h2, h1')?.textContent.toLowerCase().includes('contact')
+    );
+    
+    if (contactSections.length > 0) {
+      contactSections[0].scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // العودة إلى الأعلى
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+};
   return (
     <>
       <footer className="footer" ref={footerRef}>
@@ -283,7 +385,7 @@ export const Footer = () => {
               <span className="softy">FLY</span>
               <span className="pinko">VIA</span>
             </div>
-            <p className="footer-tagline" style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}>
+            <p className="footer-tagline" >
               {t('tagline')}
             </p>
           </div>
@@ -294,15 +396,15 @@ export const Footer = () => {
             <div 
               className="footer-column" 
               ref={el => columnsRef.current[0] = el}
-              style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}
+              // style={{ direction: currentLang === 'AR' ? 'ltr' : 'ltr' }}
             >
               <h3>{t('quickLinks')}</h3>
               <ul className="footer-links">
                 {quickLinks.map((link, index) => (
                   <li key={index}>
                     <a href={link.href} style={{ 
-                      flexDirection: currentLang === 'AR' ? 'row-reverse' : 'row',
-                      justifyContent: currentLang === 'AR' ? 'flex-start' : 'flex-start'
+                      // flexDirection: currentLang === 'AR' ? 'row-reverse' : 'row',
+                      // justifyContent: currentLang === 'AR' ? 'flex-start' : 'flex-start'
                     }}>
                       <FaArrowRight style={{ 
                         fontSize: '0.8rem',
@@ -321,15 +423,15 @@ export const Footer = () => {
             <div 
               className="footer-column" 
               ref={el => columnsRef.current[1] = el}
-              style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}
+              // style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}
             >
               <h3>{t('ourServices')}</h3>
               <ul className="footer-links">
                 {services.map((service, index) => (
                   <li key={index}>
                     <a href={service.href} style={{ 
-                      flexDirection: currentLang === 'AR' ? 'row-reverse' : 'row',
-                      justifyContent: currentLang === 'AR' ? 'flex-start' : 'flex-start'
+                      // flexDirection: currentLang === 'AR' ? 'row-reverse' : 'row',
+                      // justifyContent: currentLang === 'AR' ? 'flex-start' : 'flex-start'
                     }}>
                       <FaArrowRight style={{ 
                         fontSize: '0.8rem',
@@ -348,7 +450,7 @@ export const Footer = () => {
             <div 
               className="footer-column" 
               ref={el => columnsRef.current[2] = el}
-              style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}
+              // style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}
             >
               <h3>{t('contactInfo')}</h3>
               <div className="contact-info">
@@ -382,63 +484,72 @@ export const Footer = () => {
             </div>
 
             {/* Newsletter Column */}
-            <div 
-              className="footer-column" 
-              ref={el => columnsRef.current[3] = el}
-              style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}
-            >
-              <h3>{t('stayUpdated')}</h3>
-              <p style={{ 
-                color: 'rgba(255, 255, 255, 0.7)', 
-                marginBottom: '20px',
-                direction: currentLang === 'AR' ? 'rtl' : 'ltr'
-              }}>
-                {t('newsletterText')}
-              </p>
-              
-              <form onSubmit={handleSubscribe} className="newsletter-form">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={t('enterEmail')}
-                  className="newsletter-input"
-                  required
-                  dir={currentLang === 'AR' ? 'rtl' : 'ltr'}
-                  style={{ textAlign: currentLang === 'AR' ? 'right' : 'left' }}
-                />
-                <button type="submit" className="newsletter-btn" style={{ 
-                  flexDirection: currentLang === 'AR' ? 'row-reverse' : 'row'
-                }}>
-                  {t('subscribe')}
-                  <FaPaperPlane style={{ 
-                    marginLeft: currentLang === 'AR' ? '0' : '10px',
-                    marginRight: currentLang === 'AR' ? '10px' : '0'
-                  }} />
-                </button>
-                
-                {subscribed && (
-                  <div className="newsletter-success" style={{
-                    marginTop: '15px',
-                    padding: '12px',
-                    background: 'rgba(212, 237, 218, 0.2)',
-                    color: '#d4edda',
-                    borderRadius: '8px',
-                    textAlign: 'center',
-                    fontSize: '0.9rem',
-                    direction: currentLang === 'AR' ? 'rtl' : 'ltr'
-                  }}>
-                    {t('thankYouSubscribe')}
-                  </div>
-                )}
-              </form>
-            </div>
+           {/* Newsletter Column - Updated to Contact Redirect */}
+<div 
+  className="footer-column" 
+  ref={el => columnsRef.current[3] = el}
+  // style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}
+>
+  <h3>{t('contact')}</h3> {/* تغيير العنوان */}
+  <p style={{ 
+    color: 'rgba(255, 255, 255, 0.7)', 
+    marginBottom: '20px',
+    direction: currentLang === 'AR' ? 'rtl' : 'ltr'
+  }}>
+    {currentLang === 'AR' 
+      ? 'لديك استفسارات أو تحتاج إلى مساعدة؟ تواصل مع فريقنا.' 
+      : 'Have questions or need assistance? Get in touch with our team.'}
+  </p>
+  
+  <div className="contact-redirect" style={{ textAlign: 'center' }}>
+    <button 
+      id='contact' 
+      className="contact-redirect-btn"
+      onClick={scrollToContact}
+      style={{ 
+        flexDirection: currentLang === 'AR' ? 'row-reverse' : 'row',
+        width: '100%',
+        padding: '15px 20px',
+        background: 'linear-gradient(135deg, #ff4081, #7b1fa2)',
+        color: 'white',
+        border: 'none',
+        borderRadius: '8px',
+        fontSize: '1rem',
+        fontWeight: '600',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '10px',
+        transition: 'all 0.3s ease',
+        marginTop: '10px'
+      }}
+      onMouseEnter={(e) => {
+        e.target.style.transform = 'translateY(-3px)';
+        e.target.style.boxShadow = '0 8px 25px rgba(255, 64, 129, 0.4)';
+      }}
+      onMouseLeave={(e) => {
+        e.target.style.transform = 'translateY(0)';
+        e.target.style.boxShadow = 'none';
+      }}
+    >
+      {currentLang === 'AR' ? 'اذهب إلى نموذج الاتصال' : 'Go to Contact Form'}
+      <FaPaperPlane style={{ 
+        marginLeft: currentLang === 'AR' ? '0' : '10px',
+        marginRight: currentLang === 'AR' ? '10px' : '0',
+        fontSize: '0.9rem'
+      }} />
+    </button>
+    
+   
+  </div>
+</div>
           </div>
 
           {/* Footer Bottom */}
           <div className="footer-bottom" style={{ 
-            flexDirection: currentLang === 'AR' ? 'row-reverse' : 'row',
-            textAlign: currentLang === 'AR' ? 'right' : 'left'
+            // flexDirection: currentLang === 'AR' ? 'row-reverse' : 'row',
+            // textAlign: currentLang === 'AR' ? 'right' : 'left'
           }}>
             <div className="copyright" style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}>
               {t('copyright')}

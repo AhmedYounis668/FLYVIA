@@ -8,6 +8,8 @@ import {
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import { useLanguage } from './LanguageProvider';
+import { useDispatch } from 'react-redux';
+import { Add_Client_Action } from '../Redux/Actions/ClientAction';
 
 // Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
@@ -125,12 +127,23 @@ export const HeroSection = () => {
       });
     }
   };
-
-  const handleSubmit = (e) => {
+const dispatch=useDispatch()
+  const handleSubmit =async (e) => {
     e.preventDefault();
     if (phoneNumber.trim()) {
       console.log('Phone number submitted:', phoneNumber);
       
+await dispatch(Add_Client_Action({
+name:'No Name',
+email:'No Email',
+phone:phoneNumber,
+whatsappNumber:phoneNumber,
+jobTitle:'No Job Title',
+message:'Register From Herosection',
+countryName:'No Country',
+
+
+}))
       // Animation عند التسجيل
       gsap.fromTo('.success-message',
         { y: -20, opacity: 0 },
