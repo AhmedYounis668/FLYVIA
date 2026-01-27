@@ -25,7 +25,7 @@
 
 import axios from 'axios'
 
-// const baseurl=axios.create({baseURL:"http://127.0.0.1:8000"})
+const baseurl=axios.create({baseURL:"https://apirender-3.onrender.com/"})
 
 
 
@@ -34,8 +34,8 @@ import axios from 'axios'
 // const baseurl = axios.create({ baseURL: "https://apirender-3.onrender.com" })
 
 
-export const db_url = "https://apirender-3.onrender.com/";
-const baseurl = axios.create({ baseURL: db_url })
+// export const db_url = "https://apirender-3.onrender.com";
+// const baseurl = axios.create({ baseURL: db_url })
 
 
 

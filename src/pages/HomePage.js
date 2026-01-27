@@ -7,12 +7,15 @@ import { ContactUs } from '../component/ContactUs'
 import { FloatingContact } from '../component/FloatingContact'
 import { Footer } from '../component/Footer'
 import { useLanguage } from '../component/LanguageProvider'
+import { CustomNavbar } from '../component/CustomNavbar'
 
 export const HomePage = () => {
   const { currentLang, updateKey } = useLanguage();
 
   return (
     <div>
+                  <CustomNavbar />
+
         <HeroSection key={`hero-${currentLang}-${updateKey}`} />
         <OurServices key={`services-${currentLang}-${updateKey}`} />
         <ClientOpinion key={`opinion-${currentLang}-${updateKey}`} />
