@@ -7,14 +7,14 @@ import {
 } from 'react-icons/fa';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
-import { useLanguage } from './LanguageProvider'; // استيراد الـ hook
+import { useLanguage } from './LanguageProvider';
 import { useDispatch } from 'react-redux';
 import { Add_Client_Action } from '../Redux/Actions/ClientAction';
 
 gsap.registerPlugin(ScrollTrigger);
 
 export const Footer = () => {
-  const { currentLang } = useLanguage(); // استخدام الـ hook
+  const { currentLang } = useLanguage();
   
   const [phone, setPhone] = useState('');
   const [subscribed, setSubscribed] = useState(false);
@@ -121,30 +121,27 @@ export const Footer = () => {
     { icon: <FaYoutube />, href: '#', label: 'YouTube' }
   ];
 
-        const dispatch=useDispatch()
+  const dispatch = useDispatch();
 
-        const phonechange=(e)=>{
-          setPhone(e.target.value)
-        }
-  const handleSubscribe =async (e) => {
+  const phonechange = (e) => {
+    setPhone(e.target.value);
+  };
+
+  const handleSubscribe = async (e) => {
     e.preventDefault();
     if (phone.trim()) {
       console.log('Phone Newsletter subscription:', phone);
-      
 
-   
-await dispatch(Add_Client_Action({
-name:'No Name',
-email:'No Email',
-phone:phone,
-whatsappNumber:phone,
-jobTitle:'No Job Title',
-message:'Register From Footer',
-countryName:'No Country',
+      await dispatch(Add_Client_Action({
+        name: 'No Name',
+        email: 'No Email',
+        phone: phone,
+        whatsappNumber: phone,
+        jobTitle: 'No Job Title',
+        message: 'Register From Footer',
+        countryName: 'No Country',
+      }));
 
-
-}))
-      // Animation for success
       gsap.fromTo('.newsletter-success',
         { y: -20, opacity: 0 },
         { y: 0, opacity: 1, duration: 0.6, ease: 'back.out(1.7)' }
@@ -153,7 +150,6 @@ countryName:'No Country',
       setSubscribed(true);
       setPhone('');
       
-      // Reset after 3 seconds
       setTimeout(() => {
         setSubscribed(false);
       }, 3000);
@@ -166,7 +162,6 @@ countryName:'No Country',
       behavior: 'smooth'
     });
     
-    // Animation feedback
     if (backToTopRef.current) {
       gsap.to(backToTopRef.current, {
         scale: 0.8,
@@ -177,7 +172,6 @@ countryName:'No Country',
     }
   };
 
-  // Show/hide back to top button
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 500) {
@@ -193,7 +187,6 @@ countryName:'No Country',
 
   // GSAP Animations
   useEffect(() => {
-    // Footer animation
     gsap.fromTo(footerRef.current,
       {
         opacity: 0,
@@ -213,7 +206,6 @@ countryName:'No Country',
       }
     );
 
-    // Footer columns animation
     columnsRef.current.forEach((column, index) => {
       if (column) {
         gsap.fromTo(column,
@@ -240,7 +232,6 @@ countryName:'No Country',
       }
     });
 
-    // Link hover animations
     const links = document.querySelectorAll('.footer-links a');
     links.forEach(link => {
       link.addEventListener('mouseenter', () => {
@@ -260,7 +251,6 @@ countryName:'No Country',
       });
     });
 
-    // Social links animation
     const socialIcons = document.querySelectorAll('.social-link');
     socialIcons.forEach((icon, index) => {
       gsap.fromTo(icon,
@@ -291,90 +281,38 @@ countryName:'No Country',
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [currentLang]); // أضف currentLang كـ dependency
+  }, [currentLang]);
 
-
-
-
-  // دالة التنقل إلى قسم ContactUs
-const scrollToContact = () => {
-  const contactSection = document.getElementById('contact');
-  
-  if (contactSection) {
-    // إغلاق الفوتر أولاً إذا كان مفتوحاً (إذا كان responsive)
-    const footer = document.querySelector('.footer');
-    if (footer) {
-      footer.style.transition = 'all 0.5s ease';
-      footer.style.opacity = '0.8';
-    }
+  const scrollToContact = () => {
+    const contactSection = document.getElementById('contact');
     
-    // تنقل سلس مع offset للرأس الثابت
-    const headerHeight = 80; // ارتفاع الهيدر
-    const elementPosition = contactSection.getBoundingClientRect().top;
-    const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
-    
-    window.scrollTo({
-      top: offsetPosition,
-      behavior: 'smooth'
-    });
-    
-    // تأثيرات GSAP عند الوصول
-    setTimeout(() => {
-      // إبراز القسم
-      gsap.fromTo(contactSection,
-        {
-          boxShadow: '0 0 0 5px rgba(255, 64, 129, 0.3)',
-          scale: 1.01
-        },
-        {
-          boxShadow: '0 0 0 0 rgba(255, 64, 129, 0)',
-          scale: 1,
-          duration: 1.5,
-          ease: 'power2.out'
-        }
-      );
+    if (contactSection) {
+      const headerHeight = 80;
+      const elementPosition = contactSection.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
       
-      // إبراز النموذج
-      const form = contactSection.querySelector('.contact-form-container-compact');
-      if (form) {
-        gsap.fromTo(form,
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+      
+      setTimeout(() => {
+        gsap.fromTo(contactSection,
           {
-            border: '2px solid rgba(255, 64, 129, 0.5)',
-            backgroundColor: 'rgba(255, 64, 129, 0.05)'
+            boxShadow: '0 0 0 5px rgba(255, 64, 129, 0.3)',
+            scale: 1.01
           },
           {
-            border: '2px solid transparent',
-            backgroundColor: 'transparent',
-            duration: 2,
+            boxShadow: '0 0 0 0 rgba(255, 64, 129, 0)',
+            scale: 1,
+            duration: 1.5,
             ease: 'power2.out'
           }
         );
-      }
-      
-      // إعادة الفوتر لحالته الطبيعية
-      if (footer) {
-        footer.style.opacity = '1';
-      }
-    }, 1000);
-  } else {
-    // إذا لم يتم العثور على القسم
-    console.warn('Contact section not found. Make sure ContactUs component has id="contact"');
-    
-    // حاول البحث بطرق أخرى
-    const sections = document.querySelectorAll('section');
-    const contactSections = Array.from(sections).filter(section => 
-      section.textContent.toLowerCase().includes('contact') ||
-      section.querySelector('h2, h1')?.textContent.toLowerCase().includes('contact')
-    );
-    
-    if (contactSections.length > 0) {
-      contactSections[0].scrollIntoView({ behavior: 'smooth' });
-    } else {
-      // العودة إلى الأعلى
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 1000);
     }
-  }
-};
+  };
+
   return (
     <>
       <footer className="footer" ref={footerRef}>
@@ -385,7 +323,7 @@ const scrollToContact = () => {
               <span className="softy">FLY</span>
               <span className="pinko">VIA</span>
             </div>
-            <p className="footer-tagline" >
+            <p className="footer-tagline">
               {t('tagline')}
             </p>
           </div>
@@ -396,22 +334,18 @@ const scrollToContact = () => {
             <div 
               className="footer-column" 
               ref={el => columnsRef.current[0] = el}
-              // style={{ direction: currentLang === 'AR' ? 'ltr' : 'ltr' }}
             >
-              <h3>{t('quickLinks')}</h3>
+              <div className="footer-title-wrapper">
+                <h3 className="footer-column-title">
+                  {t('quickLinks')}
+                  <span className="footer-title-line"></span>
+                </h3>
+              </div>
               <ul className="footer-links">
                 {quickLinks.map((link, index) => (
                   <li key={index}>
-                    <a href={link.href} style={{ 
-                      // flexDirection: currentLang === 'AR' ? 'row-reverse' : 'row',
-                      // justifyContent: currentLang === 'AR' ? 'flex-start' : 'flex-start'
-                    }}>
-                      <FaArrowRight style={{ 
-                        fontSize: '0.8rem',
-                        marginLeft: currentLang === 'AR' ? '10px' : '0',
-                        marginRight: currentLang === 'AR' ? '0' : '10px',
-                        transform: currentLang === 'AR' ? 'rotate(180deg)' : 'none'
-                      }} />
+                    <a href={link.href}>
+                      <FaArrowRight className={`footer-link-arrow ${currentLang === 'AR' ? 'rtl-arrow' : ''}`} />
                       {link.label}
                     </a>
                   </li>
@@ -423,22 +357,18 @@ const scrollToContact = () => {
             <div 
               className="footer-column" 
               ref={el => columnsRef.current[1] = el}
-              // style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}
             >
-              <h3>{t('ourServices')}</h3>
+              <div className="footer-title-wrapper">
+                <h3 className="footer-column-title">
+                  {t('ourServices')}
+                  <span className="footer-title-line"></span>
+                </h3>
+              </div>
               <ul className="footer-links">
                 {services.map((service, index) => (
                   <li key={index}>
-                    <a href={service.href} style={{ 
-                      // flexDirection: currentLang === 'AR' ? 'row-reverse' : 'row',
-                      // justifyContent: currentLang === 'AR' ? 'flex-start' : 'flex-start'
-                    }}>
-                      <FaArrowRight style={{ 
-                        fontSize: '0.8rem',
-                        marginLeft: currentLang === 'AR' ? '10px' : '0',
-                        marginRight: currentLang === 'AR' ? '0' : '10px',
-                        transform: currentLang === 'AR' ? 'rotate(180deg)' : 'none'
-                      }} />
+                    <a href={service.href}>
+                      <FaArrowRight className={`footer-link-arrow ${currentLang === 'AR' ? 'rtl-arrow' : ''}`} />
                       {service.label}
                     </a>
                   </li>
@@ -450,9 +380,13 @@ const scrollToContact = () => {
             <div 
               className="footer-column" 
               ref={el => columnsRef.current[2] = el}
-              // style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}
             >
-              <h3>{t('contactInfo')}</h3>
+              <div className="footer-title-wrapper">
+                <h3 className="footer-column-title">
+                  {t('contactInfo')}
+                  <span className="footer-title-line"></span>
+                </h3>
+              </div>
               <div className="contact-info">
                 <div className="contact-item">
                   <FaMapMarkerAlt />
@@ -468,7 +402,6 @@ const scrollToContact = () => {
                 </div>
               </div>
 
-              {/* Social Media */}
               <div className="social-links">
                 {socialLinks.map((social, index) => (
                   <a
@@ -483,82 +416,45 @@ const scrollToContact = () => {
               </div>
             </div>
 
-            {/* Newsletter Column */}
-           {/* Newsletter Column - Updated to Contact Redirect */}
-<div 
-  className="footer-column" 
-  ref={el => columnsRef.current[3] = el}
-  // style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}
->
-  <h3>{t('contact')}</h3> {/* تغيير العنوان */}
-  <p style={{ 
-    color: 'rgba(255, 255, 255, 0.7)', 
-    marginBottom: '20px',
-    direction: currentLang === 'AR' ? 'rtl' : 'ltr'
-  }}>
-    {currentLang === 'AR' 
-      ? 'لديك استفسارات أو تحتاج إلى مساعدة؟ تواصل مع فريقنا.' 
-      : 'Have questions or need assistance? Get in touch with our team.'}
-  </p>
-  
-  <div className="contact-redirect" style={{ textAlign: 'center' }}>
-    <button 
-      id='contact' 
-      className="contact-redirect-btn"
-      onClick={scrollToContact}
-      style={{ 
-        flexDirection: currentLang === 'AR' ? 'row-reverse' : 'row',
-        width: '100%',
-        padding: '15px 20px',
-        background: 'linear-gradient(135deg, #ff4081, #7b1fa2)',
-        color: 'white',
-        border: 'none',
-        borderRadius: '8px',
-        fontSize: '1rem',
-        fontWeight: '600',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '10px',
-        transition: 'all 0.3s ease',
-        marginTop: '10px'
-      }}
-      onMouseEnter={(e) => {
-        e.target.style.transform = 'translateY(-3px)';
-        e.target.style.boxShadow = '0 8px 25px rgba(255, 64, 129, 0.4)';
-      }}
-      onMouseLeave={(e) => {
-        e.target.style.transform = 'translateY(0)';
-        e.target.style.boxShadow = 'none';
-      }}
-    >
-      {currentLang === 'AR' ? 'اذهب إلى نموذج الاتصال' : 'Go to Contact Form'}
-      <FaPaperPlane style={{ 
-        marginLeft: currentLang === 'AR' ? '0' : '10px',
-        marginRight: currentLang === 'AR' ? '10px' : '0',
-        fontSize: '0.9rem'
-      }} />
-    </button>
-    
-   
-  </div>
-</div>
+            {/* Contact Column */}
+            <div 
+              className="footer-column" 
+              ref={el => columnsRef.current[3] = el}
+            >
+              <div className="footer-title-wrapper">
+                <h3 className="footer-column-title">
+                  {t('contact')}
+                  <span className="footer-title-line"></span>
+                </h3>
+              </div>
+              <p className="contact-description">
+                {currentLang === 'AR' 
+                  ? 'لديك استفسارات أو تحتاج إلى مساعدة؟ تواصل مع فريقنا.' 
+                  : 'Have questions or need assistance? Get in touch with our team.'}
+              </p>
+              
+              <div className="contact-redirect">
+                <button 
+                  className="contact-redirect-btn"
+                  onClick={scrollToContact}
+                >
+                  {currentLang === 'AR' ? 'اذهب إلى نموذج الاتصال' : 'Go to Contact Form'}
+                  <FaPaperPlane className={`contact-btn-icon ${currentLang === 'AR' ? 'rtl-icon' : ''}`} />
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Footer Bottom */}
-          <div className="footer-bottom" style={{ 
-            // flexDirection: currentLang === 'AR' ? 'row-reverse' : 'row',
-            // textAlign: currentLang === 'AR' ? 'right' : 'left'
-          }}>
-            <div className="copyright" style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}>
+          <div className="footer-bottom">
+            <div className="copyright">
               {t('copyright')}
             </div>
-            <div className="footer-legal" style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}>
-              <a href="#" style={{ marginLeft: currentLang === 'AR' ? '25px' : '0', marginRight: currentLang === 'AR' ? '0' : '25px' }}>
+            <div className="footer-legal">
+              <a href="#">
                 {t('privacyPolicy')}
               </a>
-              <a href="#" style={{ marginLeft: currentLang === 'AR' ? '25px' : '0', marginRight: currentLang === 'AR' ? '0' : '25px' }}>
+              <a href="#">
                 {t('termsService')}
               </a>
               <a href="#">
@@ -569,7 +465,6 @@ const scrollToContact = () => {
         </Container>
       </footer>
 
-      {/* Back to Top Button */}
       <button
         ref={backToTopRef}
         className={`back-to-top ${showBackToTop ? 'visible' : ''}`}

@@ -14,15 +14,14 @@ export const HomePage = () => {
 
   return (
     <div>
-                  <CustomNavbar />
 
         <HeroSection key={`hero-${currentLang}-${updateKey}`} />
         <OurServices key={`services-${currentLang}-${updateKey}`} />
         <ClientOpinion key={`opinion-${currentLang}-${updateKey}`} />
         <Blogs key={`blogs-${currentLang}-${updateKey}`} />
         <ContactUs key={`contact-${currentLang}-${updateKey}`} />
-        <FloatingContact key={`floating-${currentLang}-${updateKey}`} />
-        <Footer key={`footer-${currentLang}-${updateKey}`} />
+        {/* <FloatingContact key={`floating-${currentLang}-${updateKey}`} /> */}
+        {/* <Footer key={`footer-${currentLang}-${updateKey}`} /> */}
     </div>
   )
 }

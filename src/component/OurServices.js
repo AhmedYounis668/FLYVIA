@@ -1,15 +1,14 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useMemo } from 'react'
 import { Col, Container, Row } from 'react-bootstrap'
 import { FaChartLine, FaUsers, FaLightbulb, FaArrowRight } from 'react-icons/fa';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
-import { useLanguage } from './LanguageProvider'; // استيراد الـ hook
+import { useLanguage } from './LanguageProvider';
 
-// Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
 
 export const OurServices = () => {
-  const { currentLang } = useLanguage(); // استخدام الـ hook
+  const { currentLang } = useLanguage();
   
   const cardsRef = useRef([]);
   const sectionTitleRef = useRef(null);
@@ -46,7 +45,8 @@ export const OurServices = () => {
     return translations[currentLang][key] || translations.EN[key];
   };
 
-  const cardsData = [
+  // تعريف cardsData باستخدام useMemo
+  const cardsData = useMemo(() => [
     {
       id: 1,
       icon: <FaChartLine />,
@@ -68,10 +68,13 @@ export const OurServices = () => {
       description: t('innovationDesc'),
       color: "#FF9800"
     }
-  ];
+  ], [currentLang]);
 
   // GSAP Animations
   useEffect(() => {
+    // تنظيف الـ refs القديمة
+    cardsRef.current = cardsRef.current.slice(0, cardsData.length);
+
     // Animation للعنوان
     if (sectionTitleRef.current) {
       gsap.fromTo(sectionTitleRef.current,
@@ -156,7 +159,7 @@ export const OurServices = () => {
     // Card hover animations
     const cardElements = document.querySelectorAll('.feature-card-under');
     cardElements.forEach(card => {
-      card.addEventListener('mouseenter', () => {
+      const mouseEnterHandler = () => {
         gsap.to(card, {
           y: -15,
           duration: 0.4,
@@ -187,9 +190,9 @@ export const OurServices = () => {
           boxShadow: '0 25px 70px rgba(0, 0, 0, 0.15)',
           duration: 0.3
         });
-      });
+      };
       
-      card.addEventListener('mouseleave', () => {
+      const mouseLeaveHandler = () => {
         gsap.to(card, {
           y: 0,
           duration: 0.4,
@@ -209,14 +212,51 @@ export const OurServices = () => {
           boxShadow: '0 15px 50px rgba(0, 0, 0, 0.08)',
           duration: 0.3
         });
-      });
+      };
+      
+      card.addEventListener('mouseenter', mouseEnterHandler);
+      card.addEventListener('mouseleave', mouseLeaveHandler);
+      
+      // Cleanup
+      return () => {
+        card.removeEventListener('mouseenter', mouseEnterHandler);
+        card.removeEventListener('mouseleave', mouseLeaveHandler);
+      };
     });
 
     // Cleanup
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [currentLang]); // أضف currentLang كـ dependency
+  }, [currentLang, cardsData]);
+
+  // Animation للنصوص عند تغيير اللغة
+  useEffect(() => {
+    const elementsToAnimate = [
+      sectionTitleRef.current,
+      sectionSubtitleRef.current,
+      ...cardsRef.current.filter(card => card)
+    ].filter(el => el);
+
+    if (elementsToAnimate.length > 0) {
+      gsap.to(elementsToAnimate, {
+        opacity: 0,
+        duration: 0.2,
+        stagger: 0.05,
+        onComplete: () => {
+          gsap.fromTo(elementsToAnimate,
+            { opacity: 0 },
+            {
+              opacity: 1,
+              duration: 0.3,
+              stagger: 0.05,
+              ease: 'power2.out'
+            }
+          );
+        }
+      });
+    }
+  }, [currentLang, cardsData]);
 
   return (
     <div>
@@ -224,31 +264,34 @@ export const OurServices = () => {
         <Container fluid="lg">
           <Row className="justify-content-center">
             <Col xl={10} lg={11} md={12} className="text-center">
-              <h2 className="cards-section-title" ref={sectionTitleRef}>
+              <h2 className="cards-section-title center-text" ref={sectionTitleRef}>
                 {t('sectionTitle')}
               </h2>
-              <p className="cards-section-subtitle" ref={sectionSubtitleRef}>
+              <p className="cards-section-subtitle center-text" ref={sectionSubtitleRef}>
                 {t('sectionSubtitle')}
               </p>
             </Col>
           </Row>
-          <Row className="justify-content-center cards-row">
+          <Row 
+            className="justify-content-center cards-row"
+            key={`services-cards-${currentLang}`}
+          >
             {cardsData.map((card, index) => (
               <Col lg={4} md={6} sm={12} key={card.id} className="mb-4">
                 <div 
-                  className="feature-card-under"
+                  className="feature-card-under center-text"
                   ref={el => cardsRef.current[index] = el}
                 >
                   <div 
-                    className="card-icon-under" 
+                    className="card-icon-under center-icon" 
                     style={{ backgroundColor: `${card.color}15`, color: card.color }}
                   >
                     {card.icon}
                   </div>
-                  <h4 className="card-title-under">{card.title}</h4>
-                  <p className="card-description-under">{card.description}</p>
-                  <div className="card-line-under" style={{ backgroundColor: card.color }}></div>
-                  <div className="card-link-under">
+                  <h4 className="card-title-under center-text">{card.title}</h4>
+                  <p className="card-description-under center-text">{card.description}</p>
+                  <div className="card-line-under center-line" style={{ backgroundColor: card.color }}></div>
+                  <div className="card-link-under center-link">
                     <span>{t('learnMore')}</span>
                     <FaArrowRight className="arrow-icon-under" />
                   </div>

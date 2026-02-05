@@ -45,11 +45,11 @@ export const CustomNavbar = () => {
   };
 
   const navItems = [
-    { href: '#home', id: 'home' },
-    { href: '#about', id: 'about' },
-    { href: '#testimonials', id: 'testimonials' },
-    { href: '#blog', id: 'blog' },
-    { href: '#contact', id: 'contact' }
+    { id: 'home', sectionId: 'home' },
+    { id: 'about', sectionId: 'about' },
+    { id: 'testimonials', sectionId: 'testimonials' },
+    { id: 'blog', sectionId: 'blog' },
+    { id: 'contact', sectionId: 'contact' }
   ];
 
   const getText = (id) => {
@@ -116,7 +116,6 @@ export const CustomNavbar = () => {
       );
     });
 
-    // زر اللغة في الديسكتوب (للسكرينات الكبيرة فقط)
     const langNavItem = document.querySelector('.lang-nav-item');
     if (langNavItem) {
       gsap.fromTo(langNavItem,
@@ -241,34 +240,28 @@ export const CustomNavbar = () => {
     }
   };
 
-  const handleChangeLanguage = (lang) => {
+  const handleChangeLanguage = (lang, closeMenu = true) => {
     if (lang === currentLang || isSwitchingLang) return;
     
     setIsSwitchingLang(true);
     
-    // تنظيف GSAP animations قبل التغيير
     ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     gsap.globalTimeline.clear();
     
-    // حفظ اللغة الجديدة في localStorage أولاً
     localStorage.setItem('appLanguage', lang);
     
-    // إغلاق القائمة المنسدلة إذا كانت مفتوحة
     setShowLangDropdown(false);
     
-    // إغلاق القائمة المتنقلة إذا كانت مفتوحة
-    if (menuOpen) {
+    if (closeMenu && menuOpen) {
       setMenuOpen(false);
       document.body.style.overflow = 'auto';
     }
     
-    // تغيير اللغة مع انيميشن سريع
     changeLanguage(lang);
     
-    // بعد 200ms ثانية، عمل refresh للصفحة
     setTimeout(() => {
-      window.location.reload();
-    }, 200);
+      setIsSwitchingLang(false);
+    }, 500);
   };
 
   const toggleLanguageSwitch = () => {
@@ -314,31 +307,80 @@ export const CustomNavbar = () => {
     };
   }, []);
 
+  // دالة للتنقل إلى السكاشن
+  const scrollToSection = (sectionId, e) => {
+    if (e) {
+      e.preventDefault();
+    }
+    
+    // إغلاق القائمة المتنقلة إذا كانت مفتوحة
+    if (menuOpen) {
+      setMenuOpen(false);
+      document.body.style.overflow = 'auto';
+    }
+    
+    // البحث عن العنصر
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const headerHeight = 80; // ارتفاع الـ navbar
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+      
+      // تحديث الـ URL بدون إعادة تحميل الصفحة
+      window.history.pushState(null, '', `/#${sectionId}`);
+    }
+  };
+
+  // دالة للعودة للرئيسية
+  const scrollToHome = (e) => {
+    if (e) {
+      e.preventDefault();
+    }
+    
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+    
+    window.history.pushState(null, '', '/#');
+  };
+
   return (
     <>
       <div className="custom-navbar-wrapper">
         <nav className={`custom-navbar ${scrolled ? 'scrolled' : ''}`} ref={navbarRef}>
-          <img 
-            className='navbar-brand-custom' 
-            ref={brandRef} 
-            style={{width:'120px',height:'120px'}} 
-            src={logo} 
-            alt='logo'
-          />
+          <a 
+            href="/" 
+            className="navbar-brand-link"
+            onClick={scrollToHome}
+          >
+            <img 
+              className='navbar-brand-custom' 
+              ref={brandRef} 
+              style={{width:'120px',height:'120px'}} 
+              src={logo} 
+              alt='logo'
+            />
+          </a>
           
           {/* Desktop Menu - للشاشات الكبيرة فقط */}
           <div className="nav-menu">
             {navItems.map((item, index) => (
               <a 
                 key={index}
-                href={item.href} 
+                href={`#${item.sectionId}`}
                 className={`nav-link-custom ${index === 0 ? 'active' : ''}`}
+                onClick={(e) => scrollToSection(item.sectionId, e)}
               >
                 {getText(item.id)}
               </a>
             ))}
             
-            {/* زر اللغة للديسكتوب فقط (للسكرينات الكبيرة) */}
             <div className="lang-nav-item desktop-only" onClick={toggleLangDropdown}>
               <button 
                 className="lang-nav-btn"
@@ -354,14 +396,14 @@ export const CustomNavbar = () => {
                 <div className="lang-dropdown" ref={langDropdownRef}>
                   <button 
                     className={`lang-option ${currentLang === 'EN' ? 'active' : ''}`}
-                    onClick={() => handleChangeLanguage('EN')}
+                    onClick={() => handleChangeLanguage('EN', false)}
                   >
                     <span className="lang-flag">🇬🇧</span>
                     <span>{getText('english')}</span>
                   </button>
                   <button 
                     className={`lang-option ${currentLang === 'AR' ? 'active' : ''}`}
-                    onClick={() => handleChangeLanguage('AR')}
+                    onClick={() => handleChangeLanguage('AR', false)}
                   >
                     <span className="lang-flag">🇸🇦</span>
                     <span>{getText('arabic')}</span>
@@ -371,7 +413,6 @@ export const CustomNavbar = () => {
             </div>
           </div>
           
-          {/* Hamburger Button */}
           <button 
             className={`hamburger-btn-custom ${menuOpen ? 'active' : ''}`}
             ref={hamburgerRef}
@@ -386,77 +427,65 @@ export const CustomNavbar = () => {
         </nav>
       </div>
       
-      {/* Mobile Menu Overlay */}
       <div 
         className={`mobile-menu-overlay ${menuOpen ? 'open' : ''}`}
         onClick={toggleMenu}
       />
       
-      {/* Mobile Menu - للشاشات الصغيرة */}
       <div className={`mobile-menu ${menuOpen ? 'open' : ''}`}>
         {navItems.map((item, index) => (
           <a 
             key={index}
-            href={item.href} 
+            href={`#${item.sectionId}`}
             className={`nav-link-custom ${index === 0 ? 'active' : ''}`}
-            onClick={toggleMenu}
+            onClick={(e) => {
+              scrollToSection(item.sectionId, e);
+              toggleMenu();
+            }}
           >
             {getText(item.id)}
           </a>
         ))}
         
-        {/* زر اللغة في القائمة المتنقلة (Mobile Menu) */}
-       <div className="mobile-language-switch">
-  {/* <div className="mobile-language-header">
-    <FaGlobe className="mobile-language-icon" />
-    <span className="mobile-language-title">{getText('changeLanguage')}</span>
-  </div> */}
-  
-  {/* تصميم التبديل الحديث */}
-  <div className="modern-language-toggle">
-    {/* زر التبديل */}
-    <button
-      className={`modern-toggle-btn ${isSwitchingLang ? 'switching' : ''}`}
-      onClick={() => {
-        const newLang = currentLang === 'EN' ? 'AR' : 'EN';
-        handleChangeLanguage(newLang);
-        toggleMenu();
-      }}
-      disabled={isSwitchingLang}
-    >
-      {/* الجزء الخلفي المتحرك */}
-      <div className="toggle-background">
-        {/* الدائرة المنزلقة */}
-        <div className={`toggle-slider ${currentLang === 'EN' ? 'left' : 'right'}`}>
-          <span className="slider-flag">
-            {currentLang === 'EN' ? 'EN' : 'AR'}
-          </span>
+        <div className="mobile-language-switch">
+          <div className="modern-language-toggle">
+            <button
+              className={`modern-toggle-btn ${isSwitchingLang ? 'switching' : ''}`}
+              onClick={() => {
+                const newLang = currentLang === 'EN' ? 'AR' : 'EN';
+                handleChangeLanguage(newLang, true);
+              }}
+              disabled={isSwitchingLang}
+            >
+              <div className="toggle-background">
+                <div className={`toggle-slider ${currentLang === 'EN' ? 'left' : 'right'}`}>
+                  <span className="slider-flag">
+                    {currentLang === 'EN' ? '🇬🇧' : '🇸🇦'}
+                  </span>
+                </div>
+                
+                <div className="toggle-labels">
+                  <span className={`label-left ${currentLang === 'EN' ? 'active' : ''}`}>
+                    EN
+                  </span>
+                  <span className={`label-right ${currentLang === 'AR' ? 'active' : ''}`}>
+                    AR
+                  </span>
+                </div>
+              </div>
+              
+              <div className="toggle-text">
+                <span className="current-lang-name">
+                  {getText(currentLang === 'EN' ? 'english' : 'arabic')}
+                </span>
+                <FaExchangeAlt className="toggle-icon" />
+                <span className="target-lang-name">
+                  {getText(currentLang === 'EN' ? 'arabic' : 'english')}
+                </span>
+              </div>
+            </button>
+          </div>
         </div>
-        
-        {/* العلامات الثابتة */}
-        <div className="toggle-labels">
-          <span className={`label-left ${currentLang === 'EN' ? 'active' : ''}`}>
-            🇬🇧
-          </span>
-          <span className={`label-right ${currentLang === 'AR' ? 'active' : ''}`}>
-            🇸🇦
-          </span>
-        </div>
-      </div>
-      
-      {/* النص التوضيحي */}
-      <div className="toggle-text">
-        <span className="current-lang-name">
-          {getText(currentLang === 'EN' ? 'english' : 'arabic')}
-        </span>
-        <FaExchangeAlt className="toggle-icon" />
-        <span className="target-lang-name">
-          {getText(currentLang === 'EN' ? 'arabic' : 'english')}
-        </span>
-      </div>
-    </button>
-  </div>
-</div>
       </div>
     </>
   );

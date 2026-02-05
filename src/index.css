@@ -5308,3 +5308,617 @@ html {
 .dashboard-container > * {
     animation: fadeIn 0.5s ease-out;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+/* في ملف CSS */
+/* RTL Styles */
+.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+/* RTL adjustments for HeroSection */
+.rtl .brand-name {
+  direction: ltr; /* Keep brand name LTR even in RTL */
+}
+
+.rtl .phone-input-group {
+  flex-direction: row-reverse;
+}
+
+.rtl .input-icon {
+  margin-right: 0;
+  margin-left: 15px;
+  border-left: none;
+  border-right: 2px solid rgba(255, 255, 255, 0.3);
+  padding-left: 0;
+  padding-right: 15px;
+}
+
+.rtl .about-us-link {
+  flex-direction: row-reverse;
+}
+
+.rtl .about-us-arrow {
+  transform: rotate(180deg);
+  margin-right: 8px;
+  margin-left: 0;
+}
+
+/* Adjust animations for RTL */
+.rtl .about-us-card:hover .about-us-icon {
+  transform: rotateY(-180deg) !important; /* Reverse for RTL */
+}
+
+/* Form adjustments */
+.rtl .phone-form .input-group-wrapper {
+  flex-direction: row-reverse;
+}
+
+
+
+
+
+
+
+
+
+/* Mobile Language Switch Styles */
+.mobile-language-switch {
+  margin: 20px 15px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modern-language-toggle {
+  width: 100%;
+}
+
+.modern-toggle-btn {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.modern-toggle-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.modern-toggle-btn.switching .toggle-slider {
+  animation: pulse 0.5s infinite alternate;
+}
+
+@keyframes pulse {
+  from { transform: scale(0.9); }
+  to { transform: scale(1.1); }
+}
+
+.toggle-background {
+  position: relative;
+  height: 50px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 25px;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.toggle-slider {
+  position: absolute;
+  top: 5px;
+  width: 40px;
+  height: 40px;
+  background: white;
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+}
+
+.toggle-slider.left {
+  left: 5px;
+}
+
+.toggle-slider.right {
+  left: calc(100% - 45px);
+}
+
+.slider-flag {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.toggle-labels {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  z-index: 1;
+}
+
+.label-left,
+.label-right {
+  font-size: 16px;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.3s ease;
+}
+
+.label-left.active,
+.label-right.active {
+  color: white;
+  transform: scale(1.1);
+}
+
+.toggle-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.current-lang-name {
+  font-weight: bold;
+  color: #e83e8c;
+}
+
+.target-lang-name {
+  font-weight: bold;
+  color: #2196F3;
+}
+
+.toggle-icon {
+  color: #4CAF50;
+  animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* RTL Support */
+.rtl .toggle-slider {
+  transform: scaleX(-1);
+}
+
+.rtl .toggle-text {
+  flex-direction: row-reverse;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  .mobile-language-switch {
+    margin: 15px 10px;
+    padding: 12px;
+  }
+  
+  .toggle-background {
+    height: 45px;
+  }
+  
+  .toggle-slider {
+    width: 35px;
+    height: 35px;
+    top: 5px;
+  }
+  
+  .toggle-slider.right {
+    left: calc(100% - 40px);
+  }
+}
+
+
+
+
+
+
+
+
+
+/* CSS لضبط النص في المنتصف */
+.center-text {
+  text-align: center !important;
+  justify-content: center !important;
+  display: block !important;
+}
+
+.center-icon {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.center-line {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.center-link {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* تجاوز أي styles لـ RTL */
+.rtl .center-text,
+.rtl .cards-section-title,
+.rtl .cards-section-subtitle,
+.rtl .card-title-under,
+.rtl .card-description-under,
+.rtl .feature-card-under,
+.rtl .card-link-under {
+  text-align: center !important;
+  direction: ltr !important;
+}
+
+/* خاص للنص العربي فقط */
+.rtl .cards-section-title[lang="ar"],
+.rtl .cards-section-subtitle[lang="ar"],
+.rtl .card-title-under[lang="ar"],
+.rtl .card-description-under[lang="ar"] {
+  direction: rtl;
+  display: inline-block;
+  text-align: center;
+  width: 100%;
+}
+
+/* ضبط أيقونة السهم */
+.rtl .arrow-icon-under {
+  transform: none !important;
+  margin-left: 8px !important;
+  margin-right: 0 !important;
+}
+
+/* ضبط الروابط */
+.rtl .card-link-under {
+  flex-direction: row !important;
+  justify-content: center !important;
+}
+
+/* Classes خاصة للعناصر */
+.cards-section-title,
+.cards-section-subtitle,
+.card-title-under,
+.card-description-under,
+.feature-card-under,
+.card-link-under {
+  text-align: center !important;
+}
+
+/* تجاوز أي Bootstrap styles */
+.text-left,
+.text-right,
+.text-start,
+.text-end {
+  text-align: center !important;
+}
+
+/* إزالة أي تأثيرات للـ RTL على النص المركزي */
+.rtl .center-text {
+  unicode-bidi: plaintext;
+}
+
+/* ضبط الكروت */
+.feature-card-under {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+
+
+
+
+
+
+/* Footer CSS */
+.footer-column-title {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: white;
+}
+
+.footer-title-wrapper {
+  text-align: start; /* بداية النص حسب اللغة */
+  margin-bottom: 20px;
+}
+
+/* الخط تحت العنوان مباشرة تحت الكلمة */
+.footer-title-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #ff4081, #7b1fa2);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* في اللغة العربية يكون الخط من اليمين لليسار */
+[dir="rtl"] .footer-title-line {
+  left: auto;
+  right: 0;
+  background: linear-gradient(90deg, #7b1fa2, #ff4081);
+}
+
+.footer-column:hover .footer-title-line {
+  height: 4px;
+}
+
+/* Footer links styling */
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin-bottom: 10px;
+}
+
+.footer-links a {
+  display: flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  padding: 5px 0;
+}
+
+.footer-links a:hover {
+  color: #ff4081;
+  transform: translateX(5px);
+}
+
+/* Arrow styling - LTR */
+.footer-link-arrow {
+  font-size: 0.8rem;
+  margin-right: 10px;
+  transition: transform 0.3s ease;
+}
+
+.footer-links a:hover .footer-link-arrow {
+  transform: translateX(3px);
+}
+
+/* RTL arrow */
+.rtl-arrow {
+  margin-right: 0;
+  margin-left: 10px;
+  transform: rotate(180deg);
+}
+
+[dir="rtl"] .footer-links a:hover {
+  transform: translateX(-5px);
+}
+
+[dir="rtl"] .footer-links a:hover .rtl-arrow {
+  transform: translateX(-3px) rotate(180deg);
+}
+
+/* Contact info styling */
+.contact-info {
+  text-align: start; /* بداية النص حسب اللغة */
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.contact-item svg {
+  margin-right: 10px;
+  color: #ff4081;
+  min-width: 16px;
+}
+
+/* RTL for contact items */
+[dir="rtl"] .contact-item svg {
+  margin-right: 0;
+  margin-left: 10px;
+}
+
+/* Contact redirect button */
+.contact-redirect {
+  text-align: start; /* بداية النص حسب اللغة */
+}
+
+.contact-description {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 20px;
+  text-align: start; /* بداية النص حسب اللغة */
+  font-size: 0.9rem;
+}
+
+.contact-redirect-btn {
+  width: 100%;
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #ff4081, #7b1fa2);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
+
+.contact-redirect-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(255, 64, 129, 0.4);
+}
+
+.contact-btn-icon {
+  font-size: 0.9rem;
+}
+
+/* RTL icon for contact button */
+.rtl-icon {
+  order: -1; /* يضع الأيقونة في البداية في RTL */
+}
+
+/* Social links */
+.social-links {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.social-link:hover {
+  background: #ff4081;
+  transform: translateY(-3px);
+}
+
+/* Footer bottom */
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 30px;
+  margin-top: 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.copyright {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+}
+
+.footer-legal {
+  display: flex;
+  gap: 25px;
+}
+
+.footer-legal a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+}
+
+.footer-legal a:hover {
+  color: #ff4081;
+}
+
+/* RTL for footer bottom */
+[dir="rtl"] .footer-bottom {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .footer-legal {
+  flex-direction: row-reverse;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  
+  .footer-title-wrapper {
+    text-align: center;
+  }
+  
+  .footer-column-title {
+    display: block;
+    text-align: center;
+  }
+  
+  .footer-title-line {
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+  }
+  
+  [dir="rtl"] .footer-title-line {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+  }
+  
+  .footer-bottom {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+  
+  .footer-legal {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+

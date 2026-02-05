@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+// HeroSection.js
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { Container, Row, Col, Button, Form } from 'react-bootstrap';
 import { 
-  FaPhone, FaPlay, FaPause, FaArrowRight,
+  FaPhone, FaPlay, FaPause, FaArrowRight, FaArrowDown,
   FaRocket, FaUsers, FaChartLine, FaHandshake,
   FaLightbulb, FaGlobe, FaAward
 } from 'react-icons/fa';
@@ -10,6 +11,7 @@ import ScrollTrigger from 'gsap/ScrollTrigger';
 import { useLanguage } from './LanguageProvider';
 import { useDispatch } from 'react-redux';
 import { Add_Client_Action } from '../Redux/Actions/ClientAction';
+import { useNavigate } from 'react-router-dom'; // إضافة useNavigate
 
 // Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
@@ -19,7 +21,8 @@ export const HeroSection = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
   const videoRef = useRef(null);
-    const { currentLang } = useLanguage(); // استخدام الـ hook
+  const { currentLang } = useLanguage();
+  const navigate = useNavigate(); // إضافة useNavigate
 
   // ========== الترجمات ==========
   const translations = {
@@ -49,6 +52,7 @@ export const HeroSection = () => {
       partnershipDesc: "We build lasting partnerships based on trust, transparency, and mutual success with our clients.",
       
       readMore: "Read more",
+      discoverMoreAbout: "Discover More About Us",
       pauseVideo: "Pause video",
       playVideo: "Play video"
     },
@@ -78,16 +82,41 @@ export const HeroSection = () => {
       partnershipDesc: "نبني شراكات دائمة تقوم على الثقة والشفافية والنجاح المتبادل مع عملائنا.",
       
       readMore: "اقرأ المزيد",
+      discoverMoreAbout: "اكتشف المزيد عننا",
       pauseVideo: "إيقاف الفيديو",
       playVideo: "تشغيل الفيديو"
     }
   };
 
   // ========== دالة الترجمة ==========
-  const t = (key) => {
+  const t = useCallback((key) => {
     return translations[currentLang][key] || translations.EN[key];
-  };
-  // =================================
+  }, [currentLang]);
+
+  // تعريف aboutCardsData باستخدام useMemo
+  const aboutCardsData = useMemo(() => [
+    {
+      id: 1,
+      icon: <FaRocket />,
+      title: t('missionTitle'),
+      description: t('missionDesc'),
+      color: "#e83e8c"
+    },
+    {
+      id: 2,
+      icon: <FaGlobe />,
+      title: t('visionTitle'),
+      description: t('visionDesc'),
+      color: "#2196F3"
+    },
+    {
+      id: 6,
+      icon: <FaHandshake />,
+      title: t('partnershipTitle'),
+      description: t('partnershipDesc'),
+      color: "#00BCD4"
+    }
+  ], [t]);
 
   // Refs للعناصر اللي هنعملها animate
   const heroRef = useRef(null);
@@ -102,8 +131,13 @@ export const HeroSection = () => {
   const aboutTitleRef = useRef(null);
   const aboutSubtitleRef = useRef(null);
 
+  // وظيفة للانتقال لصفحة AboutUs
+  const goToAboutUsPage = useCallback(() => {
+    navigate('/Aboutuspage'); // الانتقال لصفحة /about
+  }, [navigate]);
+
   // وظيفة للانتقال لسيكشن services
-  const scrollToServices = () => {
+  const scrollToServices = useCallback(() => {
     const servicesSection = document.getElementById('services');
     if (servicesSection) {
       // تأثير على الزر عند الدوس
@@ -126,24 +160,25 @@ export const HeroSection = () => {
         block: 'start'
       });
     }
-  };
-const dispatch=useDispatch()
-  const handleSubmit =async (e) => {
+  }, []);
+
+  const dispatch = useDispatch();
+
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     if (phoneNumber.trim()) {
       console.log('Phone number submitted:', phoneNumber);
       
-await dispatch(Add_Client_Action({
-name:'No Name',
-email:'No Email',
-phone:phoneNumber,
-whatsappNumber:phoneNumber,
-jobTitle:'No Job Title',
-message:'Register From Herosection',
-countryName:'No Country',
+      await dispatch(Add_Client_Action({
+        name: 'No Name',
+        email: 'No Email',
+        phone: phoneNumber,
+        whatsappNumber: phoneNumber,
+        jobTitle: 'No Job Title',
+        message: 'Register From Herosection',
+        countryName: 'No Country',
+      }));
 
-
-}))
       // Animation عند التسجيل
       gsap.fromTo('.success-message',
         { y: -20, opacity: 0 },
@@ -156,9 +191,9 @@ countryName:'No Country',
         setPhoneNumber('');
       }, 3000);
     }
-  };
+  }, [phoneNumber, dispatch]);
 
-  const toggleVideoPlay = () => {
+  const toggleVideoPlay = useCallback(() => {
     if (videoRef.current) {
       if (isPlaying) {
         videoRef.current.pause();
@@ -180,17 +215,20 @@ countryName:'No Country',
       }
       setIsPlaying(!isPlaying);
     }
-  };
+  }, [isPlaying]);
 
-  const handleVideoEnded = () => {
+  const handleVideoEnded = useCallback(() => {
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
       videoRef.current.play();
     }
-  };
+  }, []);
 
   // GSAP Animations
   useEffect(() => {
+    // تنظيف الـ refs القديمة
+    aboutCardsRef.current = aboutCardsRef.current.slice(0, aboutCardsData.length);
+
     // Initial animations عند التحميل
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
@@ -353,27 +391,36 @@ countryName:'No Country',
     // Button hover animation
     const buttons = document.querySelectorAll('.discover-btn, .submit-btn');
     buttons.forEach(btn => {
-      btn.addEventListener('mouseenter', () => {
+      const mouseEnterHandler = () => {
         gsap.to(btn, {
           scale: 1.05,
           duration: 0.3,
           ease: 'power2.out'
         });
-      });
+      };
       
-      btn.addEventListener('mouseleave', () => {
+      const mouseLeaveHandler = () => {
         gsap.to(btn, {
           scale: 1,
           duration: 0.3,
           ease: 'power2.out'
         });
-      });
+      };
+      
+      btn.addEventListener('mouseenter', mouseEnterHandler);
+      btn.addEventListener('mouseleave', mouseLeaveHandler);
+      
+      // Cleanup
+      return () => {
+        btn.removeEventListener('mouseenter', mouseEnterHandler);
+        btn.removeEventListener('mouseleave', mouseLeaveHandler);
+      };
     });
 
     // Card hover animations
     const cardElements = document.querySelectorAll('.about-us-card');
     cardElements.forEach(card => {
-      card.addEventListener('mouseenter', () => {
+      const mouseEnterHandler = () => {
         gsap.to(card, {
           y: -15,
           duration: 0.4,
@@ -404,9 +451,9 @@ countryName:'No Country',
           boxShadow: '0 25px 70px rgba(0, 0, 0, 0.15)',
           duration: 0.3
         });
-      });
+      };
       
-      card.addEventListener('mouseleave', () => {
+      const mouseLeaveHandler = () => {
         gsap.to(card, {
           y: 0,
           duration: 0.4,
@@ -426,25 +473,42 @@ countryName:'No Country',
           boxShadow: '0 15px 50px rgba(0, 0, 0, 0.08)',
           duration: 0.3
         });
-      });
+      };
+      
+      card.addEventListener('mouseenter', mouseEnterHandler);
+      card.addEventListener('mouseleave', mouseLeaveHandler);
+      
+      // Cleanup
+      return () => {
+        card.removeEventListener('mouseenter', mouseEnterHandler);
+        card.removeEventListener('mouseleave', mouseLeaveHandler);
+      };
     });
 
     // Input focus animation
     const phoneInput = document.querySelector('.phone-input');
     if (phoneInput) {
-      phoneInput.addEventListener('focus', () => {
+      const focusHandler = () => {
         gsap.to('.phone-input-group', {
           scale: 1.02,
           duration: 0.3
         });
-      });
+      };
       
-      phoneInput.addEventListener('blur', () => {
+      const blurHandler = () => {
         gsap.to('.phone-input-group', {
           scale: 1,
           duration: 0.3
         });
-      });
+      };
+      
+      phoneInput.addEventListener('focus', focusHandler);
+      phoneInput.addEventListener('blur', blurHandler);
+      
+      return () => {
+        phoneInput.removeEventListener('focus', focusHandler);
+        phoneInput.removeEventListener('blur', blurHandler);
+      };
     }
 
     // Scroll animation للفيديو
@@ -464,64 +528,39 @@ countryName:'No Country',
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [currentLang]); // أضف currentLang كـ dependency
+  }, [currentLang, aboutCardsData]);
 
-
-  // HeroSection.js
-useEffect(() => {
   // Animation للنصوص عند تغيير اللغة
-  const elementsToAnimate = [
-    mainTitleRef.current,
-    descriptionRef.current,
-    discoverBtnRef.current,
-    phoneSectionRef.current,
-    aboutTitleRef.current,
-    aboutSubtitleRef.current,
-    ...aboutCardsRef.current.filter(card => card)
-  ].filter(el => el);
+  useEffect(() => {
+    const elementsToAnimate = [
+      mainTitleRef.current,
+      descriptionRef.current,
+      discoverBtnRef.current,
+      phoneSectionRef.current,
+      aboutTitleRef.current,
+      aboutSubtitleRef.current,
+      ...aboutCardsRef.current.filter(card => card)
+    ].filter(el => el);
 
-  if (elementsToAnimate.length > 0) {
-    gsap.to(elementsToAnimate, {
-      opacity: 0,
-      duration: 0.2,
-      stagger: 0.05,
-      onComplete: () => {
-        gsap.fromTo(elementsToAnimate,
-          { opacity: 0 },
-          {
-            opacity: 1,
-            duration: 0.3,
-            stagger: 0.05,
-            ease: 'power2.out'
-          }
-        );
-      }
-    });
-  }
-}, [currentLang]);
-  const aboutCardsData = [
-    {
-      id: 1,
-      icon: <FaRocket />,
-      title: t('missionTitle'),
-      description: t('missionDesc'),
-      color: "#e83e8c"
-    },
-    {
-      id: 2,
-      icon: <FaGlobe />,
-      title: t('visionTitle'),
-      description: t('visionDesc'),
-      color: "#2196F3"
-    },
-    {
-      id: 6,
-      icon: <FaHandshake />,
-      title: t('partnershipTitle'),
-      description: t('partnershipDesc'),
-      color: "#00BCD4"
+    if (elementsToAnimate.length > 0) {
+      gsap.to(elementsToAnimate, {
+        opacity: 0,
+        duration: 0.2,
+        stagger: 0.05,
+        onComplete: () => {
+          gsap.fromTo(elementsToAnimate,
+            { opacity: 0 },
+            {
+              opacity: 1,
+              duration: 0.3,
+              stagger: 0.05,
+              ease: 'power2.out'
+            }
+          );
+        }
+      });
     }
-  ];
+  }, [currentLang, aboutCardsData]);
 
   return (
     <div className="hero-container" ref={heroRef}>
@@ -661,7 +700,12 @@ useEffect(() => {
               </p>
             </Col>
           </Row>
-          <Row className="justify-content-center about-us-content">
+          
+          {/* إضافة key للـ Row لفرض إعادة التصيير عند تغيير اللغة */}
+          <Row 
+            className="justify-content-center about-us-content"
+            key={`about-cards-${currentLang}`}
+          >
             {aboutCardsData.map((card, index) => (
               <Col lg={4} md={6} sm={12} key={card.id} className="mb-4">
                 <div 
@@ -677,13 +721,61 @@ useEffect(() => {
                   <h4 className="about-us-card-title">{card.title}</h4>
                   <p className="about-us-card-description">{card.description}</p>
                   <div className="about-us-line" style={{ backgroundColor: card.color }}></div>
-                  <div className="about-us-link">
+                  <div 
+                    className="about-us-link"
+                    onClick={goToAboutUsPage}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <span>{t('readMore')}</span>
                     <FaArrowRight className="about-us-arrow" />
                   </div>
                 </div>
               </Col>
             ))}
+          </Row>
+
+          {/* زر الانتقال لصفحة AboutUs الكاملة */}
+          <Row className="justify-content-center mt-5">
+            <Col xs={12} className="text-center">
+              <div 
+                className="go-to-about-page"
+                onClick={goToAboutUsPage}
+                style={{
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  flexDirection: 'column',
+                  gap: '10px',
+                  padding: '15px 30px',
+                  borderRadius: '25px',
+                  background: 'rgba(231, 62, 140, 0.1)',
+                  transition: 'all 0.3s ease',
+                  border: '2px solid rgba(231, 62, 140, 0.3)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(231, 62, 140, 0.2)';
+                  e.currentTarget.style.transform = 'translateY(-5px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(231, 62, 140, 0.1)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                <span style={{ 
+                  fontWeight: '600', 
+                  color: '#e83e8c',
+                  fontSize: '1.1rem'
+                }}>
+                  {t('discoverMoreAbout')}
+                </span>
+                <div className="animated-arrow">
+                  <FaArrowDown style={{ 
+                    color: '#e83e8c',
+                    animation: 'bounce 2s infinite'
+                  }} />
+                </div>
+              </div>
+            </Col>
           </Row>
         </Container>
       </section>
