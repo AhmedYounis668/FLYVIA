@@ -4,6 +4,7 @@ import { FaChartLine, FaUsers, FaLightbulb, FaArrowRight } from 'react-icons/fa'
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import { useLanguage } from './LanguageProvider';
+import { Link } from 'react-router-dom'; // Add this import
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -25,7 +26,8 @@ export const OurServices = () => {
       teamDesc: "Expert team working together to achieve your business goals.",
       innovation: "Innovation",
       innovationDesc: "Cutting-edge solutions and innovative approaches for your business.",
-      learnMore: "Learn more"
+      learnMore: "Learn more",
+      discoverMore: "Discover More" // Added translation for the button
     },
     AR: {
       sectionTitle: "خدماتنا الأساسية",
@@ -36,7 +38,8 @@ export const OurServices = () => {
       teamDesc: "فريق من الخبراء يعملون معًا لتحقيق أهداف عملك.",
       innovation: "الابتكار",
       innovationDesc: "حلول متطورة ونهج مبتكر لعملك.",
-      learnMore: "تعلم المزيد"
+      learnMore: "تعلم المزيد",
+      discoverMore: "اكتشف المزيد" // Added translation for the button
     }
   };
 
@@ -52,25 +55,28 @@ export const OurServices = () => {
       icon: <FaChartLine />,
       title: t('growthStrategy'),
       description: t('growthDesc'),
-      color: "#4CAF50"
+      color: "#4CAF50",
+      link: "/ourservicepage" // Added link for each card
     },
     {
       id: 2,
       icon: <FaUsers />,
       title: t('teamCollaboration'),
       description: t('teamDesc'),
-      color: "#2196F3"
+      color: "#2196F3",
+      link: "/ourservicepage"
     },
     {
       id: 3,
       icon: <FaLightbulb />,
       title: t('innovation'),
       description: t('innovationDesc'),
-      color: "#FF9800"
+      color: "#FF9800",
+      link: "/ourservicepage"
     }
   ], [currentLang]);
 
-  // GSAP Animations
+  // GSAP Animations - Same as before
   useEffect(() => {
     // تنظيف الـ refs القديمة
     cardsRef.current = cardsRef.current.slice(0, cardsData.length);
@@ -278,29 +284,79 @@ export const OurServices = () => {
           >
             {cardsData.map((card, index) => (
               <Col lg={4} md={6} sm={12} key={card.id} className="mb-4">
-                <div 
-                  className="feature-card-under center-text"
-                  ref={el => cardsRef.current[index] = el}
+                {/* Wrap the entire card with Link */}
+                <Link 
+                  to={card.link} 
+                  className="text-decoration-none"
+                  style={{ display: 'block' }}
                 >
                   <div 
-                    className="card-icon-under center-icon" 
-                    style={{ backgroundColor: `${card.color}15`, color: card.color }}
+                    className="feature-card-under center-text"
+                    ref={el => cardsRef.current[index] = el}
+                    style={{ cursor: 'pointer' }} // Add cursor pointer
                   >
-                    {card.icon}
+                    <div 
+                      className="card-icon-under center-icon" 
+                      style={{ backgroundColor: `${card.color}15`, color: card.color }}
+                    >
+                      {card.icon}
+                    </div>
+                    <h4 className="card-title-under center-text">{card.title}</h4>
+                    <p className="card-description-under center-text">{card.description}</p>
+                    <div className="card-line-under center-line" style={{ backgroundColor: card.color }}></div>
+                    
+                    {/* Added Discover More Button */}
+                    <button className="discover-more-btn mt-3">
+                      {t('discoverMore')}
+                      <FaArrowRight className="ms-2" />
+                    </button>
+                    
+                    <div className="card-link-under center-link">
+                      <span>{t('learnMore')}</span>
+                      <FaArrowRight className="arrow-icon-under" />
+                    </div>
                   </div>
-                  <h4 className="card-title-under center-text">{card.title}</h4>
-                  <p className="card-description-under center-text">{card.description}</p>
-                  <div className="card-line-under center-line" style={{ backgroundColor: card.color }}></div>
-                  <div className="card-link-under center-link">
-                    <span>{t('learnMore')}</span>
-                    <FaArrowRight className="arrow-icon-under" />
-                  </div>
-                </div>
+                </Link>
               </Col>
             ))}
           </Row>
         </Container>
       </section>
+      
+      {/* Add CSS for the new button */}
+      <style>
+        {`
+          .discover-more-btn {
+            background: linear-gradient(45deg, #2196F3, #21CBF3);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+          }
+          
+          .discover-more-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(33, 150, 243, 0.4);
+          }
+          
+          .discover-more-btn:active {
+            transform: translateY(-1px);
+          }
+          
+          /* Optional: Style for Arabic direction */
+          .discover-more-btn[dir="rtl"] {
+            flex-direction: row-reverse;
+          }
+        `}
+      </style>
     </div>
   )
 }

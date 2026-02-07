@@ -10,7 +10,10 @@ import {
   FaLanguage
 } from 'react-icons/fa';
 import gsap from 'gsap';
+import ScrollTrigger from 'gsap/ScrollTrigger'; // أضف هذا السطر
 import { useLanguage } from './LanguageProvider';
+
+gsap.registerPlugin(ScrollTrigger); // سجل الـ plugin
 
 export const FloatingContact = () => {
   const [showForm, setShowForm] = useState(false);
@@ -110,7 +113,7 @@ export const FloatingContact = () => {
     }));
   };
 
-  // ========== دالة تبديل اللغة البسيطة ==========
+  // ========== دالة تبديل اللغة بدون reload ==========
   const toggleLanguage = () => {
     if (isSwitchingLang) return;
     
@@ -119,12 +122,12 @@ export const FloatingContact = () => {
     setIsSwitchingLang(true);
     
     // تنظيف GSAP animations قبل التغيير
-    if (window.ScrollTrigger) {
-      window.ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    if (ScrollTrigger) {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     }
     gsap.globalTimeline.clear();
     
-    // حفظ اللغة الجديدة في localStorage أولاً
+    // حفظ اللغة الجديدة في localStorage
     localStorage.setItem('appLanguage', newLang);
     
     // Animation للزر
@@ -135,17 +138,58 @@ export const FloatingContact = () => {
         duration: 0.3,
         ease: 'back.out(1.7)',
         onComplete: () => {
+          // تغيير direction بدون reload
+          if (newLang === 'AR') {
+            document.documentElement.dir = 'rtl';
+            document.documentElement.lang = 'ar';
+            document.body.classList.add('rtl');
+            document.body.classList.remove('ltr');
+          } else {
+            document.documentElement.dir = 'ltr';
+            document.documentElement.lang = 'en';
+            document.body.classList.add('ltr');
+            document.body.classList.remove('rtl');
+          }
+          
+          // تغيير اللغة
           changeLanguage(newLang);
+          
+          // إرسال حدث لتحديث الصفحة
+          window.dispatchEvent(new CustomEvent('languageChanged', { detail: newLang }));
+          
+          // إعادة تحميل الـ ScrollTrigger بعد تغيير اللغة
           setTimeout(() => {
-            window.location.reload();
-          }, 200);
+            if (ScrollTrigger) {
+              ScrollTrigger.refresh();
+            }
+            setIsSwitchingLang(false);
+          }, 300);
         }
       });
     } else {
+      // تغيير direction بدون reload
+      if (newLang === 'AR') {
+        document.documentElement.dir = 'rtl';
+        document.documentElement.lang = 'ar';
+        document.body.classList.add('rtl');
+        document.body.classList.remove('ltr');
+      } else {
+        document.documentElement.dir = 'ltr';
+        document.documentElement.lang = 'en';
+        document.body.classList.add('ltr');
+        document.body.classList.remove('rtl');
+      }
+      
       changeLanguage(newLang);
+      
+      window.dispatchEvent(new CustomEvent('languageChanged', { detail: newLang }));
+      
       setTimeout(() => {
-        window.location.reload();
-      }, 200);
+        if (ScrollTrigger) {
+          ScrollTrigger.refresh();
+        }
+        setIsSwitchingLang(false);
+      }, 300);
     }
   };
 
@@ -299,34 +343,25 @@ export const FloatingContact = () => {
 
         {/* ========== زر تبديل اللغة البسيط للشاشات الصغيرة فقط ========== */}
         {isMobile && (
-  <button
-    ref={langBtnRef}
-    className="floating-lang-toggle"
-    onClick={toggleLanguage}
-    disabled={isSwitchingLang}
-  >
-    <div className="lang-toggle-inner">
-      {/* العلم الحالي */}
-      {/* <span className="current-flag">
-        {currentLang === 'EN' ? }
-      </span> */}
-      
-      {/* نص التبديل */}
-      <span className="toggle-text">
-        {currentLang === 'EN' ? 'EN' : 'AR'}
-        <FaExchangeAlt className="toggle-icon" />
-        {currentLang === 'EN' ? 'AR' : 'EN'}
-      </span>
-      
-      {/* أيقونة التبديل */}
-      {/* <FaLanguage className="lang-icon" /> */}
-    </div>
-    
-    <span className="floating-tooltip">
-      Switch language
-    </span>
-  </button>
-)}
+          <button
+            ref={langBtnRef}
+            className="floating-lang-toggle"
+            onClick={toggleLanguage}
+            disabled={isSwitchingLang}
+          >
+            <div className="lang-toggle-inner">
+              <span className="toggle-text">
+                {currentLang === 'EN' ? 'EN' : 'AR'}
+                <FaExchangeAlt className="toggle-icon" />
+                {currentLang === 'EN' ? 'AR' : 'EN'}
+              </span>
+            </div>
+            
+            <span className="floating-tooltip">
+              Switch language
+            </span>
+          </button>
+        )}
         {/* ============================================================== */}
       </div>
 

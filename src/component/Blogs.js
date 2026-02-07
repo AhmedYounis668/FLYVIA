@@ -7,6 +7,7 @@ import {
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import { useLanguage } from './LanguageProvider'; // استيراد الـ hook
+import { Link } from 'react-router-dom';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -24,7 +25,7 @@ export const Blogs = () => {
   // الترجمات
   const translations = {
     EN: {
-      sectionTitle: "Latest Insights & Articles",
+      sectionTitle: "Our Blogs",
       sectionSubtitle: "Explore our latest articles, industry insights, and expert advice to stay ahead in today's dynamic business landscape",
       businessCategory: "Business",
       marketingCategory: "Marketing",
@@ -443,7 +444,7 @@ export const Blogs = () => {
                     <span>{blog.author}</span>
                   </div>
                   
-                  <div className="blog-stats">
+                  {/* <div className="blog-stats">
                     <div className="blog-stat">
                       <FaEye />
                       <span>{blog.views.toLocaleString(currentLang === 'AR' ? 'ar-SA' : 'en-US')}</span>
@@ -456,7 +457,7 @@ export const Blogs = () => {
                       <FaHeart />
                       <span>{blog.likes}</span>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
 
                 {/* Blog Title */}
@@ -466,20 +467,20 @@ export const Blogs = () => {
                 <p className="blog-excerpt">{blog.excerpt}</p>
 
                 {/* Blog Tags */}
-                <div className="blog-tags">
+                {/* <div className="blog-tags">
                   {blog.tags.map((tag, tagIndex) => (
                     <span key={tagIndex} className="blog-tag">
                       <FaTag style={{ marginRight: '5px', fontSize: '0.8rem' }} />
                       {tag}
                     </span>
                   ))}
-                </div>
+                </div> */}
 
+<Link to={`/MainBlogsCardspage`} className="read-more"> 
                 {/* Read More */}
-                <a href="#" className="read-more">
                   {t('readFullArticle')}
                   <FaArrowRight style={{ marginRight: currentLang === 'AR' ? '10px' : '0', marginLeft: currentLang === 'AR' ? '0' : '10px' }} />
-                </a>
+                </Link>
               </div>
             </div>
           ))}

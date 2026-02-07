@@ -735,7 +735,7 @@ export const HeroSection = () => {
           </Row>
 
           {/* زر الانتقال لصفحة AboutUs الكاملة */}
-          <Row className="justify-content-center mt-5">
+          {/* <Row className="justify-content-center mt-5">
             <Col xs={12} className="text-center">
               <div 
                 className="go-to-about-page"
@@ -776,7 +776,7 @@ export const HeroSection = () => {
                 </div>
               </div>
             </Col>
-          </Row>
+          </Row> */}
         </Container>
       </section>
     </div>

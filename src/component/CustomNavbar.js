@@ -4,6 +4,7 @@ import ScrollTrigger from 'gsap/ScrollTrigger';
 import logo from '../Images/Flyvia Logo.png';
 import { FaGlobe, FaExchangeAlt } from 'react-icons/fa';
 import { useLanguage } from '../component/LanguageProvider';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -13,8 +14,11 @@ export const CustomNavbar = () => {
   const hamburgerRef = useRef(null);
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeItem, setActiveItem] = useState('home');
   
   const { currentLang, changeLanguage } = useLanguage();
+  const location = useLocation();
+  const navigate = useNavigate();
   
   const [showLangDropdown, setShowLangDropdown] = useState(false);
   const [isSwitchingLang, setIsSwitchingLang] = useState(false);
@@ -25,6 +29,7 @@ export const CustomNavbar = () => {
     EN: {
       home: 'Home',
       about: 'About',
+      services: 'Services',
       testimonials: 'Testimonials',
       blog: 'Blog Entries',
       contact: 'Contact Us',
@@ -35,6 +40,7 @@ export const CustomNavbar = () => {
     AR: {
       home: 'الرئيسية',
       about: 'من نحن',
+      services: 'خدماتنا',
       testimonials: 'آراء العملاء',
       blog: 'المدونة',
       contact: 'اتصل بنا',
@@ -44,17 +50,37 @@ export const CustomNavbar = () => {
     }
   };
 
+  // تعريف navItems مع الـ routes الجديدة
   const navItems = [
-    { id: 'home', sectionId: 'home' },
-    { id: 'about', sectionId: 'about' },
-    { id: 'testimonials', sectionId: 'testimonials' },
-    { id: 'blog', sectionId: 'blog' },
-    { id: 'contact', sectionId: 'contact' }
+    { id: 'home', path: '/', name: 'home' },
+    { id: 'about', path: '/Aboutuspage', name: 'about' },
+    { id: 'services', path: '/ourservicepage', name: 'services' },
+    { id: 'blog', path: '/MainBlogsCardspage', name: 'blog' },
+    { id: 'contact', path: '/#contact', name: 'contact' }
   ];
 
   const getText = (id) => {
     return translations[currentLang][id];
   };
+
+  useEffect(() => {
+    // تحديث الـ active item بناء على الـ URL الحالي
+    const path = location.pathname;
+    
+    if (path === '/') {
+      setActiveItem('home');
+    } else if (path === '/Aboutuspage') {
+      setActiveItem('about');
+    } else if (path === '/ourservicepage') {
+      setActiveItem('services');
+    } else if (path === '/MainBlogsCardspage') {
+      setActiveItem('blog');
+    } else if (path.includes('/BlogDetails')) {
+      setActiveItem('blog');
+    } else if (path === '/Login' || path === '/dashboard') {
+      setActiveItem('');
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -172,7 +198,7 @@ export const CustomNavbar = () => {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [scrolled, currentLang]);
+  }, [scrolled, currentLang, location.pathname]);
 
   const toggleMenu = () => {
     const newMenuState = !menuOpen;
@@ -264,11 +290,6 @@ export const CustomNavbar = () => {
     }, 500);
   };
 
-  const toggleLanguageSwitch = () => {
-    const newLang = currentLang === 'EN' ? 'AR' : 'EN';
-    handleChangeLanguage(newLang);
-  };
-
   const toggleLangDropdown = (e) => {
     e.stopPropagation();
     setShowLangDropdown(!showLangDropdown);
@@ -307,11 +328,13 @@ export const CustomNavbar = () => {
     };
   }, []);
 
-  // دالة للتنقل إلى السكاشن
-  const scrollToSection = (sectionId, e) => {
+  // دالة للتنقل بين الصفحات
+  const navigateToPage = (path, itemId, e) => {
     if (e) {
       e.preventDefault();
     }
+    
+    setActiveItem(itemId);
     
     // إغلاق القائمة المتنقلة إذا كانت مفتوحة
     if (menuOpen) {
@@ -319,6 +342,40 @@ export const CustomNavbar = () => {
       document.body.style.overflow = 'auto';
     }
     
+    // إذا كان path يبدأ بـ /# فهو section في نفس الصفحة
+    if (path.startsWith('/#')) {
+      const sectionId = path.replace('/#', '');
+      scrollToSection(sectionId);
+    } else {
+      // إذا كان route عادي، اذهب للصفحة
+      navigate(path);
+      
+      // إذا كان Home، اذهب للأعلى
+      if (path === '/') {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }
+    }
+  };
+
+  // دالة للعودة للرئيسية
+  const navigateToHome = (e) => {
+    if (e) {
+      e.preventDefault();
+    }
+    
+    setActiveItem('home');
+    navigate('/');
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
+  // دالة للتنقل إلى السكاشن (مازالت محفوظة لـ contact)
+  const scrollToSection = (sectionId) => {
     // البحث عن العنصر
     const element = document.getElementById(sectionId);
     if (element) {
@@ -336,20 +393,6 @@ export const CustomNavbar = () => {
     }
   };
 
-  // دالة للعودة للرئيسية
-  const scrollToHome = (e) => {
-    if (e) {
-      e.preventDefault();
-    }
-    
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-    
-    window.history.pushState(null, '', '/#');
-  };
-
   return (
     <>
       <div className="custom-navbar-wrapper">
@@ -357,7 +400,7 @@ export const CustomNavbar = () => {
           <a 
             href="/" 
             className="navbar-brand-link"
-            onClick={scrollToHome}
+            onClick={navigateToHome}
           >
             <img 
               className='navbar-brand-custom' 
@@ -373,11 +416,11 @@ export const CustomNavbar = () => {
             {navItems.map((item, index) => (
               <a 
                 key={index}
-                href={`#${item.sectionId}`}
-                className={`nav-link-custom ${index === 0 ? 'active' : ''}`}
-                onClick={(e) => scrollToSection(item.sectionId, e)}
+                href={item.path}
+                className={`nav-link-custom ${activeItem === item.id ? 'active' : ''}`}
+                onClick={(e) => navigateToPage(item.path, item.id, e)}
               >
-                {getText(item.id)}
+                {getText(item.name)}
               </a>
             ))}
             
@@ -436,14 +479,14 @@ export const CustomNavbar = () => {
         {navItems.map((item, index) => (
           <a 
             key={index}
-            href={`#${item.sectionId}`}
-            className={`nav-link-custom ${index === 0 ? 'active' : ''}`}
+            href={item.path}
+            className={`nav-link-custom ${activeItem === item.id ? 'active' : ''}`}
             onClick={(e) => {
-              scrollToSection(item.sectionId, e);
+              navigateToPage(item.path, item.id, e);
               toggleMenu();
             }}
           >
-            {getText(item.id)}
+            {getText(item.name)}
           </a>
         ))}
         

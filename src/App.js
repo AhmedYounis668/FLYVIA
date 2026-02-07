@@ -12,14 +12,19 @@ import 'swiper/css/pagination';
 import 'swiper/css/autoplay';
 import { Footer } from "./component/Footer";
 import { FloatingContact } from "./component/FloatingContact";
+import { Ourservicepage } from "./pages/Ourservicepage";
+import { MainBlogsCards } from "./component/MainBlogsCards";
+import { BlogDetails } from "./component/BlogDetails";
 function App() {
  
+
+  
   return (
     <LanguageProvider>
+  <HashRouter>
    
                             <CustomNavbar />
           <FloatingContact/>
-  <HashRouter>
 
       
             
@@ -28,8 +33,12 @@ function App() {
                     <Route path="/" element={ <HomePage  /> }/> 
 
             <Route path="/Login" element={ <Login /> }/> 
-                        <Route path="/dashboard" element={ <Dashboard /> }/> 
-                        <Route path="/Aboutuspage" element={ <AboutUsPage /> }/> 
+            <Route path="/dashboard" element={ <Dashboard /> }/> 
+            <Route path="/Aboutuspage" element={ <AboutUsPage /> }/> 
+            <Route path="/ourservicepage" element={ <Ourservicepage /> }/> 
+            <Route path="/MainBlogsCardspage" element={ <MainBlogsCards /> }/> 
+            <Route path="/BlogDetails/:id" element={ <BlogDetails /> }/> 
+
 
       </Routes>
     </HashRouter>

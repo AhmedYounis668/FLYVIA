@@ -57,6 +57,7 @@ import {
 } from '@mui/icons-material';
 import { useLanguage } from '../component/LanguageProvider';
 import { useNavigate } from 'react-router-dom';
+import { cleanupGSAP, initGSAP } from './initGSAP';
 
 export const AboutUsPage = ({ 
   visibleSections = ['story', 'mission', 'team', 'whyChooseUs', 'contact'],
@@ -71,7 +72,13 @@ export const AboutUsPage = ({
   const teamContainerRef = useRef(null);
   const [scrollPosition, setScrollPosition] = useState(0);
   const [maxScroll, setMaxScroll] = useState(0);
-
+ useEffect(() => {
+    initGSAP();
+    
+    return () => {
+      cleanupGSAP();
+    };
+  }, []);
   const translations = {
     EN: {
       pageTitle: "About FLYVIA",

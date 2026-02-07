@@ -10,6 +10,7 @@ import ScrollTrigger from 'gsap/ScrollTrigger';
 import { useLanguage } from './LanguageProvider';
 import { useDispatch } from 'react-redux';
 import { Add_Client_Action } from '../Redux/Actions/ClientAction';
+import { cleanupGSAP, initGSAP } from '../pages/initGSAP';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -23,7 +24,13 @@ export const Footer = () => {
   const footerRef = useRef(null);
   const columnsRef = useRef([]);
   const backToTopRef = useRef(null);
-
+ useEffect(() => {
+    initGSAP();
+    
+    return () => {
+      cleanupGSAP();
+    };
+  }, []);
   // الترجمات
   const translations = {
     EN: {
