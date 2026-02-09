@@ -6,13 +6,13 @@ import {
 } from 'react-icons/fa';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
-import { useLanguage } from './LanguageProvider'; // استيراد الـ hook
+import { useLanguage } from './LanguageProvider';
 import { Link } from 'react-router-dom';
 
 gsap.registerPlugin(ScrollTrigger);
 
-export const Blogs = () => {
-  const { currentLang } = useLanguage(); // استخدام الـ hook
+export const Blogs = ({threeblogs}) => {
+  const { currentLang } = useLanguage();
   
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
@@ -22,6 +22,63 @@ export const Blogs = () => {
   const blogCardsRef = useRef([]);
   const newsletterRef = useRef(null);
 
+  // دالة لمعالجة رابط الصورة
+  const getImageUrl = (url) => {
+    if (!url || typeof url !== 'string') return null
+    
+    // تنظيف الرابط من undefined
+    let cleanUrl = url.replace(/^undefined\//, '')
+    
+    if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
+      return cleanUrl
+    }
+    
+    if (cleanUrl.startsWith('/')) {
+      return `http://localhost:8000${cleanUrl}`
+    }
+    
+    return `http://localhost:8000/${cleanUrl}`
+  }
+
+  // دالة لاختصار النص
+  const truncateText = (text, maxLength = 100) => {
+    if (!text || typeof text !== 'string') return ''
+    if (text.length <= maxLength) return text
+    return text.substring(0, maxLength) + '...'
+  }
+
+  // دالة لتنظيف التاغات
+  const cleanTag = (tag) => {
+    if (!tag) return ''
+    if (typeof tag === 'string') {
+      try {
+        const parsed = JSON.parse(tag)
+        if (Array.isArray(parsed)) {
+          return parsed[0] || ''
+        }
+        return parsed || tag.replace(/[\[\]"]+/g, '')
+      } catch {
+        return tag.replace(/[\[\]"]+/g, '')
+      }
+    }
+    return String(tag)
+  }
+
+  // دالة لاستخراج التاغات من البيانات
+  const getTagsArray = (tags, lang) => {
+    if (!tags) return []
+    
+    // إذا كانت التاغات كائن يحتوي على ar و en
+    if (tags[lang]) {
+      const tagValue = tags[lang]
+      if (Array.isArray(tagValue)) {
+        return tagValue.slice(0, 2).map(tag => cleanTag(tag))
+      }
+    }
+    
+    return []
+  }
+  
   // الترجمات
   const translations = {
     EN: {
@@ -33,24 +90,6 @@ export const Blogs = () => {
       brandingCategory: "Branding",
       teamworkCategory: "Teamwork",
       sustainabilityCategory: "Sustainability",
-      blog1Title: "10 Strategies to Boost Your Business Growth in 2024",
-      blog1Excerpt: "Discover the most effective strategies that successful businesses are using to achieve exponential growth in today's competitive market.",
-      blog2Title: "The Future of Digital Marketing: Trends You Can't Ignore",
-      blog2Excerpt: "Explore the latest digital marketing trends that are shaping the industry and learn how to stay ahead of the curve.",
-      blog3Title: "How AI is Transforming Business Operations in 2024",
-      blog3Excerpt: "Learn how artificial intelligence is revolutionizing business operations and creating new opportunities for efficiency and growth.",
-      blog4Title: "Building a Strong Brand Identity: A Complete Guide",
-      blog4Excerpt: "A comprehensive guide to creating a memorable brand identity that resonates with your target audience and drives loyalty.",
-      blog5Title: "Remote Team Collaboration: Tools and Best Practices",
-      blog5Excerpt: "Discover the best tools and practices for effective remote team collaboration and maintaining productivity.",
-      blog6Title: "Sustainable Business Practices for Long-Term Success",
-      blog6Excerpt: "How implementing sustainable practices can lead to long-term business success and positive social impact.",
-      alexJohnson: "Alex Johnson",
-      sarahWilliams: "Sarah Williams",
-      michaelChen: "Michael Chen",
-      emmaRodriguez: "Emma Rodriguez",
-      davidWilson: "David Wilson",
-      lisaThompson: "Lisa Thompson",
       readFullArticle: "Read Full Article",
       viewAllArticles: "View All Articles",
       newsletterTitle: "Stay Updated",
@@ -74,7 +113,8 @@ export const Blogs = () => {
       collaboration: "Collaboration",
       productivity: "Productivity",
       sustainability: "Sustainability",
-      green: "Green"
+      green: "Green",
+      defaultAuthor: "Admin"
     },
     AR: {
       sectionTitle: "أحدث المقالات والرؤى",
@@ -85,24 +125,6 @@ export const Blogs = () => {
       brandingCategory: "العلامة التجارية",
       teamworkCategory: "العمل الجماعي",
       sustainabilityCategory: "الاستدامة",
-      blog1Title: "10 استراتيجيات لتعزيز نمو أعمالك في 2024",
-      blog1Excerpt: "اكتشف الاستراتيجيات الأكثر فعالية التي تستخدمها الشركات الناجحة لتحقيق نمو هائل في سوق اليوم التنافسي.",
-      blog2Title: "مستقبل التسويق الرقمي: اتجاهات لا يمكنك تجاهلها",
-      blog2Excerpt: "استكشف أحدث اتجاهات التسويق الرقمي التي تشكل الصناعة وتعلم كيفية البقاء في المقدمة.",
-      blog3Title: "كيف يغير الذكاء الاصطناعي عمليات الأعمال في 2024",
-      blog3Excerpt: "تعرف على كيفية ثورة الذكاء الاصطناعي في عمليات الأعمال وخلق فرص جديدة للكفاءة والنمو.",
-      blog4Title: "بناء هوية علامة تجارية قوية: دليل شامل",
-      blog4Excerpt: "دليل شامل لإنشاء هوية علامة تجارية لا تنسى تتردد صداها مع جمهورك المستهدف وتدفع الولاء.",
-      blog5Title: "تعاون الفريق عن بعد: الأدوات وأفضل الممارسات",
-      blog5Excerpt: "اكتشف أفضل الأدوات والممارسات للتعاون الفعال للفرق عن بعد والحفاظ على الإنتاجية.",
-      blog6Title: "ممارسات الأعمال المستدامة للنجاح على المدى الطويل",
-      blog6Excerpt: "كيف يمكن لتطبيق الممارسات المستدامة أن يؤدي إلى نجاح الأعمال على المدى الطويل والتأثير الاجتماعي الإيجابي.",
-      alexJohnson: "أليكس جونسون",
-      sarahWilliams: "سارة ويليامز",
-      michaelChen: "مايكل تشين",
-      emmaRodriguez: "إيما رودريجيز",
-      davidWilson: "ديفيد ويلسون",
-      lisaThompson: "ليسا تومسون",
       readFullArticle: "اقرأ المقال الكامل",
       viewAllArticles: "عرض جميع المقالات",
       newsletterTitle: "ابق على اطلاع",
@@ -126,7 +148,8 @@ export const Blogs = () => {
       collaboration: "تعاون",
       productivity: "إنتاجية",
       sustainability: "استدامة",
-      green: "أخضر"
+      green: "أخضر",
+      defaultAuthor: "المدير"
     }
   };
 
@@ -138,11 +161,17 @@ export const Blogs = () => {
   const blogsData = [
     {
       id: 1,
-      title: t('blog1Title'),
-      excerpt: t('blog1Excerpt'),
+      title: {
+        EN: "10 Strategies to Boost Your Business Growth in 2024",
+        AR: "10 استراتيجيات لتعزيز نمو أعمالك في 2024"
+      },
+      excerpt: {
+        EN: "Discover the most effective strategies that successful businesses are using to achieve exponential growth in today's competitive market.",
+        AR: "اكتشف الاستراتيجيات الأكثر فعالية التي تستخدمها الشركات الناجحة لتحقيق نمو هائل في سوق اليوم التنافسي."
+      },
       category: t('businessCategory'),
       date: currentLang === 'AR' ? "١٥ مارس ٢٠٢٤" : "March 15, 2024",
-      author: t('alexJohnson'),
+      author: "Alex Johnson",
       authorAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
       views: 1247,
       comments: 42,
@@ -152,11 +181,17 @@ export const Blogs = () => {
     },
     {
       id: 2,
-      title: t('blog2Title'),
-      excerpt: t('blog2Excerpt'),
+      title: {
+        EN: "The Future of Digital Marketing: Trends You Can't Ignore",
+        AR: "مستقبل التسويق الرقمي: اتجاهات لا يمكنك تجاهلها"
+      },
+      excerpt: {
+        EN: "Explore the latest digital marketing trends that are shaping the industry and learn how to stay ahead of the curve.",
+        AR: "استكشف أحدث اتجاهات التسويق الرقمي التي تشكل الصناعة وتعلم كيفية البقاء في المقدمة."
+      },
       category: t('marketingCategory'),
       date: currentLang === 'AR' ? "١٠ مارس ٢٠٢٤" : "March 10, 2024",
-      author: t('sarahWilliams'),
+      author: "Sarah Williams",
       authorAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
       views: 2156,
       comments: 68,
@@ -166,59 +201,23 @@ export const Blogs = () => {
     },
     {
       id: 3,
-      title: t('blog3Title'),
-      excerpt: t('blog3Excerpt'),
+      title: {
+        EN: "How AI is Transforming Business Operations in 2024",
+        AR: "كيف يغير الذكاء الاصطناعي عمليات الأعمال في 2024"
+      },
+      excerpt: {
+        EN: "Learn how artificial intelligence is revolutionizing business operations and creating new opportunities for efficiency and growth.",
+        AR: "تعرف على كيفية ثورة الذكاء الاصطناعي في عمليات الأعمال وخلق فرص جديدة للكفاءة والنمو."
+      },
       category: t('technologyCategory'),
       date: currentLang === 'AR' ? "٥ مارس ٢٠٢٤" : "March 5, 2024",
-      author: t('michaelChen'),
+      author: "Michael Chen",
       authorAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
       views: 3125,
       comments: 124,
       likes: 256,
       image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
       tags: [t('ai'), t('technology'), t('innovation')]
-    },
-    {
-      id: 4,
-      title: t('blog4Title'),
-      excerpt: t('blog4Excerpt'),
-      category: t('brandingCategory'),
-      date: currentLang === 'AR' ? "٢٨ فبراير ٢٠٢٤" : "February 28, 2024",
-      author: t('emmaRodriguez'),
-      authorAvatar: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
-      views: 1789,
-      comments: 35,
-      likes: 98,
-      image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      tags: [t('branding'), t('identity'), t('design')]
-    },
-    {
-      id: 5,
-      title: t('blog5Title'),
-      excerpt: t('blog5Excerpt'),
-      category: t('teamworkCategory'),
-      date: currentLang === 'AR' ? "٢٠ فبراير ٢٠٢٤" : "February 20, 2024",
-      author: t('davidWilson'),
-      authorAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
-      views: 2456,
-      comments: 78,
-      likes: 167,
-      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      tags: [t('remote'), t('collaboration'), t('productivity')]
-    },
-    {
-      id: 6,
-      title: t('blog6Title'),
-      excerpt: t('blog6Excerpt'),
-      category: t('sustainabilityCategory'),
-      date: currentLang === 'AR' ? "١٥ فبراير ٢٠٢٤" : "February 15, 2024",
-      author: t('lisaThompson'),
-      authorAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
-      views: 1987,
-      comments: 56,
-      likes: 134,
-      image: "https://images.unsplash.com/photo-1466781783364-36c955e42a7f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      tags: [t('sustainability'), t('green'), t('business')]
     }
   ];
 
@@ -397,7 +396,168 @@ export const Blogs = () => {
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [currentLang]); // أضف currentLang كـ dependency
+  }, [currentLang, threeblogs]);
+
+  // دالة لاستخراج البيانات حسب اللغة
+  const getLocalizedData = (blog) => {
+    const lang = currentLang.toLowerCase()
+    
+    return {
+      title: blog?.title?.[lang] || blog?.title?.ar || blog?.title?.en || 'بدون عنوان',
+      excerpt: blog?.short_description?.[lang] || blog?.short_description?.ar || blog?.short_description?.en || '',
+      author: blog?.author || t('defaultAuthor'),
+      createdAt: blog?.createdAt ? new Date(blog.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }) : (lang === 'ar' ? '١ يناير ٢٠٢٤' : 'January 1, 2024'),
+      tags: getTagsArray(blog?.tags, lang === 'ar' ? 'ar' : 'en'),
+      slug: blog?.slug?.[lang] || blog?.slug?.ar || blog?.slug?.en || blog?._id
+    }
+  }
+
+  // عرض المدونات الحقيقية من الـ API أو البيانات الافتراضية
+  const renderBlogs = () => {
+    console.log('Three blogs data:', threeblogs) // للتحقق من البيانات
+    
+    // إذا كانت هناك بيانات حقيقية من الـ API
+    if (threeblogs && threeblogs.length > 0) {
+      return threeblogs.slice(0, 3).map((blog, index) => {
+        const blogId = blog?._id || `blog-${index}`
+        
+        // الحصول على البيانات المترجمة
+        const localizedData = getLocalizedData(blog)
+        
+        // معالجة صورة الملف الشخصي للمؤلف
+        const authorAvatar = blog?.authorAvatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80"
+        
+        // معالجة صورة المدونة
+        const blogImageRaw = blog?.profileImg || blog?.image || null
+        const blogImage = blogImageRaw ? getImageUrl(blogImageRaw) : blogsData[index]?.image
+        
+        console.log(`Blog ${index} - Title: ${localizedData.title}, Image: ${blogImage}`)
+
+        return (
+          <div 
+            key={blogId} 
+            className="blog-card"
+            ref={el => blogCardsRef.current[index] = el}
+            style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}
+          >
+            {/* Blog Image */}
+            <div className="blog-image">
+              <img 
+                src={blogImage} 
+                alt={localizedData.title} 
+                onError={(e) => {
+                  console.log('Image failed to load:', blogImage)
+                  e.target.src = blogsData[index]?.image || "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+                }} 
+              />
+              <div className="blog-overlay"></div>
+              <span className="blog-category">{t('businessCategory')}</span>
+              <span className="blog-date">
+                <FaCalendar style={{ marginRight: '5px' }} />
+                {localizedData.createdAt}
+              </span>
+            </div>
+
+            {/* Blog Content */}
+            <div className="blog-content">
+              {/* Blog Meta */}
+              <div className="blog-meta">
+                <div className="blog-author">
+                  <div className="author-avatar">
+                    <img src={authorAvatar} alt={localizedData.author} />
+                  </div>
+                  <span>{localizedData.author}</span>
+                </div>
+              </div>
+
+              {/* Blog Title */}
+              <h3 className="blog-title">{localizedData.title}</h3>
+
+              {/* Blog Excerpt */}
+              <p className="blog-excerpt">{truncateText(localizedData.excerpt, 120)}</p>
+
+              {/* Blog Tags - يمكنك تفعيلها إذا أردت */}
+              {/* {localizedData.tags.length > 0 && (
+                <div className="blog-tags">
+                  {localizedData.tags.slice(0, 2).map((tag, tagIndex) => (
+                    <span key={tagIndex} className="blog-tag">
+                      <FaTag style={{ marginRight: '5px', fontSize: '0.8rem' }} />
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )} */}
+
+              <Link to={`/blog/${blogId}`} className="read-more">
+                {t('readFullArticle')}
+                <FaArrowRight style={{ 
+                  marginRight: currentLang === 'AR' ? '10px' : '0', 
+                  marginLeft: currentLang === 'AR' ? '0' : '10px' 
+                }} />
+              </Link>
+            </div>
+          </div>
+        )
+      })
+    } else {
+      // إذا لم تكن هناك بيانات، عرض البيانات الافتراضية
+      return blogsData.map((blog, index) => {
+        const title = blog.title[currentLang] || blog.title.EN
+        const excerpt = blog.excerpt[currentLang] || blog.excerpt.EN
+        
+        return (
+          <div 
+            key={blog.id} 
+            className="blog-card"
+            ref={el => blogCardsRef.current[index] = el}
+            style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}
+          >
+            {/* Blog Image */}
+            <div className="blog-image">
+              <img src={blog.image} alt={title} />
+              <div className="blog-overlay"></div>
+              <span className="blog-category">{blog.category}</span>
+              <span className="blog-date">
+                <FaCalendar style={{ marginRight: '5px' }} />
+                {blog.date}
+              </span>
+            </div>
+
+            {/* Blog Content */}
+            <div className="blog-content">
+              {/* Blog Meta */}
+              <div className="blog-meta">
+                <div className="blog-author">
+                  <div className="author-avatar">
+                    <img src={blog.authorAvatar} alt={blog.author} />
+                  </div>
+                  <span>{blog.author}</span>
+                </div>
+              </div>
+
+              {/* Blog Title */}
+              <h3 className="blog-title">{title}</h3>
+
+              {/* Blog Excerpt */}
+              <p className="blog-excerpt">{excerpt}</p>
+
+              <Link to={`/MainBlogsCardspage`} className="read-more"> 
+                {t('readFullArticle')}
+                <FaArrowRight style={{ 
+                  marginRight: currentLang === 'AR' ? '10px' : '0', 
+                  marginLeft: currentLang === 'AR' ? '0' : '10px' 
+                }} />
+              </Link>
+            </div>
+          </div>
+        )
+      })
+    }
+  }
 
   return (
     <section className="blogs-section" ref={sectionRef} id="blog">
@@ -415,83 +575,20 @@ export const Blogs = () => {
 
         {/* Blogs Grid */}
         <div className="blogs-grid">
-          {blogsData.map((blog, index) => (
-            <div 
-              key={blog.id} 
-              className="blog-card"
-              ref={el => blogCardsRef.current[index] = el}
-              style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}
-            >
-              {/* Blog Image */}
-              <div className="blog-image">
-                <img src={blog.image} alt={blog.title} />
-                <div className="blog-overlay"></div>
-                <span className="blog-category">{blog.category}</span>
-                <span className="blog-date">
-                  <FaCalendar style={{ marginRight: '5px' }} />
-                  {blog.date}
-                </span>
-              </div>
-
-              {/* Blog Content */}
-              <div className="blog-content">
-                {/* Blog Meta */}
-                <div className="blog-meta">
-                  <div className="blog-author">
-                    <div className="author-avatar">
-                      <img src={blog.authorAvatar} alt={blog.author} />
-                    </div>
-                    <span>{blog.author}</span>
-                  </div>
-                  
-                  {/* <div className="blog-stats">
-                    <div className="blog-stat">
-                      <FaEye />
-                      <span>{blog.views.toLocaleString(currentLang === 'AR' ? 'ar-SA' : 'en-US')}</span>
-                    </div>
-                    <div className="blog-stat">
-                      <FaComment />
-                      <span>{blog.comments}</span>
-                    </div>
-                    <div className="blog-stat">
-                      <FaHeart />
-                      <span>{blog.likes}</span>
-                    </div>
-                  </div> */}
-                </div>
-
-                {/* Blog Title */}
-                <h3 className="blog-title">{blog.title}</h3>
-
-                {/* Blog Excerpt */}
-                <p className="blog-excerpt">{blog.excerpt}</p>
-
-                {/* Blog Tags */}
-                {/* <div className="blog-tags">
-                  {blog.tags.map((tag, tagIndex) => (
-                    <span key={tagIndex} className="blog-tag">
-                      <FaTag style={{ marginRight: '5px', fontSize: '0.8rem' }} />
-                      {tag}
-                    </span>
-                  ))}
-                </div> */}
-
-<Link to={`/MainBlogsCardspage`} className="read-more"> 
-                {/* Read More */}
-                  {t('readFullArticle')}
-                  <FaArrowRight style={{ marginRight: currentLang === 'AR' ? '10px' : '0', marginLeft: currentLang === 'AR' ? '0' : '10px' }} />
-                </Link>
-              </div>
-            </div>
-          ))}
+          {renderBlogs()}
         </div>
 
         {/* View All Button */}
         <div className="blogs-cta">
-          <Button className="view-all-btn">
-            {t('viewAllArticles')}
-            <FaArrowRight style={{ marginLeft: currentLang === 'AR' ? '0' : '10px', marginRight: currentLang === 'AR' ? '10px' : '0' }} />
-          </Button>
+          <Link to="/MainBlogsCardspage">
+            <Button className="view-all-btn">
+              {t('viewAllArticles')}
+              <FaArrowRight style={{ 
+                marginLeft: currentLang === 'AR' ? '0' : '10px', 
+                marginRight: currentLang === 'AR' ? '10px' : '0' 
+              }} />
+            </Button>
+          </Link>
         </div>
 
         {/* Newsletter Section */}

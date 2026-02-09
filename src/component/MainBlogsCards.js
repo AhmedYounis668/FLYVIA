@@ -6,29 +6,137 @@ import {
 } from 'react-icons/fa';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
-import { useLanguage } from './LanguageProvider'; // استيراد الـ hook
+import { useLanguage } from './LanguageProvider';
 import { Link } from 'react-router-dom';
-import { cleanupGSAP, initGSAP } from '../pages/initGSAP';
-// import './MainBlogsCards.css'; // ملف CSS منفصل للأنماط
+import { useDispatch, useSelector } from 'react-redux';
+import { Get_All_Blogs_Action } from '../Redux/Actions/BlogsAction';
 
 gsap.registerPlugin(ScrollTrigger);
 
 export const MainBlogsCards = () => {
   const { currentLang } = useLanguage();
+  const dispatch = useDispatch();
+  
+  // State للـ pagination والبيانات
   const [currentPage, setCurrentPage] = useState(1);
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
-  const blogsPerPage = 9;
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [loading, setLoading] = useState(false);
+  
+  const blogsPerPage = 6;
   const sectionRef = useRef(null);
   const titleRef = useRef(null);
   const heroRef = useRef(null);
-  useEffect(() => {
-    initGSAP();
+
+  // الحصول على البيانات من Redux
+  const resblogs = useSelector(state => state.AllBlogs.Blog);
+  const blogsLoading = useSelector(state => state.AllBlogs.loading);
+
+  // دالة لمعالجة رابط الصورة
+  const getImageUrl = (url) => {
+    if (!url || typeof url !== 'string') return null
     
-    return () => {
-      cleanupGSAP();
-    };
-  }, []);
+    // تنظيف الرابط من undefined
+    let cleanUrl = url.replace(/^undefined\//, '')
+    
+    if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
+      return cleanUrl
+    }
+    
+    if (cleanUrl.startsWith('/')) {
+      return `http://localhost:8000${cleanUrl}`
+    }
+    
+    return `http://localhost:8000/${cleanUrl}`
+  }
+
+  // دالة لاختصار النص
+  const truncateText = (text, maxLength = 100) => {
+    if (!text || typeof text !== 'string') return ''
+    if (text.length <= maxLength) return text
+    return text.substring(0, maxLength) + '...'
+  }
+
+  // دالة لتنظيف التاغات
+  const cleanTag = (tag) => {
+    if (!tag) return ''
+    if (typeof tag === 'string') {
+      try {
+        const parsed = JSON.parse(tag)
+        if (Array.isArray(parsed)) {
+          return parsed[0] || ''
+        }
+        return parsed || tag.replace(/[\[\]"]+/g, '')
+      } catch {
+        return tag.replace(/[\[\]"]+/g, '')
+      }
+    }
+    return String(tag)
+  }
+
+  // دالة لاستخراج التاغات من البيانات
+  const getTagsArray = (tags, lang) => {
+    if (!tags) return []
+    
+    // إذا كانت التاغات كائن يحتوي على ar و en
+    if (tags[lang]) {
+      const tagValue = tags[lang]
+      if (Array.isArray(tagValue)) {
+        return tagValue.slice(0, 2).map(tag => cleanTag(tag))
+      }
+    }
+    
+    return []
+  }
+
+  // جلب المدونات من الـ API
+  const getAllBlogs = async (pageNum = 1) => {
+    setLoading(true);
+    try {
+      await dispatch(Get_All_Blogs_Action(`page=${pageNum}&limit=${blogsPerPage}`));
+    } catch (error) {
+      console.error('Error fetching blogs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // عند تغيير الصفحة
+  useEffect(() => {
+    getAllBlogs(currentPage);
+  }, [currentPage]);
+
+  // تحديث البيانات عند استلامها من الـ API
+  useEffect(() => {
+    if (resblogs) {
+      console.log('Blogs data from API:', resblogs);
+      setTotalPages(resblogs?.pagination?.totalPages || 1);
+      setTotalItems(resblogs?.pagination?.totalItems || 0);
+    }
+  }, [resblogs]);
+
+  // دالة لاستخراج البيانات حسب اللغة
+  const getLocalizedData = (blog) => {
+    const lang = currentLang.toLowerCase()
+    
+    return {
+      id: blog?._id || '',
+      title: blog?.title?.[lang] || blog?.title?.ar || blog?.title?.en || 'بدون عنوان',
+      excerpt: blog?.short_description?.[lang] || blog?.short_description?.ar || blog?.short_description?.en || '',
+      author: blog?.author || t('defaultAuthor'),
+      createdAt: blog?.createdAt ? new Date(blog.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }) : (lang === 'ar' ? '١ يناير ٢٠٢٤' : 'January 1, 2024'),
+      tags: getTagsArray(blog?.tags, lang === 'ar' ? 'ar' : 'en'),
+      slug: blog?.slug?.[lang] || blog?.slug?.ar || blog?.slug?.en || blog?._id,
+      category: blog?.category?.[lang] || blog?.category?.ar || blog?.category?.en || t('businessCategory')
+    }
+  }
+
   // الترجمات
   const translations = {
     EN: {
@@ -46,44 +154,8 @@ export const MainBlogsCards = () => {
       leadershipCategory: "Leadership",
       startupCategory: "Startup",
       designCategory: "Design",
-      blog1Title: "10 Strategies to Boost Your Business Growth in 2024",
-      blog1Excerpt: "Discover the most effective strategies that successful businesses are using to achieve exponential growth in today's competitive market.",
-      blog2Title: "The Future of Digital Marketing: Trends You Can't Ignore",
-      blog2Excerpt: "Explore the latest digital marketing trends that are shaping the industry and learn how to stay ahead of the curve.",
-      blog3Title: "How AI is Transforming Business Operations in 2024",
-      blog3Excerpt: "Learn how artificial intelligence is revolutionizing business operations and creating new opportunities for efficiency and growth.",
-      blog4Title: "Building a Strong Brand Identity: A Complete Guide",
-      blog4Excerpt: "A comprehensive guide to creating a memorable brand identity that resonates with your target audience and drives loyalty.",
-      blog5Title: "Remote Team Collaboration: Tools and Best Practices",
-      blog5Excerpt: "Discover the best tools and practices for effective remote team collaboration and maintaining productivity.",
-      blog6Title: "Sustainable Business Practices for Long-Term Success",
-      blog6Excerpt: "How implementing sustainable practices can lead to long-term business success and positive social impact.",
-      blog7Title: "Financial Planning for Startups: A Step-by-Step Guide",
-      blog7Excerpt: "Essential financial planning strategies for startups to ensure sustainable growth and investor confidence.",
-      blog8Title: "Effective Leadership in the Digital Age",
-      blog8Excerpt: "Modern leadership approaches that inspire teams and drive innovation in fast-paced digital environments.",
-      blog9Title: "UX/UI Design Principles for Better Conversion Rates",
-      blog9Excerpt: "Key design principles that can significantly improve user experience and boost conversion rates.",
-      blog10Title: "Scaling Your Business: When and How to Expand",
-      blog10Excerpt: "Strategic insights on timing and methods for scaling your business operations effectively.",
-      blog11Title: "Content Marketing Strategies That Actually Work",
-      blog11Excerpt: "Proven content marketing strategies that generate leads and build brand authority.",
-      blog12Title: "The Psychology of Consumer Decision Making",
-      blog12Excerpt: "Understanding consumer psychology to create more effective marketing campaigns and product designs.",
-      alexJohnson: "Alex Johnson",
-      sarahWilliams: "Sarah Williams",
-      michaelChen: "Michael Chen",
-      emmaRodriguez: "Emma Rodriguez",
-      davidWilson: "David Wilson",
-      lisaThompson: "Lisa Thompson",
-      robertBrown: "Robert Brown",
-      sophiaLee: "Sophia Lee",
-      jamesMiller: "James Miller",
-      oliviaDavis: "Olivia Davis",
-      chrisTaylor: "Chris Taylor",
-      amandaClark: "Amanda Clark",
-      blogDetails: "Blog Details",
       readFullArticle: "Read Full Article",
+      blogDetails: "Blog Details",
       previous: "Previous",
       next: "Next",
       newsletterTitle: "Stay Updated",
@@ -91,27 +163,13 @@ export const MainBlogsCards = () => {
       placeholderEmail: "Enter your email",
       subscribeButton: "Subscribe",
       subscribedMessage: "Thank you for subscribing!",
-      growth: "Growth",
-      strategy: "Strategy",
-      business: "Business",
-      digital: "Digital",
-      marketing: "Marketing",
-      trends: "Trends",
-      ai: "AI",
-      technology: "Technology",
-      innovation: "Innovation",
-      branding: "Branding",
-      identity: "Identity",
-      design: "Design",
-      remote: "Remote",
-      collaboration: "Collaboration",
-      productivity: "Productivity",
-      sustainability: "Sustainability",
-      green: "Green",
-      finance: "Finance",
-      leadership: "Leadership",
-      startup: "Startup",
-      ux: "UX/UI"
+      defaultAuthor: "Admin",
+      loading: "Loading...",
+      noBlogs: "No blogs found",
+      showing: "Showing",
+      of: "of",
+      articles: "articles",
+      page: "Page"
     },
     AR: {
       pageTitle: "المدونات",
@@ -128,44 +186,8 @@ export const MainBlogsCards = () => {
       leadershipCategory: "قيادة",
       startupCategory: "شركات ناشئة",
       designCategory: "تصميم",
-      blog1Title: "10 استراتيجيات لتعزيز نمو أعمالك في 2024",
-      blog1Excerpt: "اكتشف الاستراتيجيات الأكثر فعالية التي تستخدمها الشركات الناجحة لتحقيق نمو هائل في سوق اليوم التنافسي.",
-      blog2Title: "مستقبل التسويق الرقمي: اتجاهات لا يمكنك تجاهلها",
-      blog2Excerpt: "استكشف أحدث اتجاهات التسويق الرقمي التي تشكل الصناعة وتعلم كيفية البقاء في المقدمة.",
-      blog3Title: "كيف يغير الذكاء الاصطناعي عمليات الأعمال في 2024",
-      blog3Excerpt: "تعرف على كيفية ثورة الذكاء الاصطناعي في عمليات الأعمال وخلق فرص جديدة للكفاءة والنمو.",
-      blog4Title: "بناء هوية علامة تجارية قوية: دليل شامل",
-      blog4Excerpt: "دليل شامل لإنشاء هوية علامة تجارية لا تنسى تتردد صداها مع جمهورك المستهدف وتدفع الولاء.",
-      blog5Title: "تعاون الفريق عن بعد: الأدوات وأفضل الممارسات",
-      blog5Excerpt: "اكتشف أفضل الأدوات والممارسات للتعاون الفعال للفرق عن بعد والحفاظ على الإنتاجية.",
-      blog6Title: "ممارسات الأعمال المستدامة للنجاح على المدى الطويل",
-      blog6Excerpt: "كيف يمكن لتطبيق الممارسات المستدامة أن يؤدي إلى نجاح الأعمال على المدى الطويل والتأثير الاجتماعي الإيجابي.",
-      blog7Title: "التخطيط المالي للشركات الناشئة: دليل خطوة بخطوة",
-      blog7Excerpt: "استراتيجيات التخطيط المالي الأساسية للشركات الناشئة لضمان النمو المستدام وثقة المستثمرين.",
-      blog8Title: "القيادة الفعالة في العصر الرقمي",
-      blog8Excerpt: "نهج القيادة الحديثة التي تلهم الفرق وتدفع الابتكار في البيئات الرقمية سريعة الخطى.",
-      blog9Title: "مبادئ تصميم UX/UI لتحسين معدلات التحويل",
-      blog9Excerpt: "مبادئ التصميم الرئيسية التي يمكن أن تحسن بشكل كبير تجربة المستخدم وتعزز معدلات التحويل.",
-      blog10Title: "توسيع نطاق عملك: متى وكيف تتوسع",
-      blog10Excerpt: "رؤى استراتيجية حول توقيت وطرق توسيع عمليات عملك بشكل فعال.",
-      blog11Title: "استراتيجيات تسويق المحتوى التي تعمل بالفعل",
-      blog11Excerpt: "استراتيجيات تسويق المحتوى المثبتة التي تولد العملاء المحتملين وتبني سلطة العلامة التجارية.",
-      blog12Title: "سيكولوجية اتخاذ القرار لدى المستهلك",
-      blog12Excerpt: "فهم سيكولوجية المستهلك لإنشاء حملات تسويقية وتصاميم منتجات أكثر فعالية.",
-      alexJohnson: "أليكس جونسون",
-      sarahWilliams: "سارة ويليامز",
-      michaelChen: "مايكل تشين",
-      emmaRodriguez: "إيما رودريجيز",
-      davidWilson: "ديفيد ويلسون",
-      lisaThompson: "ليسا تومسون",
-      robertBrown: "روبرت براون",
-      sophiaLee: "صوفيا لي",
-      jamesMiller: "جيمس ميلر",
-      oliviaDavis: "أوليفيا ديفيس",
-      chrisTaylor: "كريس تايلور",
-      amandaClark: "أماندا كلارك",
-      blogDetails: "تفاصيل المدونة",
       readFullArticle: "اقرأ المقال الكامل",
+      blogDetails: "تفاصيل المدونة",
       previous: "السابق",
       next: "التالي",
       newsletterTitle: "ابق على اطلاع",
@@ -173,27 +195,13 @@ export const MainBlogsCards = () => {
       placeholderEmail: "أدخل بريدك الإلكتروني",
       subscribeButton: "اشترك",
       subscribedMessage: "شكراً لك على الاشتراك!",
-      growth: "نمو",
-      strategy: "استراتيجية",
-      business: "أعمال",
-      digital: "رقمي",
-      marketing: "تسويق",
-      trends: "اتجاهات",
-      ai: "ذكاء اصطناعي",
-      technology: "تكنولوجيا",
-      innovation: "ابتكار",
-      branding: "علامة تجارية",
-      identity: "هوية",
-      design: "تصميم",
-      remote: "عن بعد",
-      collaboration: "تعاون",
-      productivity: "إنتاجية",
-      sustainability: "استدامة",
-      green: "أخضر",
-      finance: "تمويل",
-      leadership: "قيادة",
-      startup: "شركة ناشئة",
-      ux: "UX/UI"
+      defaultAuthor: "المدير",
+      loading: "جاري التحميل...",
+      noBlogs: "لا توجد مقالات",
+      showing: "عرض",
+      of: "من",
+      articles: "مقال",
+      page: "صفحة"
     }
   };
 
@@ -202,200 +210,200 @@ export const MainBlogsCards = () => {
     return translations[currentLang][key] || translations.EN[key];
   };
 
-  // بيانات المدونات (12 مدونة)
-  const blogsData = [
-    {
-      id: 1,
-      title: t('blog1Title'),
-      excerpt: t('blog1Excerpt'),
-      category: t('businessCategory'),
-      date: currentLang === 'AR' ? "١٥ مارس ٢٠٢٤" : "March 15, 2024",
-      author: t('alexJohnson'),
-      authorAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
-      views: 1247,
-      comments: 42,
-      likes: 89,
-      image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      tags: [t('growth'), t('strategy'), t('business')]
-    },
-    {
-      id: 2,
-      title: t('blog2Title'),
-      excerpt: t('blog2Excerpt'),
-      category: t('marketingCategory'),
-      date: currentLang === 'AR' ? "١٠ مارس ٢٠٢٤" : "March 10, 2024",
-      author: t('sarahWilliams'),
-      authorAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
-      views: 2156,
-      comments: 68,
-      likes: 142,
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      tags: [t('digital'), t('marketing'), t('trends')]
-    },
-    {
-      id: 3,
-      title: t('blog3Title'),
-      excerpt: t('blog3Excerpt'),
-      category: t('technologyCategory'),
-      date: currentLang === 'AR' ? "٥ مارس ٢٠٢٤" : "March 5, 2024",
-      author: t('michaelChen'),
-      authorAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
-      views: 3125,
-      comments: 124,
-      likes: 256,
-      image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      tags: [t('ai'), t('technology'), t('innovation')]
-    },
-    {
-      id: 4,
-      title: t('blog4Title'),
-      excerpt: t('blog4Excerpt'),
-      category: t('brandingCategory'),
-      date: currentLang === 'AR' ? "٢٨ فبراير ٢٠٢٤" : "February 28, 2024",
-      author: t('emmaRodriguez'),
-      authorAvatar: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
-      views: 1789,
-      comments: 35,
-      likes: 98,
-      image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      tags: [t('branding'), t('identity'), t('design')]
-    },
-    {
-      id: 5,
-      title: t('blog5Title'),
-      excerpt: t('blog5Excerpt'),
-      category: t('teamworkCategory'),
-      date: currentLang === 'AR' ? "٢٠ فبراير ٢٠٢٤" : "February 20, 2024",
-      author: t('davidWilson'),
-      authorAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
-      views: 2456,
-      comments: 78,
-      likes: 167,
-      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      tags: [t('remote'), t('collaboration'), t('productivity')]
-    },
-    {
-      id: 6,
-      title: t('blog6Title'),
-      excerpt: t('blog6Excerpt'),
-      category: t('sustainabilityCategory'),
-      date: currentLang === 'AR' ? "١٥ فبراير ٢٠٢٤" : "February 15, 2024",
-      author: t('lisaThompson'),
-      authorAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
-      views: 1987,
-      comments: 56,
-      likes: 134,
-      image: "https://images.unsplash.com/photo-1466781783364-36c955e42a7f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      tags: [t('sustainability'), t('green'), t('business')]
-    },
-    {
-      id: 7,
-      title: t('blog7Title'),
-      excerpt: t('blog7Excerpt'),
-      category: t('financeCategory'),
-      date: currentLang === 'AR' ? "١٠ فبراير ٢٠٢٤" : "February 10, 2024",
-      author: t('robertBrown'),
-      authorAvatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
-      views: 1678,
-      comments: 42,
-      likes: 95,
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      tags: [t('finance'), t('startup'), t('business')]
-    },
-    {
-      id: 8,
-      title: t('blog8Title'),
-      excerpt: t('blog8Excerpt'),
-      category: t('leadershipCategory'),
-      date: currentLang === 'AR' ? "٥ فبراير ٢٠٢٤" : "February 5, 2024",
-      author: t('sophiaLee'),
-      authorAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
-      views: 2345,
-      comments: 87,
-      likes: 156,
-      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      tags: [t('leadership'), t('management'), t('innovation')]
-    },
-    {
-      id: 9,
-      title: t('blog9Title'),
-      excerpt: t('blog9Excerpt'),
-      category: t('designCategory'),
-      date: currentLang === 'AR' ? "٣٠ يناير ٢٠٢٤" : "January 30, 2024",
-      author: t('jamesMiller'),
-      authorAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
-      views: 1876,
-      comments: 65,
-      likes: 123,
-      image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      tags: [t('design'), t('ux'), t('innovation')]
-    },
-    {
-      id: 10,
-      title: t('blog10Title'),
-      excerpt: t('blog10Excerpt'),
-      category: t('businessCategory'),
-      date: currentLang === 'AR' ? "٢٥ يناير ٢٠٢٤" : "January 25, 2024",
-      author: t('oliviaDavis'),
-      authorAvatar: "https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
-      views: 2789,
-      comments: 92,
-      likes: 178,
-      image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      tags: [t('growth'), t('strategy'), t('business')]
-    },
-    {
-      id: 11,
-      title: t('blog11Title'),
-      excerpt: t('blog11Excerpt'),
-      category: t('marketingCategory'),
-      date: currentLang === 'AR' ? "٢٠ يناير ٢٠٢٤" : "January 20, 2024",
-      author: t('chrisTaylor'),
-      authorAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
-      views: 1987,
-      comments: 58,
-      likes: 145,
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      tags: [t('marketing'), t('content'), t('strategy')]
-    },
-    {
-      id: 12,
-      title: t('blog12Title'),
-      excerpt: t('blog12Excerpt'),
-      category: t('marketingCategory'),
-      date: currentLang === 'AR' ? "١٥ يناير ٢٠٢٤" : "January 15, 2024",
-      author: t('amandaClark'),
-      authorAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
-      views: 2234,
-      comments: 76,
-      likes: 167,
-      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      tags: [t('marketing'), t('psychology'), t('trends')]
-    }
-  ];
-
-  // Pagination Logic
-  const indexOfLastBlog = currentPage * blogsPerPage;
-  const indexOfFirstBlog = indexOfLastBlog - blogsPerPage;
-  const currentBlogs = blogsData.slice(indexOfFirstBlog, indexOfLastBlog);
-  const totalPages = Math.ceil(blogsData.length / blogsPerPage);
-
+  // التعامل مع تغيير الصفحة
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
     window.scrollTo({ top: sectionRef.current?.offsetTop - 100, behavior: 'smooth' });
   };
 
-  const handleSubscribe = (e) => {
-    e.preventDefault();
-    if (email.trim()) {
-      console.log('Subscribed with email:', email);
-      setSubscribed(true);
-      setEmail('');
-      
-      setTimeout(() => {
-        setSubscribed(false);
-      }, 3000);
+  // عرض المدونات
+  const renderBlogs = () => {
+    if (loading || blogsLoading) {
+      return (
+        <div className="text-center py-5">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">{t('loading')}</span>
+          </div>
+          <p className="mt-3">{t('loading')}</p>
+        </div>
+      );
     }
+
+    const blogs = resblogs?.data?.blogs || [];
+    
+    if (blogs.length === 0) {
+      return (
+        <div className="text-center py-5">
+          <p className="text-muted">{t('noBlogs')}</p>
+        </div>
+      );
+    }
+
+    return blogs.map((blog) => {
+      const localizedData = getLocalizedData(blog);
+      const blogId = blog?._id || '';
+      
+      // معالجة صورة الملف الشخصي للمؤلف
+      const authorAvatar = blog?.authorAvatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80";
+      
+      // معالجة صورة المدونة
+      const blogImageRaw = blog?.profileImg || blog?.image || null;
+      const blogImage = blogImageRaw ? getImageUrl(blogImageRaw) : "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80";
+
+      return (
+        <Col lg={4} md={6} sm={12} key={blogId} className="mb-4">
+          <div 
+            className="blog-card"
+            style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}
+          >
+            {/* Blog Image */}
+            <div className="blog-image">
+              <img 
+                src={blogImage} 
+                alt={localizedData.title} 
+                className="img-fluid"
+                onError={(e) => {
+                  e.target.src = "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80";
+                }} 
+              />
+              <div className="blog-overlay"></div>
+              <span className="blog-category">{localizedData.category}</span>
+              <span className="blog-date">
+                <FaCalendar style={{ marginRight: '5px' }} />
+                {localizedData.createdAt}
+              </span>
+            </div>
+
+            {/* Blog Content */}
+            <div className="blog-content">
+              {/* Blog Meta */}
+              <div className="blog-meta">
+                <div className="blog-author">
+                  <div className="author-avatar">
+                    <img src={authorAvatar} alt={localizedData.author} />
+                  </div>
+                  <span>{localizedData.author}</span>
+                </div>
+              </div>
+
+              {/* Blog Title */}
+              <h3 className="blog-title">{localizedData.title}</h3>
+
+              {/* Blog Excerpt */}
+              <p className="blog-excerpt">{truncateText(localizedData.excerpt, 120)}</p>
+
+              {/* Blog Tags */}
+              {localizedData.tags.length > 0 && (
+                <div className="blog-tags">
+                  {localizedData.tags.slice(0, 2).map((tag, tagIndex) => (
+                    <span key={tagIndex} className="blog-tag">
+                      <FaTag style={{ marginRight: '5px', fontSize: '0.8rem' }} />
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Blog Details Button */}
+              <div className="blog-actions">
+<Link to={`/BlogDetails/${blogId}`} className="blog-details-link" style={{ textDecoration: 'none' }}>
+                  {t('readFullArticle')}
+                  <FaArrowRight style={{ 
+                    marginLeft: currentLang === 'AR' ? '0' : '8px', 
+                    marginRight: currentLang === 'AR' ? '8px' : '0' 
+                  }} />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </Col>
+      );
+    });
+  };
+
+  // Generate pagination items
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    const items = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    // زر الأول
+    items.push(
+      <Pagination.First 
+        key="first" 
+        onClick={() => handlePageChange(1)} 
+        disabled={currentPage === 1}
+      />
+    );
+    
+    // زر السابق
+    items.push(
+      <Pagination.Prev 
+        key="prev" 
+        onClick={() => handlePageChange(currentPage - 1)} 
+        disabled={currentPage === 1}
+      >
+        {t('previous')}
+      </Pagination.Prev>
+    );
+
+    // أرقام الصفحات
+    for (let i = startPage; i <= endPage; i++) {
+      items.push(
+        <Pagination.Item
+          key={i}
+          active={i === currentPage}
+          onClick={() => handlePageChange(i)}
+        >
+          {i}
+        </Pagination.Item>
+      );
+    }
+
+    // زر التالي
+    items.push(
+      <Pagination.Next 
+        key="next" 
+        onClick={() => handlePageChange(currentPage + 1)} 
+        disabled={currentPage === totalPages}
+      >
+        {t('next')}
+      </Pagination.Next>
+    );
+    
+    // زر الأخير
+    items.push(
+      <Pagination.Last 
+        key="last" 
+        onClick={() => handlePageChange(totalPages)} 
+        disabled={currentPage === totalPages}
+      />
+    );
+
+    return (
+      <Row className="mt-5">
+        <Col className="d-flex flex-column align-items-center">
+          {/* Pagination Info */}
+          <div className="mb-3 text-center">
+            <span className="text-muted">
+              {t('showing')} {Math.min((currentPage - 1) * blogsPerPage + 1, totalItems)} - {Math.min(currentPage * blogsPerPage, totalItems)} {t('of')} {totalItems} {t('articles')}
+            </span>
+          </div>
+          
+          {/* Pagination Controls */}
+          <Pagination>
+            {items}
+          </Pagination>
+        </Col>
+      </Row>
+    );
   };
 
   // GSAP Animations
@@ -487,21 +495,7 @@ export const MainBlogsCards = () => {
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [currentPage, currentLang]);
-
-  // Generate pagination items
-  const paginationItems = [];
-  for (let number = 1; number <= totalPages; number++) {
-    paginationItems.push(
-      <Pagination.Item 
-        key={number} 
-        active={number === currentPage}
-        onClick={() => handlePageChange(number)}
-      >
-        {number}
-      </Pagination.Item>
-    );
-  }
+  }, [currentPage, currentLang, resblogs]);
 
   return (
     <div className="main-blogs-page">
@@ -531,113 +525,295 @@ export const MainBlogsCards = () => {
 
           {/* Blogs Grid - 3 cards per row */}
           <Row className="g-4">
-            {currentBlogs.map((blog) => (
-              <Col lg={4} md={6} sm={12} key={blog.id}>
-                <div 
-                  className="blog-card"
-                  style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}
-                >
-                  {/* Blog Image */}
-                  <div className="blog-image">
-                    <img src={blog.image} alt={blog.title} />
-                    <div className="blog-overlay"></div>
-                    <span className="blog-category">{blog.category}</span>
-                    <span className="blog-date">
-                      <FaCalendar style={{ marginRight: '5px' }} />
-                      {blog.date}
-                    </span>
-                    {/* <button className="bookmark-btn">
-                      <FaBookmark />
-                    </button> */}
-                  </div>
-
-                  {/* Blog Content */}
-                  <div className="blog-content">
-                    {/* Blog Meta */}
-                    <div className="blog-meta">
-                      <div className="blog-author">
-                        <div className="author-avatar">
-                          <img src={blog.authorAvatar} alt={blog.author} />
-                        </div>
-                        <span>{blog.author}</span>
-                      </div>
-                      
-                      {/* <div className="blog-stats">
-                        <div className="blog-stat">
-                          <FaEye />
-                          <span>{blog.views.toLocaleString(currentLang === 'AR' ? 'ar-SA' : 'en-US')}</span>
-                        </div>
-                        <div className="blog-stat">
-                          <FaComment />
-                          <span>{blog.comments}</span>
-                        </div>
-                        <div className="blog-stat">
-                          <FaHeart />
-                          <span>{blog.likes}</span>
-                        </div>
-                      </div> */}
-                    </div>
-
-                    {/* Blog Title */}
-                    <h3 className="blog-title">{blog.title}</h3>
-
-                    {/* Blog Excerpt */}
-                    <p className="blog-excerpt">{blog.excerpt}</p>
-
-                    {/* Blog Tags */}
-                    {/* <div className="blog-tags">
-                      {blog.tags.map((tag, tagIndex) => (
-                        <span key={tagIndex} className="blog-tag">
-                          <FaTag style={{ marginRight: '5px', fontSize: '0.8rem' }} />
-                          {tag}
-                        </span>
-                      ))}
-                    </div> */}
-
-                    {/* Blog Details Button */}
-                    <div className="blog-actions">
-                        {/* <Link to={`/BlogDetails/${blog.id}`} className="blog-details-link" style={{textdecoration: 'none'}}>
-                      <Button className="blog-details-btn">
-                        {t('blogDetails')}
-                        <FaArrowRight style={{ marginLeft: currentLang === 'AR' ? '0' : '8px', marginRight: currentLang === 'AR' ? '8px' : '0' }} />
-                      </Button>
-                      </Link> */}
-                        <Link to={`/BlogDetails/${blog.id}`} className="blog-details-link" style={{textdecoration: 'none'}}>
-                        {t('readFullArticle')}
-                      <FaArrowRight style={{ marginLeft: currentLang === 'AR' ? '0' : '8px', marginRight: currentLang === 'AR' ? '8px' : '0' }} />
-
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </Col>
-            ))}
+            {renderBlogs()}
           </Row>
 
           {/* Pagination */}
-          {totalPages > 1 && (
-            <Row className="mt-5">
-              <Col className="d-flex justify-content-center">
-                <Pagination>
-                  <Pagination.Prev 
-                    onClick={() => handlePageChange(currentPage - 1)} 
-                    disabled={currentPage === 1}
-                  >
-                    {t('previous')}
-                  </Pagination.Prev>
-                  {paginationItems}
-                  <Pagination.Next 
-                    onClick={() => handlePageChange(currentPage + 1)} 
-                    disabled={currentPage === totalPages}
-                  >
-                    {t('next')}
-                  </Pagination.Next>
-                </Pagination>
-              </Col>
-            </Row>
-          )}
+          {renderPagination()}
         </Container>
       </section>
     </div>
   );
 };
+
+// CSS Styles
+const styles = `
+.main-blogs-page {
+  background: linear-gradient(135deg, #fff 0%, #fff 100%);
+  min-height: 100vh;
+  box-shadow: inset 0 0 50px rgba(24, 15, 15, 0.05);
+}
+
+.blogs-hero {
+  position: relative;
+  height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
+              // url('https://images.unsplash.com/photo-1499750310107-5fef28a66643?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');
+  background-size: cover;
+  background-position: center;
+  border-radius: 0 0 50px 50px;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  // background: linear-gradient(to bottom, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.8));
+}
+
+.blogshero-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  color: white;
+  padding: 20px;
+}
+
+.blogshero-title {
+  font-size: 4rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.blogshero-subtitle {
+  font-size: 1.5rem;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.blogs-main-section {
+  padding: 100px 0;
+  background: white;
+  border-radius: 50px 50px 0 0;
+  margin-top: -50px;
+  position: relative;
+}
+
+.blogssection-title {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.blogssection-subtitle {
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 3rem;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.blog-card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(50,50,93,0.1), 0 5px 15px rgba(0,0,0,0.07);
+  transition: all 0.4s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.blog-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 25px 50px rgba(50,50,93,0.15), 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.blog-image {
+  position: relative;
+  height: 250px;
+  overflow: hidden;
+}
+
+.blog-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.blog-card:hover .blog-image img {
+  transform: scale(1.1);
+}
+
+.blog-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.7) 100%);
+}
+
+.blog-category {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  // background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  z-index: 1;
+}
+
+.blog-date {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(255,255,255,0.9);
+  color: #333;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  z-index: 1;
+}
+
+.blog-content {
+  padding: 25px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.blog-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.blog-author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.author-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #f0f0f0;
+}
+
+.author-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.blog-author span {
+  font-weight: 600;
+  color: #555;
+}
+
+.blog-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: #333;
+  line-height: 1.4;
+}
+
+.blog-excerpt {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  flex: 1;
+}
+
+.blog-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.blog-tag {
+  background: #f0f0f0;
+  color: #667eea;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.blog-actions {
+  margin-top: auto;
+}
+
+.blog-details-link {
+  display: inline-flex;
+  align-items: center;
+  color: #667eea;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.blog-details-link:hover {
+  color: #764ba2;
+  transform: translateX(5px);
+}
+
+.pagination {
+  margin-bottom: 0;
+}
+
+.page-item.active .page-link {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+}
+
+.page-link {
+  color: #667eea;
+  border: none;
+  margin: 0 5px;
+  border-radius: 10px;
+  padding: 10px 15px;
+}
+
+.page-link:hover {
+  background: #f0f0f0;
+  color: #764ba2;
+}
+
+@media (max-width: 768px) {
+  .blogshero-title {
+    font-size: 2.5rem;
+  }
+  
+  .blogshero-subtitle {
+    font-size: 1.2rem;
+  }
+  
+  .blogssection-title {
+    font-size: 2.2rem;
+  }
+  
+  .blogs-main-section {
+    padding: 60px 0;
+  }
+}
+`;
+
+// إضافة الـ styles إلى document head
+const styleSheet = document.createElement("style");
+styleSheet.innerText = styles;
+document.head.appendChild(styleSheet);

@@ -15,6 +15,8 @@ export const OurServices = () => {
   const sectionTitleRef = useRef(null);
   const sectionSubtitleRef = useRef(null);
 
+
+  
   // الترجمات
   const translations = {
     EN: {

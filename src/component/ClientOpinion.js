@@ -17,6 +17,8 @@ export const ClientOpinion = () => {
   const subtitleRef = useRef(null);
   const testimonialsRef = useRef([]);
 
+
+  
   // الترجمات
   const translations = {
     EN: {

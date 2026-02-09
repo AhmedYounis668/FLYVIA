@@ -6796,3 +6796,47 @@ html {
 .blog-content-full-width::-webkit-scrollbar-thumb:hover {
   background: #2c5eb6;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Custom styles for AddBlogsPage */
+.language-indicator {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.image-upload-area {
+  transition: all 0.3s ease;
+}
+
+.image-upload-area:hover {
+  background-color: #f5f5f5;
+  border-color: #1976d2;
+}
+
+/* Tag chip animations */
+.tag-chip {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

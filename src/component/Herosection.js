@@ -24,6 +24,7 @@ export const HeroSection = () => {
   const { currentLang } = useLanguage();
   const navigate = useNavigate(); // إضافة useNavigate
 
+  
   // ========== الترجمات ==========
   const translations = {
     EN: {
