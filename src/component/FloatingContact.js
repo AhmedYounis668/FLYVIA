@@ -365,62 +365,7 @@ export const FloatingContact = () => {
         {/* ============================================================== */}
       </div>
 
-      {/* Quick Contact Form */}
-      <div 
-        ref={formRef}
-        className={`quick-contact-form ${showForm ? 'active' : ''} ${isMobile ? 'mobile-form' : ''}`}
-      >
-        <div className="quick-form-header">
-          <h3 className="quick-form-title">Quick Contact</h3>
-          <button 
-            className="close-quick-form"
-            onClick={() => setShowForm(false)}
-            aria-label="Close form"
-          >
-            <FaTimes />
-          </button>
-        </div>
-        
-        <form onSubmit={handleFormSubmit}>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            placeholder="Your Name"
-            className="quick-form-input"
-            required
-          />
-          
-          <input
-            type="tel"
-            name="phone"
-            value={formData.phone}
-            onChange={handleInputChange}
-            placeholder="Phone Number"
-            className="quick-form-input"
-            required
-          />
-          
-          <textarea
-            name="message"
-            value={formData.message}
-            onChange={handleInputChange}
-            placeholder="Your Message (Optional)"
-            className="quick-form-input"
-            rows="3"
-          />
-          
-          <button 
-            type="submit" 
-            className="quick-form-btn"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Sending...' : 'Send Message'}
-            {!isSubmitting && <FaPaperPlane style={{ marginLeft: '10px' }} />}
-          </button>
-        </form>
-      </div>
+     
     </>
   );
 };

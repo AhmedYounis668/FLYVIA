@@ -1,25 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { FaStar, FaChevronLeft, FaChevronRight, FaQuoteLeft } from 'react-icons/fa';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
-import { useLanguage } from './LanguageProvider'; // استيراد الـ hook
+import { useLanguage } from './LanguageProvider';
 
 gsap.registerPlugin(ScrollTrigger);
 
 export const ClientOpinion = () => {
-  const { currentLang } = useLanguage(); // استخدام الـ hook
+  const { currentLang, isInitialized } = useLanguage();
   
   const [currentIndex, setCurrentIndex] = useState(0);
   const [animate, setAnimate] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const sectionRef = useRef(null);
   const titleRef = useRef(null);
   const subtitleRef = useRef(null);
   const testimonialsRef = useRef([]);
 
-
-  
-  // الترجمات
+  // الترجمات المحسنة مع معالجة الأخطاء
   const translations = {
     EN: {
       sectionTitle: "What Our Clients Say",
@@ -69,12 +68,26 @@ export const ClientOpinion = () => {
     }
   };
 
-  // دالة الترجمة
+  // دالة الترجمة المحسنة
   const t = (key) => {
-    return translations[currentLang][key] || translations.EN[key];
+    try {
+      // تحويل currentLang إلى أحرف كبيرة مع fallback
+      const langKey = currentLang?.toUpperCase?.() || 'EN';
+      const translation = translations[langKey]?.[key];
+      
+      if (!translation) {
+        return translations.EN[key] || key;
+      }
+      
+      return translation;
+    } catch (error) {
+      console.error('Translation error:', error);
+      return translations.EN[key] || key;
+    }
   };
 
-  const testimonials = [
+  // استخدام useMemo لـ testimonials لتجنب إعادة التصيير اللانهائي
+  const testimonials = useMemo(() => [
     {
       id: 1,
       name: t('sarahJohnson'),
@@ -123,18 +136,7 @@ export const ClientOpinion = () => {
       text: t('robertText'),
       avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80"
     }
-  ];
-
-  const companyLogos = [
-    "https://cdn.worldvectorlogo.com/logos/google-2015.svg",
-    "https://cdn.worldvectorlogo.com/logos/microsoft-6.svg",
-    "https://cdn.worldvectorlogo.com/logos/amazon-2.svg",
-    "https://cdn.worldvectorlogo.com/logos/ibm-1.svg",
-    "https://cdn.worldvectorlogo.com/logos/netflix-3.svg",
-    "https://cdn.worldvectorlogo.com/logos/facebook-3.svg",
-    "https://cdn.worldvectorlogo.com/logos/apple-11.svg",
-    "https://cdn.worldvectorlogo.com/logos/samsung-2.svg"
-  ];
+  ], [currentLang, t]);
 
   const testimonialsPerView = 3;
 
@@ -157,91 +159,67 @@ export const ClientOpinion = () => {
     setAnimate(true);
   };
 
-  // GSAP Animations
   useEffect(() => {
-    // Section animation
-    gsap.fromTo(sectionRef.current,
-      {
-        opacity: 0,
-        y: 50
-      },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 1,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top 80%',
-          end: 'top 50%',
-          toggleActions: 'play none none reverse'
-        }
-      }
-    );
+    setIsMounted(true);
+  }, []);
 
-    // Title animation
-    gsap.fromTo(titleRef.current,
-      {
-        y: 60,
-        opacity: 0,
-        scale: 0.8
-      },
-      {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        duration: 1,
-        ease: 'back.out(1.7)',
-        scrollTrigger: {
-          trigger: titleRef.current,
-          start: 'top 85%',
-          end: 'top 60%',
-          toggleActions: 'play none none reverse'
-        }
-      }
-    );
+  // GSAP Animations - مع التحقق من التحميل الكامل
+  useEffect(() => {
+    if (!isInitialized || !isMounted) return;
 
-    // Subtitle animation
-    gsap.fromTo(subtitleRef.current,
-      {
-        y: 40,
-        opacity: 0
-      },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 0.8,
-        delay: 0.3,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: subtitleRef.current,
-          start: 'top 80%',
-          end: 'top 50%',
-          toggleActions: 'play none none reverse'
-        }
-      }
-    );
+    // تنظيف أي animations سابقة
+    ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    gsap.killTweensOf('*');
 
-    // Testimonials animation
-    testimonialsRef.current.forEach((card, index) => {
-      if (card) {
-        gsap.fromTo(card,
+    // تأخير بسيط لضمان تحميل DOM
+    setTimeout(() => {
+      // جعل القسم مرئياً أولاً
+      if (sectionRef.current) {
+        sectionRef.current.style.opacity = '1';
+        sectionRef.current.style.visibility = 'visible';
+      }
+
+      // Section animation
+      if (sectionRef.current) {
+        gsap.fromTo(sectionRef.current,
           {
-            y: 80,
             opacity: 0,
-            rotationY: 15,
-            scale: 0.9
+            y: 50
+          },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top 80%',
+              end: 'top 50%',
+              toggleActions: 'play none none reverse'
+            }
+          }
+        );
+      }
+
+      // Title animation
+      if (titleRef.current) {
+        titleRef.current.style.opacity = '1';
+        titleRef.current.style.visibility = 'visible';
+        
+        gsap.fromTo(titleRef.current,
+          {
+            y: 60,
+            opacity: 0,
+            scale: 0.8
           },
           {
             y: 0,
             opacity: 1,
-            rotationY: 0,
             scale: 1,
-            duration: 0.8,
-            delay: index * 0.2,
+            duration: 1,
             ease: 'back.out(1.7)',
             scrollTrigger: {
-              trigger: card,
+              trigger: titleRef.current,
               start: 'top 85%',
               end: 'top 60%',
               toggleActions: 'play none none reverse'
@@ -249,38 +227,73 @@ export const ClientOpinion = () => {
           }
         );
       }
-    });
 
-    // Company logos animation
-    const logos = document.querySelectorAll('.company-logo');
-    logos.forEach((logo, index) => {
-      gsap.fromTo(logo,
-        {
-          y: 40,
-          opacity: 0,
-          scale: 0.8
-        },
-        {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          duration: 0.6,
-          delay: 0.5 + (index * 0.1),
-          ease: 'back.out(1.7)',
-          scrollTrigger: {
-            trigger: logo,
-            start: 'top 90%',
-            end: 'top 70%',
-            toggleActions: 'play none none reverse'
+      // Subtitle animation
+      if (subtitleRef.current) {
+        subtitleRef.current.style.opacity = '1';
+        subtitleRef.current.style.visibility = 'visible';
+        
+        gsap.fromTo(subtitleRef.current,
+          {
+            y: 40,
+            opacity: 0
+          },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            delay: 0.3,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: subtitleRef.current,
+              start: 'top 80%',
+              end: 'top 50%',
+              toggleActions: 'play none none reverse'
+            }
           }
+        );
+      }
+
+      // تحديث refs للـ testimonials
+      testimonialsRef.current = testimonialsRef.current.slice(0, testimonials.length);
+
+      // Testimonials animation
+      testimonialsRef.current.forEach((card, index) => {
+        if (card) {
+          card.style.opacity = '1';
+          card.style.visibility = 'visible';
+          
+          gsap.fromTo(card,
+            {
+              y: 80,
+              opacity: 0,
+              rotationY: 15,
+              scale: 0.9
+            },
+            {
+              y: 0,
+              opacity: 1,
+              rotationY: 0,
+              scale: 1,
+              duration: 0.8,
+              delay: index * 0.2,
+              ease: 'back.out(1.7)',
+              scrollTrigger: {
+                trigger: card,
+                start: 'top 85%',
+                end: 'top 60%',
+                toggleActions: 'play none none reverse'
+              }
+            }
+          );
         }
-      );
-    });
+      });
+    }, 100);
 
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [currentLang]); // أضف currentLang كـ dependency
+  }, [currentLang, testimonials, isInitialized, isMounted]);
 
   // Handle slide animation
   useEffect(() => {
@@ -295,7 +308,7 @@ export const ClientOpinion = () => {
         });
       }
     }
-  }, [currentIndex, animate]);
+  }, [currentIndex, animate, testimonialsPerView]);
 
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, index) => (
@@ -306,8 +319,84 @@ export const ClientOpinion = () => {
     ));
   };
 
+  // إذا لم يكن المكون جاهزاً بعد
+  if (!isMounted || !isInitialized) {
+    return (
+      <section className="client-opinion-section" id="testimonials" style={{ opacity: 1, visibility: 'visible' }}>
+        <Container fluid="lg">
+          <Row className="justify-content-center">
+            <Col xl={10} lg={11} md={12} className="text-center">
+              <h2 className="client-opinion-title" style={{ opacity: 1 }}>
+                {t('sectionTitle')}
+              </h2>
+              <p className="client-opinion-subtitle" style={{ opacity: 1 }}>
+                {t('sectionSubtitle')}
+              </p>
+            </Col>
+          </Row>
+
+          <div className="testimonial-container" style={{ opacity: 1 }}>
+            <div className="testimonial-track" style={{ transform: 'none' }}>
+              {testimonials.slice(0, 3).map((testimonial) => (
+                <div key={testimonial.id} className="testimonial-card" style={{ opacity: 1 }}>
+                  <div className="testimonial-rating">
+                    {renderStars(testimonial.rating)}
+                  </div>
+                  <p className="testimonial-text">
+                    {testimonial.text}
+                  </p>
+                  <div className="testimonial-author">
+                    <div className="author-avatar">
+                      <img src={testimonial.avatar} alt={testimonial.name} />
+                    </div>
+                    <div className="author-info">
+                      <h4>{testimonial.name}</h4>
+                      <p>{testimonial.position}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="testimonial-nav">
+            <button className="nav-btn" onClick={handlePrev} disabled={currentIndex === 0}>
+              <FaChevronLeft />
+            </button>
+            
+            <div className="testimonial-dots">
+              {Array.from({ length: testimonials.length - testimonialsPerView + 1 }, (_, index) => (
+                <div 
+                  key={index}
+                  className={`dot ${index === currentIndex ? 'active' : ''}`}
+                  onClick={() => handleDotClick(index)}
+                />
+              ))}
+            </div>
+            
+            <button className="nav-btn" onClick={handleNext} disabled={currentIndex >= testimonials.length - testimonialsPerView}>
+              <FaChevronRight />
+            </button>
+          </div>
+        </Container>
+      </section>
+    );
+  }
+
   return (
     <section className="client-opinion-section" ref={sectionRef} id="testimonials">
+      <style>{`
+        .client-opinion-section {
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+        
+        .testimonial-card {
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+      `}</style>
+      
       <Container fluid="lg">
         <Row className="justify-content-center">
           <Col xl={10} lg={11} md={12} className="text-center">
@@ -377,18 +466,6 @@ export const ClientOpinion = () => {
             <FaChevronRight />
           </button>
         </div>
-
-        {/* Trusted Companies Section */}
-        {/* <div className="companies-section">
-          <h3 className="companies-title">{t('trustedCompanies')}</h3>
-          <div className="companies-grid">
-            {companyLogos.map((logo, index) => (
-              <div key={index} className="company-logo">
-                <img src={logo} alt={`Company ${index + 1}`} />
-              </div>
-            ))}
-          </div>
-        </div> */}
       </Container>
     </section>
   );

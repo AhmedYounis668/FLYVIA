@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Container, Row, Col, Button, Pagination } from 'react-bootstrap';
 import { 
   FaCalendar, FaUser, FaArrowRight, FaBookmark,
@@ -30,6 +30,11 @@ export const MainBlogsCards = () => {
   const titleRef = useRef(null);
   const heroRef = useRef(null);
 
+  // دالة مساعدة للـ direction
+  const getDirection = () => {
+    return currentLang === 'ar' ? 'rtl' : 'ltr';
+  };
+
   // الحصول على البيانات من Redux
   const resblogs = useSelector(state => state.AllBlogs.Blog);
   const blogsLoading = useSelector(state => state.AllBlogs.loading);
@@ -38,7 +43,6 @@ export const MainBlogsCards = () => {
   const getImageUrl = (url) => {
     if (!url || typeof url !== 'string') return null
     
-    // تنظيف الرابط من undefined
     let cleanUrl = url.replace(/^undefined\//, '')
     
     if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
@@ -80,7 +84,6 @@ export const MainBlogsCards = () => {
   const getTagsArray = (tags, lang) => {
     if (!tags) return []
     
-    // إذا كانت التاغات كائن يحتوي على ar و en
     if (tags[lang]) {
       const tagValue = tags[lang]
       if (Array.isArray(tagValue)) {
@@ -116,26 +119,6 @@ export const MainBlogsCards = () => {
       setTotalItems(resblogs?.pagination?.totalItems || 0);
     }
   }, [resblogs]);
-
-  // دالة لاستخراج البيانات حسب اللغة
-  const getLocalizedData = (blog) => {
-    const lang = currentLang.toLowerCase()
-    
-    return {
-      id: blog?._id || '',
-      title: blog?.title?.[lang] || blog?.title?.ar || blog?.title?.en || 'بدون عنوان',
-      excerpt: blog?.short_description?.[lang] || blog?.short_description?.ar || blog?.short_description?.en || '',
-      author: blog?.author || t('defaultAuthor'),
-      createdAt: blog?.createdAt ? new Date(blog.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }) : (lang === 'ar' ? '١ يناير ٢٠٢٤' : 'January 1, 2024'),
-      tags: getTagsArray(blog?.tags, lang === 'ar' ? 'ar' : 'en'),
-      slug: blog?.slug?.[lang] || blog?.slug?.ar || blog?.slug?.en || blog?._id,
-      category: blog?.category?.[lang] || blog?.category?.ar || blog?.category?.en || t('businessCategory')
-    }
-  }
 
   // الترجمات
   const translations = {
@@ -205,15 +188,46 @@ export const MainBlogsCards = () => {
     }
   };
 
-  // دالة الترجمة
+  // دالة الترجمة المحسنة
   const t = (key) => {
-    return translations[currentLang][key] || translations.EN[key];
+    // تحويل currentLang إلى أحرف كبيرة
+    const langKey = currentLang.toUpperCase();
+    const translation = translations[langKey]?.[key];
+    
+    if (!translation) {
+      // إذا لم توجد الترجمة، استخدام الإنجليزية
+      return translations.EN[key] || key;
+    }
+    
+    return translation;
   };
+
+  // دالة لاستخراج البيانات حسب اللغة
+  const getLocalizedData = (blog) => {
+    const lang = currentLang.toLowerCase()
+    
+    return {
+      id: blog?._id || '',
+      title: blog?.title?.[lang] || blog?.title?.ar || blog?.title?.en || t('noBlogs'),
+      excerpt: blog?.short_description?.[lang] || blog?.short_description?.ar || blog?.short_description?.en || '',
+      author: blog?.author || t('defaultAuthor'),
+      createdAt: blog?.createdAt ? new Date(blog.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }) : (lang === 'ar' ? '١ يناير ٢٠٢٤' : 'January 1, 2024'),
+      tags: getTagsArray(blog?.tags, lang === 'ar' ? 'ar' : 'en'),
+      slug: blog?.slug?.[lang] || blog?.slug?.ar || blog?.slug?.en || blog?._id,
+      category: blog?.category?.[lang] || blog?.category?.ar || blog?.category?.en || t('businessCategory')
+    }
+  }
 
   // التعامل مع تغيير الصفحة
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
-    window.scrollTo({ top: sectionRef.current?.offsetTop - 100, behavior: 'smooth' });
+    if (sectionRef.current) {
+      window.scrollTo({ top: sectionRef.current.offsetTop - 100, behavior: 'smooth' });
+    }
   };
 
   // عرض المدونات
@@ -243,10 +257,8 @@ export const MainBlogsCards = () => {
       const localizedData = getLocalizedData(blog);
       const blogId = blog?._id || '';
       
-      // معالجة صورة الملف الشخصي للمؤلف
       const authorAvatar = blog?.authorAvatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80";
       
-      // معالجة صورة المدونة
       const blogImageRaw = blog?.profileImg || blog?.image || null;
       const blogImage = blogImageRaw ? getImageUrl(blogImageRaw) : "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80";
 
@@ -254,7 +266,7 @@ export const MainBlogsCards = () => {
         <Col lg={4} md={6} sm={12} key={blogId} className="mb-4">
           <div 
             className="blog-card"
-            style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}
+            style={{ direction: getDirection() }}
           >
             {/* Blog Image */}
             <div className="blog-image">
@@ -306,11 +318,15 @@ export const MainBlogsCards = () => {
 
               {/* Blog Details Button */}
               <div className="blog-actions">
-<Link to={`/BlogDetails/${blogId}`} className="blog-details-link" style={{ textDecoration: 'none' }}>
+                <Link 
+                  to={`/BlogDetails/${blogId}`} 
+                  className="blog-details-link" 
+                  style={{ textDecoration: 'none' }}
+                >
                   {t('readFullArticle')}
                   <FaArrowRight style={{ 
-                    marginLeft: currentLang === 'AR' ? '0' : '8px', 
-                    marginRight: currentLang === 'AR' ? '8px' : '0' 
+                    marginLeft: currentLang === 'ar' ? '0' : '8px', 
+                    marginRight: currentLang === 'ar' ? '8px' : '0' 
                   }} />
                 </Link>
               </div>
@@ -334,7 +350,6 @@ export const MainBlogsCards = () => {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
 
-    // زر الأول
     items.push(
       <Pagination.First 
         key="first" 
@@ -343,7 +358,6 @@ export const MainBlogsCards = () => {
       />
     );
     
-    // زر السابق
     items.push(
       <Pagination.Prev 
         key="prev" 
@@ -354,7 +368,6 @@ export const MainBlogsCards = () => {
       </Pagination.Prev>
     );
 
-    // أرقام الصفحات
     for (let i = startPage; i <= endPage; i++) {
       items.push(
         <Pagination.Item
@@ -367,7 +380,6 @@ export const MainBlogsCards = () => {
       );
     }
 
-    // زر التالي
     items.push(
       <Pagination.Next 
         key="next" 
@@ -378,7 +390,6 @@ export const MainBlogsCards = () => {
       </Pagination.Next>
     );
     
-    // زر الأخير
     items.push(
       <Pagination.Last 
         key="last" 
@@ -390,14 +401,12 @@ export const MainBlogsCards = () => {
     return (
       <Row className="mt-5">
         <Col className="d-flex flex-column align-items-center">
-          {/* Pagination Info */}
           <div className="mb-3 text-center">
             <span className="text-muted">
               {t('showing')} {Math.min((currentPage - 1) * blogsPerPage + 1, totalItems)} - {Math.min(currentPage * blogsPerPage, totalItems)} {t('of')} {totalItems} {t('articles')}
             </span>
           </div>
           
-          {/* Pagination Controls */}
           <Pagination>
             {items}
           </Pagination>
@@ -409,35 +418,39 @@ export const MainBlogsCards = () => {
   // GSAP Animations
   useEffect(() => {
     // Hero section animation
-    gsap.fromTo(heroRef.current,
-      {
-        opacity: 0,
-        y: 50
-      },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 1.2,
-        ease: 'power3.out'
-      }
-    );
+    if (heroRef.current) {
+      gsap.fromTo(heroRef.current,
+        {
+          opacity: 0,
+          y: 50
+        },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1.2,
+          ease: 'power3.out'
+        }
+      );
+    }
 
     // Title animation
-    gsap.fromTo(titleRef.current,
-      {
-        y: 60,
-        opacity: 0,
-        scale: 0.8
-      },
-      {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        duration: 1,
-        delay: 0.3,
-        ease: 'back.out(1.7)'
-      }
-    );
+    if (titleRef.current) {
+      gsap.fromTo(titleRef.current,
+        {
+          y: 60,
+          opacity: 0,
+          scale: 0.8
+        },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 1,
+          delay: 0.3,
+          ease: 'back.out(1.7)'
+        }
+      );
+    }
 
     // Blog cards animation on page change
     const blogCards = document.querySelectorAll('.blog-card');
@@ -470,11 +483,14 @@ export const MainBlogsCards = () => {
           ease: 'power2.out'
         });
         
-        gsap.to(card.querySelector('.blog-image img'), {
-          scale: 1.1,
-          duration: 0.5,
-          ease: 'power2.out'
-        });
+        const image = card.querySelector('.blog-image img');
+        if (image) {
+          gsap.to(image, {
+            scale: 1.1,
+            duration: 0.5,
+            ease: 'power2.out'
+          });
+        }
       });
       
       card.addEventListener('mouseleave', () => {
@@ -484,11 +500,14 @@ export const MainBlogsCards = () => {
           ease: 'power2.out'
         });
         
-        gsap.to(card.querySelector('.blog-image img'), {
-          scale: 1,
-          duration: 0.5,
-          ease: 'power2.out'
-        });
+        const image = card.querySelector('.blog-image img');
+        if (image) {
+          gsap.to(image, {
+            scale: 1,
+            duration: 0.5,
+            ease: 'power2.out'
+          });
+        }
       });
     });
 
@@ -514,10 +533,17 @@ export const MainBlogsCards = () => {
           {/* Section Header */}
           <Row className="justify-content-center mb-5">
             <Col xl={10} lg={11} md={12} className="text-center">
-              <h2 className="blogssection-title" ref={titleRef} style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}>
+              <h2 
+                className="blogssection-title" 
+                ref={titleRef} 
+                style={{ direction: getDirection() }}
+              >
                 {t('sectionTitle')}
               </h2>
-              <p className="blogssection-subtitle" style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}>
+              <p 
+                className="blogssection-subtitle" 
+                style={{ direction: getDirection() }}
+              >
                 {t('sectionSubtitle')}
               </p>
             </Col>
@@ -551,7 +577,7 @@ const styles = `
   align-items: center;
   justify-content: center;
   background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
-              // url('https://images.unsplash.com/photo-1499750310107-5fef28a66643?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');
+              url('https://images.unsplash.com/photo-1499750310107-5fef28a66643?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');
   background-size: cover;
   background-position: center;
   border-radius: 0 0 50px 50px;
@@ -563,7 +589,7 @@ const styles = `
   left: 0;
   right: 0;
   bottom: 0;
-  // background: linear-gradient(to bottom, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.8));
+  background: linear-gradient(to bottom, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.8));
 }
 
 .blogshero-content {
@@ -658,7 +684,7 @@ const styles = `
   position: absolute;
   top: 20px;
   left: 20px;
-  // background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   padding: 8px 15px;
   border-radius: 20px;
@@ -814,6 +840,8 @@ const styles = `
 `;
 
 // إضافة الـ styles إلى document head
-const styleSheet = document.createElement("style");
-styleSheet.innerText = styles;
-document.head.appendChild(styleSheet);
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement("style");
+  styleSheet.innerText = styles;
+  document.head.appendChild(styleSheet);
+}

@@ -116,7 +116,11 @@ export const BlogDetails = () => {
     }
   };
 
-  const t = (key) => translations[currentLang][key] || translations.EN[key];
+  // دالة الترجمة المحسنة
+  const t = (key) => {
+    const lang = currentLang.toUpperCase(); // تحويل 'en' إلى 'EN', 'ar' إلى 'AR'
+    return translations[lang]?.[key] || translations.EN[key] || key;
+  };
 
   // تقدير وقت القراءة
   const calculateReadTime = (content) => {
@@ -144,12 +148,12 @@ export const BlogDetails = () => {
       });
     } else {
       navigator.clipboard.writeText(window.location.href);
-      alert(currentLang === 'AR' ? 'تم نسخ الرابط' : 'Link copied to clipboard');
+      alert(currentLang === 'ar' ? 'تم نسخ الرابط' : 'Link copied to clipboard');
     }
   };
 
   // إضافة style للعربية
-  const arabicStyles = currentLang === 'AR' ? {
+  const arabicStyles = currentLang === 'ar' ? {
     textAlign: 'right',
     direction: 'rtl'
   } : {};
@@ -170,7 +174,10 @@ export const BlogDetails = () => {
       <div className="not-found-container d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '60vh', ...arabicStyles }}>
         <h3 className="mb-4 text-danger">{t('noBlogFound')}</h3>
         <Button variant="primary" onClick={handleBack}>
-          <FaArrowLeft style={{ marginLeft: currentLang === 'AR' ? '8px' : 0, marginRight: currentLang === 'EN' ? '8px' : 0 }} />
+          <FaArrowLeft style={{ 
+            marginLeft: currentLang === 'ar' ? '8px' : 0, 
+            marginRight: currentLang === 'en' ? '8px' : 0 
+          }} />
           {t('goBack')}
         </Button>
       </div>
@@ -183,9 +190,6 @@ export const BlogDetails = () => {
 
   return (
     <div className="blog-details-page" style={arabicStyles}>
-      {/* أزرار التحكم العلوية */}
-    
-
       {/* صورة المدونة الرئيسية */}
       {blog?.profileImg && (
         <div className="blog-main-image-container mb-4" style={{borderRadius:'20px'}}>
@@ -288,34 +292,11 @@ export const BlogDetails = () => {
           }}>
             {getByLanguage(blog?.content, contentLang) || (
               <div className="text-muted text-center py-5">
-                {currentLang === 'AR' ? 'لا يوجد محتوى' : 'No content available'}
+                {currentLang === 'ar' ? 'لا يوجد محتوى' : 'No content available'}
               </div>
             )}
           </div>
         </div>
-
-        {/* معلومات إضافية في الأسفل */}
-        {/* <div className="mt-5 pt-4 border-top">
-          <div className="row">
-            <div className="col-md-6">
-              <div className="card">
-                <div className="card-body">
-                  <h6 className="card-title">
-                    {currentLang === 'AR' ? 'معلومات إضافية' : 'Additional Information'}
-                  </h6>
-                  <ul className="list-unstyled mb-0">
-                    <li className="mb-2">
-                      <strong>ID:</strong> {blog?._id}
-                    </li>
-                    <li>
-                      <strong>Slug:</strong> {getByLanguage(blog?.slug, contentLang)}
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div> */}
 
         {/* أزرار التحكم في الأسفل */}
         <div className="d-flex justify-content-between align-items-center mt-5 pt-4">
@@ -325,8 +306,8 @@ export const BlogDetails = () => {
             className="d-flex align-items-center"
           >
             <FaArrowLeft style={{ 
-              marginLeft: currentLang === 'AR' ? '8px' : 0, 
-              marginRight: currentLang === 'EN' ? '8px' : 0 
+              marginLeft: currentLang === 'ar' ? '8px' : 0, 
+              marginRight: currentLang === 'en' ? '8px' : 0 
             }} />
             {t('backToBlogs')}
           </Button>

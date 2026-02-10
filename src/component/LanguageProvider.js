@@ -1,28 +1,21 @@
-// LanguageProvider.js
-import React, { createContext, useState, useContext, useCallback } from 'react';
+import React, { createContext, useState, useContext, useCallback, useEffect } from 'react';
 
 const LanguageContext = createContext();
 
 export const LanguageProvider = ({ children }) => {
   const [currentLang, setCurrentLang] = useState(() => {
-    // جلب اللغة من localStorage إذا موجودة
-    return localStorage.getItem('appLanguage') || 'EN';
+    // جلب اللغة من localStorage مع default 'en'
+    const savedLang = localStorage.getItem('appLanguage');
+    // التأكد من أن اللغة تكون أحرف صغيرة دائمًا
+    return (savedLang || 'en').toLowerCase();
   });
   
   const [updateKey, setUpdateKey] = useState(0);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  const changeLanguage = useCallback((lang) => {
-    if (lang === currentLang) return;
-    
-    // حفظ في localStorage
-    localStorage.setItem('appLanguage', lang);
-    
-    // تحديث الـ state
-    setCurrentLang(lang);
-    setUpdateKey(prev => prev + 1);
-    
-    // تغيير direction
-    if (lang === 'AR') {
+  // دالة لتطبيق إعدادات اللغة
+  const applyLanguageSettings = useCallback((lang) => {
+    if (lang === 'ar') {
       document.documentElement.dir = 'rtl';
       document.documentElement.lang = 'ar';
       document.body.classList.add('rtl');
@@ -36,13 +29,55 @@ export const LanguageProvider = ({ children }) => {
     
     // إرسال حدث لتحديث المكونات
     window.dispatchEvent(new CustomEvent('languageChanged', { detail: lang }));
+  }, []);
+
+  // تهيئة اللغة عند تحميل الموقع لأول مرة
+  useEffect(() => {
+    const initializeLanguage = () => {
+      const savedLang = localStorage.getItem('appLanguage');
+      
+      // إذا كان أول زيارة، نستخدم الإنجليزية
+      if (!savedLang) {
+        const defaultLang = 'en';
+        localStorage.setItem('appLanguage', defaultLang);
+        setCurrentLang(defaultLang);
+        applyLanguageSettings(defaultLang);
+      } else {
+        const normalizedLang = savedLang.toLowerCase();
+        setCurrentLang(normalizedLang);
+        applyLanguageSettings(normalizedLang);
+      }
+      
+      setIsInitialized(true);
+      setUpdateKey(prev => prev + 1);
+    };
+
+    initializeLanguage();
+  }, [applyLanguageSettings]);
+
+  const changeLanguage = useCallback((lang) => {
+    // تحويل إلى أحرف صغيرة
+    const normalizedLang = lang.toLowerCase();
     
-  }, [currentLang]);
+    if (normalizedLang === currentLang) return;
+    
+    // حفظ في localStorage
+    localStorage.setItem('appLanguage', normalizedLang);
+    
+    // تحديث الـ state
+    setCurrentLang(normalizedLang);
+    setUpdateKey(prev => prev + 1);
+    
+    // تطبيق إعدادات اللغة
+    applyLanguageSettings(normalizedLang);
+    
+  }, [currentLang, applyLanguageSettings]);
 
   const value = {
     currentLang,
     changeLanguage,
-    updateKey
+    updateKey,
+    isInitialized
   };
 
   return (

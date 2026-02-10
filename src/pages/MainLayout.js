@@ -9,7 +9,7 @@ const MainLayout = () => {
       <CustomNavbar />
       <FloatingContact />
       <Outlet /> {/* هذا مكان محتوى الصفحات */}
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 };

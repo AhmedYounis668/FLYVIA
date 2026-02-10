@@ -5,16 +5,12 @@ import {
   FaPaperPlane, FaFacebook, FaTwitter, FaLinkedin,
   FaInstagram, FaYoutube, FaWhatsapp
 } from 'react-icons/fa';
-import gsap from 'gsap';
-import ScrollTrigger from 'gsap/ScrollTrigger';
-import { useLanguage } from './LanguageProvider'; // استيراد الـ hook
+import { useLanguage } from './LanguageProvider';
 import { useDispatch } from 'react-redux';
 import { Add_Client_Action } from '../Redux/Actions/ClientAction';
 
-gsap.registerPlugin(ScrollTrigger);
-
 export const ContactUs = () => {
-  const { currentLang } = useLanguage(); // استخدام الـ hook
+  const { currentLang } = useLanguage();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -25,6 +21,7 @@ export const ContactUs = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   
   const sectionRef = useRef(null);
   const titleRef = useRef(null);
@@ -33,8 +30,16 @@ export const ContactUs = () => {
   const formRef = useRef(null);
   const mapRef = useRef(null);
 
+  // دالة مساعدة للـ direction
+  const getDirection = () => {
+    return currentLang === 'ar' ? 'rtl' : 'ltr';
+  };
 
-  
+  // دالة مساعدة للـ text-align
+  const getTextAlign = () => {
+    return currentLang === 'ar' ? 'right' : 'left';
+  };
+
   // الترجمات
   const translations = {
     EN: {
@@ -93,9 +98,18 @@ export const ContactUs = () => {
     }
   };
 
-  // دالة الترجمة
+  // دالة الترجمة المحسنة
   const t = (key) => {
-    return translations[currentLang][key] || translations.EN[key];
+    // تحويل currentLang إلى أحرف كبيرة
+    const langKey = currentLang.toUpperCase();
+    const translation = translations[langKey]?.[key];
+    
+    if (!translation) {
+      // إذا لم توجد الترجمة، استخدام الإنجليزية
+      return translations.EN[key] || key;
+    }
+    
+    return translation;
   };
 
   const handleChange = (e) => {
@@ -106,38 +120,32 @@ export const ContactUs = () => {
     }));
   };
 
-  const dispatch=useDispatch();
+  const dispatch = useDispatch();
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Form validation
     if (!formData.name || !formData.phone) {
-      alert(t('Enter Your Name Please and Your Phone Number With Country Code Please'));
+      alert(t('requiredFields'));
       return;
     }
       
     await dispatch(Add_Client_Action({
-    name:formData.name,
-    email:formData.email||'No Email',
-    phone:formData.phone,
-    whatsappNumber:formData.phone,
-    jobTitle:formData.subject,
-    message:'register from send a message' +' '+ formData.message||'No Message',
-    countryName:'No Country',
+      name: formData.name,
+      email: formData.email || 'No Email',
+      phone: formData.phone,
+      whatsappNumber: formData.phone,
+      jobTitle: formData.subject,
+      message: 'register from send a message' + ' ' + (formData.message || 'No Message'),
+      countryName: 'No Country',
+    }));
     
-    
-    }))
     setIsSubmitting(true);
     
     // Simulate API call
     setTimeout(() => {
       console.log('Form submitted:', formData);
-      
-      // Animation for success
-      gsap.fromTo('.success-message',
-        { y: -20, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.6, ease: 'back.out(1.7)' }
-      );
       
       setIsSubmitting(false);
       setIsSubmitted(true);
@@ -158,7 +166,8 @@ export const ContactUs = () => {
     }, 1500);
   };
 
-  const contactInfo = [
+  // استخدام useMemo لـ contactInfo لمنع إعادة التصيير
+  const contactInfo = React.useMemo(() => [
     {
       id: 1,
       icon: <FaMapMarkerAlt />,
@@ -183,7 +192,7 @@ export const ContactUs = () => {
       title: t('hoursTitle'),
       details: t('hoursDetails')
     }
-  ];
+  ], [currentLang]); // إعادة حساب عند تغيير اللغة
 
   const socialMedia = [
     { icon: <FaFacebook />, name: "Facebook", color: "#1877F2" },
@@ -194,214 +203,52 @@ export const ContactUs = () => {
     { icon: <FaWhatsapp />, name: "WhatsApp", color: "#25D366" }
   ];
 
-  // GSAP Animations
+  // تنظيف الـ refs القديمة
   useEffect(() => {
-    // Section animation
-    gsap.fromTo(sectionRef.current,
-      {
-        opacity: 0,
-        y: 30
-      },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top 85%',
-          end: 'top 60%',
-          toggleActions: 'play none none reverse'
-        }
-      }
-    );
+    infoCardsRef.current = infoCardsRef.current.slice(0, contactInfo.length);
+  }, [contactInfo]);
 
-    // Title animation
-    gsap.fromTo(titleRef.current,
-      {
-        y: 40,
-        opacity: 0,
-        scale: 0.9
-      },
-      {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        duration: 0.8,
-        ease: 'back.out(1.7)',
-        scrollTrigger: {
-          trigger: titleRef.current,
-          start: 'top 85%',
-          end: 'top 60%',
-          toggleActions: 'play none none reverse'
-        }
-      }
-    );
-
-    // Subtitle animation
-    gsap.fromTo(subtitleRef.current,
-      {
-        y: 30,
-        opacity: 0
-      },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 0.6,
-        delay: 0.2,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: subtitleRef.current,
-          start: 'top 85%',
-          end: 'top 60%',
-          toggleActions: 'play none none reverse'
-        }
-      }
-    );
-
-    // Contact info cards animation
-    infoCardsRef.current.forEach((card, index) => {
-      if (card) {
-        gsap.fromTo(card,
-          {
-            y: 50,
-            opacity: 0,
-            scale: 0.9
-          },
-          {
-            y: 0,
-            opacity: 1,
-            scale: 1,
-            duration: 0.6,
-            delay: index * 0.1,
-            ease: 'back.out(1.7)',
-            scrollTrigger: {
-              trigger: card,
-              start: 'top 85%',
-              end: 'top 60%',
-              toggleActions: 'play none none reverse'
-            }
+  // Intersection Observer للكشف عن ظهور القسم
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
           }
-        );
-      }
-    });
-
-    // Form animation
-    gsap.fromTo(formRef.current,
-      {
-        y: 50,
-        opacity: 0,
-        scale: 0.95
+        });
       },
       {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        duration: 0.8,
-        delay: 0.3,
-        ease: 'back.out(1.7)',
-        scrollTrigger: {
-          trigger: formRef.current,
-          start: 'top 85%',
-          end: 'top 60%',
-          toggleActions: 'play none none reverse'
-        }
+        threshold: 0.1, // عندما يكون 10% من العنصر مرئي
+        rootMargin: '0px 0px -100px 0px' // تحسين عند التمرير لأعلى
       }
     );
 
-    // Map animation
-    gsap.fromTo(mapRef.current,
-      {
-        y: 60,
-        opacity: 0,
-        scale: 0.9
-      },
-      {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        duration: 0.8,
-        delay: 0.4,
-        ease: 'back.out(1.7)',
-        scrollTrigger: {
-          trigger: mapRef.current,
-          start: 'top 85%',
-          end: 'top 60%',
-          toggleActions: 'play none none reverse'
-        }
-      }
-    );
-
-    // Social icons animation
-    const socialIcons = document.querySelectorAll('.social-icon-compact');
-    socialIcons.forEach((icon, index) => {
-      gsap.fromTo(icon,
-        {
-          y: 30,
-          opacity: 0,
-          scale: 0.8
-        },
-        {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          duration: 0.5,
-          delay: 0.5 + (index * 0.08),
-          ease: 'back.out(1.7)',
-          scrollTrigger: {
-            trigger: icon,
-            start: 'top 90%',
-            end: 'top 70%',
-            toggleActions: 'play none none reverse'
-          }
-        }
-      );
-    });
-
-    // Contact card hover animations
-    const contactCards = document.querySelectorAll('.contact-info-card');
-    contactCards.forEach(card => {
-      card.addEventListener('mouseenter', () => {
-        gsap.to(card, {
-          y: -5,
-          duration: 0.3,
-          ease: 'power2.out'
-        });
-        
-        gsap.to(card.querySelector('.contact-icon'), {
-          scale: 1.15,
-          duration: 0.4,
-          ease: 'back.out(1.7)'
-        });
-      });
-      
-      card.addEventListener('mouseleave', () => {
-        gsap.to(card, {
-          y: 0,
-          duration: 0.3,
-          ease: 'power2.out'
-        });
-        
-        gsap.to(card.querySelector('.contact-icon'), {
-          scale: 1,
-          duration: 0.3
-        });
-      });
-    });
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
 
     return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current);
+      }
     };
-  }, [currentLang]); // أضف currentLang كـ dependency
+  }, []);
 
   return (
     <section className="contact-section" ref={sectionRef} id="contact">
       <Container>
         <div className="text-center">
-          <h2 className="contact-title" ref={titleRef} style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}>
+          <h2 
+            className={`contact-title animated-title ${isVisible ? 'visible' : ''}`} 
+            ref={titleRef}
+          >
             {t('sectionTitle')}
           </h2>
-          <p className="contact-subtitle" ref={subtitleRef} style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}>
+          <p 
+            className={`contact-subtitle animated-subtitle ${isVisible ? 'visible' : ''}`} 
+            ref={subtitleRef}
+          >
             {t('sectionSubtitle')}
           </p>
         </div>
@@ -417,7 +264,7 @@ export const ContactUs = () => {
                   key={info.id} 
                   className="contact-info-card"
                   ref={el => infoCardsRef.current[index] = el}
-                  style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}
+                  style={{ direction: getDirection() }}
                 >
                   <div className="contact-icon">
                     {info.icon}
@@ -451,7 +298,11 @@ export const ContactUs = () => {
 
           {/* Right Column: Contact Form */}
           <div className="contact-right">
-            <div className="contact-form-container-compact" ref={formRef} style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}>
+            <div 
+              className="contact-form-container-compact" 
+              ref={formRef} 
+              style={{ direction: getDirection() }}
+            >
               <h3 className="form-title">{t('formTitle')}</h3>
               
               <Form onSubmit={handleSubmit} className="contact-form">
@@ -464,7 +315,7 @@ export const ContactUs = () => {
                     onChange={handleChange}
                     placeholder={t('fullNamePlaceholder')}
                     required
-                    dir={currentLang === 'AR' ? 'rtl' : 'ltr'}
+                    dir={getDirection()}
                   />
                 </Form.Group>
 
@@ -477,25 +328,22 @@ export const ContactUs = () => {
                     onChange={handleChange}
                     placeholder={t('emailPlaceholder')}
                     required
-                    dir={currentLang === 'AR' ? 'rtl' : 'ltr'}
+                    dir={getDirection()}
                   />
                 </Form.Group>
 
-
-
-
-                 <Form.Group controlId="formPhone">
-  <Form.Label>{t('phoneTitle')}</Form.Label>
-  <Form.Control
-    type="tel"  // ← تغيير من "phone" إلى "tel"
-    name="phone"  // ← تغيير من "Phone" إلى "phone" (حروف صغيرة)
-    value={formData.phone}
-    onChange={handleChange}
-    placeholder={t('phoneDetails')}
-    required
-    dir={currentLang === 'AR' ? 'rtl' : 'ltr'}
-  />
-</Form.Group>
+                <Form.Group controlId="formPhone">
+                  <Form.Label>{t('phoneTitle')}</Form.Label>
+                  <Form.Control
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder={t('phoneDetails')}
+                    required
+                    dir={getDirection()}
+                  />
+                </Form.Group>
 
                 <Form.Group controlId="formSubject">
                   <Form.Label>{t('subjectLabel')}</Form.Label>
@@ -505,7 +353,7 @@ export const ContactUs = () => {
                     value={formData.subject}
                     onChange={handleChange}
                     placeholder={t('subjectPlaceholder')}
-                    dir={currentLang === 'AR' ? 'rtl' : 'ltr'}
+                    dir={getDirection()}
                   />
                 </Form.Group>
 
@@ -519,7 +367,7 @@ export const ContactUs = () => {
                     placeholder={t('messagePlaceholder')}
                     rows={4}
                     required
-                    dir={currentLang === 'AR' ? 'rtl' : 'ltr'}
+                    dir={getDirection()}
                   />
                 </Form.Group>
 
@@ -529,11 +377,17 @@ export const ContactUs = () => {
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? t('sending') : t('sendMessage')}
-                  {!isSubmitting && <FaPaperPlane style={{ marginLeft: currentLang === 'AR' ? '0' : '10px', marginRight: currentLang === 'AR' ? '10px' : '0' }} />}
+                  {!isSubmitting && <FaPaperPlane style={{ 
+                    marginLeft: currentLang === 'ar' ? '0' : '10px', 
+                    marginRight: currentLang === 'ar' ? '10px' : '0' 
+                  }} />}
                 </Button>
                 
                 {isSubmitted && (
-                  <div className="success-message" style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}>
+                  <div 
+                    className="success-message" 
+                    style={{ direction: getDirection() }}
+                  >
                     {t('successMessage')}
                   </div>
                 )}
@@ -547,7 +401,7 @@ export const ContactUs = () => {
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="whatsapp-btn-compact"
-                style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}
+                style={{ direction: getDirection() }}
               >
                 <FaWhatsapp />
                 {t('chatWhatsApp')}
@@ -558,7 +412,10 @@ export const ContactUs = () => {
 
         {/* Social Media */}
         <div className="social-media-compact">
-          <h4 className="social-title-compact" style={{ direction: currentLang === 'AR' ? 'rtl' : 'ltr' }}>
+          <h4 
+            className="social-title-compact" 
+            style={{ direction: getDirection() }}
+          >
             {t('followUs')}
           </h4>
           <div className="social-icons-compact">

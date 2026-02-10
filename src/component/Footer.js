@@ -1,17 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { Container, Row, Col, Form } from 'react-bootstrap';
 import { 
   FaPhone, FaEnvelope, FaMapMarkerAlt, FaPaperPlane,
   FaFacebook, FaTwitter, FaLinkedin, FaInstagram,
   FaYoutube, FaChevronUp, FaArrowRight
 } from 'react-icons/fa';
-import gsap from 'gsap';
-import ScrollTrigger from 'gsap/ScrollTrigger';
 import { useLanguage } from './LanguageProvider';
 import { useDispatch } from 'react-redux';
 import { Add_Client_Action } from '../Redux/Actions/ClientAction';
-
-gsap.registerPlugin(ScrollTrigger);
 
 export const Footer = () => {
   const { currentLang } = useLanguage();
@@ -19,10 +15,22 @@ export const Footer = () => {
   const [phone, setPhone] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   
   const footerRef = useRef(null);
   const columnsRef = useRef([]);
   const backToTopRef = useRef(null);
+  const observerRef = useRef(null);
+
+  // دالة مساعدة للتحقق إذا كانت اللغة عربية
+  const isRTL = () => {
+    return currentLang === 'ar';
+  };
+
+  // دالة مساعدة للـ direction
+  const getDirection = () => {
+    return isRTL() ? 'rtl' : 'ltr';
+  };
  
   // الترجمات
   const translations = {
@@ -92,26 +100,33 @@ export const Footer = () => {
 
   // دالة الترجمة
   const t = (key) => {
-    return translations[currentLang][key] || translations.EN[key];
+    try {
+      const langKey = currentLang?.toUpperCase?.();
+      return translations[langKey]?.[key] || translations.EN[key] || key;
+    } catch (error) {
+      return translations.EN[key] || key;
+    }
   };
 
-  const quickLinks = [
+  // إنشاء quickLinks
+  const quickLinks = useMemo(() => [
     { label: t('home'), href: '#home' },
     { label: t('aboutUs'), href: '#about' },
     { label: t('services'), href: '#services' },
     { label: t('testimonials'), href: '#testimonials' },
     { label: t('blog'), href: '#blog' },
     { label: t('contact'), href: '#contact' }
-  ];
+  ], [currentLang, t]);
 
-  const services = [
+  // إنشاء services
+  const services = useMemo(() => [
     { label: t('growthStrategy'), href: '#' },
     { label: t('digitalMarketing'), href: '#' },
     { label: t('brandDevelopment'), href: '#' },
     { label: t('webDevelopment'), href: '#' },
     { label: t('seoOptimization'), href: '#' },
     { label: t('socialMedia'), href: '#' }
-  ];
+  ], [currentLang, t]);
 
   const socialLinks = [
     { icon: <FaFacebook />, href: '#', label: 'Facebook' },
@@ -130,29 +145,26 @@ export const Footer = () => {
   const handleSubscribe = async (e) => {
     e.preventDefault();
     if (phone.trim()) {
-      console.log('Phone Newsletter subscription:', phone);
+      try {
+        await dispatch(Add_Client_Action({
+          name: 'No Name',
+          email: 'No Email',
+          phone: phone,
+          whatsappNumber: phone,
+          jobTitle: 'No Job Title',
+          message: 'Register From Footer',
+          countryName: 'No Country',
+        }));
 
-      await dispatch(Add_Client_Action({
-        name: 'No Name',
-        email: 'No Email',
-        phone: phone,
-        whatsappNumber: phone,
-        jobTitle: 'No Job Title',
-        message: 'Register From Footer',
-        countryName: 'No Country',
-      }));
-
-      gsap.fromTo('.newsletter-success',
-        { y: -20, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.6, ease: 'back.out(1.7)' }
-      );
-      
-      setSubscribed(true);
-      setPhone('');
-      
-      setTimeout(() => {
-        setSubscribed(false);
-      }, 3000);
+        setSubscribed(true);
+        setPhone('');
+        
+        setTimeout(() => {
+          setSubscribed(false);
+        }, 3000);
+      } catch (error) {
+        console.error('Subscription error:', error);
+      }
     }
   };
 
@@ -161,13 +173,18 @@ export const Footer = () => {
       top: 0,
       behavior: 'smooth'
     });
-    
-    if (backToTopRef.current) {
-      gsap.to(backToTopRef.current, {
-        scale: 0.8,
-        duration: 0.1,
-        yoyo: true,
-        repeat: 1
+  };
+
+  const scrollToContact = () => {
+    const contactSection = document.getElementById('contact');
+    if (contactSection) {
+      const headerHeight = 80;
+      const elementPosition = contactSection.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
       });
     }
   };
@@ -185,137 +202,50 @@ export const Footer = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // GSAP Animations
+  // Intersection Observer لتفعيل الأنيميشن عند الظهور
   useEffect(() => {
-    gsap.fromTo(footerRef.current,
-      {
-        opacity: 0,
-        y: 50
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            observerRef.current.unobserve(entry.target);
+          }
+        });
       },
       {
-        opacity: 1,
-        y: 0,
-        duration: 1,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: footerRef.current,
-          start: 'top 90%',
-          end: 'top 70%',
-          toggleActions: 'play none none reverse'
-        }
+        threshold: 0.1,
+        rootMargin: '50px'
       }
     );
 
-    columnsRef.current.forEach((column, index) => {
-      if (column) {
-        gsap.fromTo(column,
-          {
-            y: 50,
-            opacity: 0,
-            scale: 0.9
-          },
-          {
-            y: 0,
-            opacity: 1,
-            scale: 1,
-            duration: 0.8,
-            delay: index * 0.15,
-            ease: 'back.out(1.7)',
-            scrollTrigger: {
-              trigger: column,
-              start: 'top 90%',
-              end: 'top 70%',
-              toggleActions: 'play none none reverse'
-            }
-          }
-        );
-      }
-    });
-
-    const links = document.querySelectorAll('.footer-links a');
-    links.forEach(link => {
-      link.addEventListener('mouseenter', () => {
-        gsap.to(link, {
-          x: currentLang === 'AR' ? -5 : 5,
-          duration: 0.3,
-          ease: 'power2.out'
-        });
-      });
-      
-      link.addEventListener('mouseleave', () => {
-        gsap.to(link, {
-          x: 0,
-          duration: 0.3,
-          ease: 'power2.out'
-        });
-      });
-    });
-
-    const socialIcons = document.querySelectorAll('.social-link');
-    socialIcons.forEach((icon, index) => {
-      gsap.fromTo(icon,
-        {
-          y: 30,
-          opacity: 0,
-          rotation: -180,
-          scale: 0.5
-        },
-        {
-          y: 0,
-          opacity: 1,
-          rotation: 0,
-          scale: 1,
-          duration: 0.6,
-          delay: 1 + (index * 0.1),
-          ease: 'back.out(1.7)',
-          scrollTrigger: {
-            trigger: icon,
-            start: 'top 90%',
-            end: 'top 70%',
-            toggleActions: 'play none none reverse'
-          }
-        }
-      );
-    });
+    if (footerRef.current) {
+      observerRef.current.observe(footerRef.current);
+    }
 
     return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
     };
-  }, [currentLang]);
+  }, []);
 
-  const scrollToContact = () => {
-    const contactSection = document.getElementById('contact');
-    
-    if (contactSection) {
-      const headerHeight = 80;
-      const elementPosition = contactSection.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
-      
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
-      
-      setTimeout(() => {
-        gsap.fromTo(contactSection,
-          {
-            boxShadow: '0 0 0 5px rgba(255, 64, 129, 0.3)',
-            scale: 1.01
-          },
-          {
-            boxShadow: '0 0 0 0 rgba(255, 64, 129, 0)',
-            scale: 1,
-            duration: 1.5,
-            ease: 'power2.out'
-          }
-        );
-      }, 1000);
-    }
-  };
+  // نص الوصف بناء على اللغة
+  const contactDescription = isRTL() 
+    ? 'لديك استفسارات أو تحتاج إلى مساعدة؟ تواصل مع فريقنا.' 
+    : 'Have questions or need assistance? Get in touch with our team.';
+
+  // نص زر التوجيه
+  const redirectButtonText = isRTL() 
+    ? 'اذهب إلى نموذج الاتصال' 
+    : 'Go to Contact Form';
 
   return (
     <>
-      <footer className="footer" ref={footerRef}>
+      <footer 
+        className={`footer ${isVisible ? 'visible' : ''}`} 
+        ref={footerRef}
+      >
         <Container>
           {/* Footer Top */}
           <div className="footer-top">
@@ -332,8 +262,9 @@ export const Footer = () => {
           <div className="footer-grid">
             {/* Quick Links Column */}
             <div 
-              className="footer-column" 
+              className={`footer-column column-1 ${isVisible ? 'animate' : ''}`} 
               ref={el => columnsRef.current[0] = el}
+              style={{ direction: getDirection() }}
             >
               <div className="footer-title-wrapper">
                 <h3 className="footer-column-title">
@@ -343,9 +274,9 @@ export const Footer = () => {
               </div>
               <ul className="footer-links">
                 {quickLinks.map((link, index) => (
-                  <li key={index}>
+                  <li key={index} style={{ animationDelay: `${index * 0.1}s` }}>
                     <a href={link.href}>
-                      <FaArrowRight className={`footer-link-arrow ${currentLang === 'AR' ? 'rtl-arrow' : ''}`} />
+                      <FaArrowRight className={`footer-link-arrow ${isRTL() ? 'rtl-arrow' : ''}`} />
                       {link.label}
                     </a>
                   </li>
@@ -355,8 +286,9 @@ export const Footer = () => {
 
             {/* Services Column */}
             <div 
-              className="footer-column" 
+              className={`footer-column column-2 ${isVisible ? 'animate' : ''}`} 
               ref={el => columnsRef.current[1] = el}
+              style={{ direction: getDirection() }}
             >
               <div className="footer-title-wrapper">
                 <h3 className="footer-column-title">
@@ -366,9 +298,9 @@ export const Footer = () => {
               </div>
               <ul className="footer-links">
                 {services.map((service, index) => (
-                  <li key={index}>
+                  <li key={index} style={{ animationDelay: `${index * 0.1}s` }}>
                     <a href={service.href}>
-                      <FaArrowRight className={`footer-link-arrow ${currentLang === 'AR' ? 'rtl-arrow' : ''}`} />
+                      <FaArrowRight className={`footer-link-arrow ${isRTL() ? 'rtl-arrow' : ''}`} />
                       {service.label}
                     </a>
                   </li>
@@ -378,8 +310,9 @@ export const Footer = () => {
 
             {/* Contact Info Column */}
             <div 
-              className="footer-column" 
+              className={`footer-column column-3 ${isVisible ? 'animate' : ''}`} 
               ref={el => columnsRef.current[2] = el}
+              style={{ direction: getDirection() }}
             >
               <div className="footer-title-wrapper">
                 <h3 className="footer-column-title">
@@ -409,6 +342,7 @@ export const Footer = () => {
                     href={social.href}
                     className="social-link"
                     aria-label={social.label}
+                    style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     {social.icon}
                   </a>
@@ -418,8 +352,9 @@ export const Footer = () => {
 
             {/* Contact Column */}
             <div 
-              className="footer-column" 
+              className={`footer-column column-4 ${isVisible ? 'animate' : ''}`} 
               ref={el => columnsRef.current[3] = el}
+              style={{ direction: getDirection() }}
             >
               <div className="footer-title-wrapper">
                 <h3 className="footer-column-title">
@@ -428,9 +363,7 @@ export const Footer = () => {
                 </h3>
               </div>
               <p className="contact-description">
-                {currentLang === 'AR' 
-                  ? 'لديك استفسارات أو تحتاج إلى مساعدة؟ تواصل مع فريقنا.' 
-                  : 'Have questions or need assistance? Get in touch with our team.'}
+                {contactDescription}
               </p>
               
               <div className="contact-redirect">
@@ -438,15 +371,15 @@ export const Footer = () => {
                   className="contact-redirect-btn"
                   onClick={scrollToContact}
                 >
-                  {currentLang === 'AR' ? 'اذهب إلى نموذج الاتصال' : 'Go to Contact Form'}
-                  <FaPaperPlane className={`contact-btn-icon ${currentLang === 'AR' ? 'rtl-icon' : ''}`} />
+                  {redirectButtonText}
+                  <FaPaperPlane className={`contact-btn-icon ${isRTL() ? 'rtl-icon' : ''}`} />
                 </button>
               </div>
             </div>
           </div>
 
           {/* Footer Bottom */}
-          <div className="footer-bottom">
+          <div className={`footer-bottom ${isVisible ? 'animate' : ''}`}>
             <div className="copyright">
               {t('copyright')}
             </div>
@@ -474,6 +407,447 @@ export const Footer = () => {
       >
         <FaChevronUp />
       </button>
+
+      <style jsx>{`
+        .footer {
+          background: linear-gradient(135deg, #2E3959 0%, #2d2d2d 100%);
+          color: #fff;
+          padding: 60px 0 30px;
+          position: relative;
+          overflow: hidden;
+          opacity: 0;
+          transform: translateY(50px);
+          transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .footer.visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .footer::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 3px;
+          background: linear-gradient(90deg, #ff4081, #7c4dff, #00bcd4);
+          animation: shimmer 3s infinite linear;
+        }
+
+        @keyframes shimmer {
+          0% { background-position: -200px 0; }
+          100% { background-position: 200px 0; }
+        }
+
+        .footer-top {
+          text-align: center;
+          margin-bottom: 60px;
+          opacity: 0;
+          transform: translateY(20px);
+          animation: fadeInUp 0.8s 0.3s forwards;
+        }
+
+        .footer-logo {
+          font-size: 3rem;
+          font-weight: 800;
+          margin-bottom: 20px;
+          display: inline-block;
+          background: linear-gradient(90deg, #fff, #ff4081);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          animation: logoGlow 2s infinite alternate;
+        }
+
+        @keyframes logoGlow {
+          0% { filter: drop-shadow(0 0 5px rgba(255, 64, 129, 0.3)); }
+          100% { filter: drop-shadow(0 0 15px rgba(255, 64, 129, 0.6)); }
+        }
+
+        .footer-tagline {
+          font-size: 1.1rem;
+          color: rgba(255, 255, 255, 0.7);
+          max-width: 600px;
+          margin: 0 auto;
+          line-height: 1.6;
+        }
+
+        .footer-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 40px;
+          margin-bottom: 50px;
+        }
+
+        .footer-column {
+          opacity: 0;
+          transform: translateY(30px) scale(0.95);
+        }
+
+        .footer-column.animate {
+          animation: slideInUp 0.6s forwards;
+        }
+
+        .column-1.animate { animation-delay: 0.1s; }
+        .column-2.animate { animation-delay: 0.2s; }
+        .column-3.animate { animation-delay: 0.3s; }
+        .column-4.animate { animation-delay: 0.4s; }
+
+        @keyframes slideInUp {
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        .footer-title-wrapper {
+          margin-bottom: 25px;
+          position: relative;
+        }
+
+        .footer-column-title {
+          font-size: 1.3rem;
+          font-weight: 600;
+          margin-bottom: 15px;
+          color: #fff;
+          display: inline-block;
+        }
+
+        .footer-title-line {
+          display: block;
+          width: 0;
+          height: 3px;
+          background: linear-gradient(90deg, #ff4081, #7c4dff);
+          margin-top: 8px;
+          transition: width 0.6s 0.5s;
+        }
+
+        .footer-column.animate .footer-title-line {
+          width: 60px;
+        }
+
+        .footer-links {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+
+        .footer-links li {
+          margin-bottom: 12px;
+          opacity: 0;
+          transform: translateX(${isRTL() ? '20px' : '-20px'});
+          animation: slideInLink 0.5s forwards;
+        }
+
+        @keyframes slideInLink {
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        .footer-links a {
+          color: rgba(255, 255, 255, 0.8);
+          text-decoration: none;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          transition: all 0.3s ease;
+          padding: 8px 0;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .footer-links a::before {
+          content: '';
+          position: absolute;
+          left: ${isRTL() ? 'auto' : '0'};
+          right: ${isRTL() ? '0' : 'auto'};
+          bottom: 0;
+          width: 0;
+          height: 2px;
+          background: #ff4081;
+          transition: width 0.3s ease;
+        }
+
+        .footer-links a:hover {
+          color: #fff;
+          transform: translateX(${isRTL() ? '-5px' : '5px'});
+        }
+
+        .footer-links a:hover::before {
+          width: 100%;
+        }
+
+        .footer-link-arrow {
+          font-size: 0.8rem;
+          transition: transform 0.3s ease;
+        }
+
+        .footer-links a:hover .footer-link-arrow {
+          transform: translateX(${isRTL() ? '-3px' : '3px'});
+        }
+
+        .rtl-arrow {
+          transform: rotate(180deg);
+        }
+
+        .contact-info {
+          margin-bottom: 25px;
+        }
+
+        .contact-item {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          margin-bottom: 15px;
+          color: rgba(255, 255, 255, 0.8);
+          font-size: 0.95rem;
+        }
+
+        .contact-item svg {
+          color: #ff4081;
+          min-width: 20px;
+        }
+
+        .contact-item a {
+          color: rgba(255, 255, 255, 0.8);
+          text-decoration: none;
+          transition: color 0.3s ease;
+        }
+
+        .contact-item a:hover {
+          color: #ff4081;
+        }
+
+        .social-links {
+          display: flex;
+          gap: 15px;
+          margin-top: 25px;
+        }
+
+        .social-link {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.1);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #fff;
+          text-decoration: none;
+          transition: all 0.3s ease;
+          opacity: 0;
+          transform: scale(0) rotate(-180deg);
+        }
+
+        .social-link.animate {
+          animation: popIn 0.6s forwards;
+        }
+
+        @keyframes popIn {
+          to {
+            opacity: 1;
+            transform: scale(1) rotate(0);
+          }
+        }
+
+        .social-link:hover {
+          background: #ff4081;
+          transform: translateY(-3px) scale(1.1);
+          box-shadow: 0 5px 15px rgba(255, 64, 129, 0.4);
+        }
+
+        .contact-description {
+          color: rgba(255, 255, 255, 0.7);
+          margin-bottom: 25px;
+          line-height: 1.6;
+        }
+
+        .contact-redirect-btn {
+          background: linear-gradient(135deg, #ff4081, #7c4dff);
+          color: white;
+          border: none;
+          padding: 15px 25px;
+          border-radius: 30px;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .contact-redirect-btn::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+          transition: left 0.5s;
+        }
+
+        .contact-redirect-btn:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 8px 20px rgba(255, 64, 129, 0.4);
+        }
+
+        .contact-redirect-btn:hover::before {
+          left: 100%;
+        }
+
+        .contact-btn-icon {
+          transition: transform 0.3s ease;
+        }
+
+        .contact-redirect-btn:hover .contact-btn-icon {
+          transform: translateX(${isRTL() ? '-5px' : '5px'});
+        }
+
+        .rtl-icon {
+          transform: rotate(180deg);
+        }
+
+        .footer-bottom {
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          padding-top: 30px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          opacity: 0;
+          animation: fadeIn 0.8s 0.8s forwards;
+        }
+
+        @keyframes fadeIn {
+          to { opacity: 1; }
+        }
+
+        .copyright {
+          color: rgba(255, 255, 255, 0.6);
+          font-size: 0.9rem;
+        }
+
+        .footer-legal {
+          display: flex;
+          gap: 25px;
+        }
+
+        .footer-legal a {
+          color: rgba(255, 255, 255, 0.6);
+          text-decoration: none;
+          font-size: 0.9rem;
+          transition: color 0.3s ease;
+          position: relative;
+        }
+
+        .footer-legal a::after {
+          content: '';
+          position: absolute;
+          bottom: -2px;
+          left: 0;
+          width: 0;
+          height: 1px;
+          background: #ff4081;
+          transition: width 0.3s ease;
+        }
+
+        .footer-legal a:hover {
+          color: #fff;
+        }
+
+        .footer-legal a:hover::after {
+          width: 100%;
+        }
+
+        .back-to-top {
+          position: fixed;
+          bottom: 30px;
+          right: ${isRTL() ? 'auto' : '30px'};
+          left: ${isRTL() ? '30px' : 'auto'};
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #ff4081, #7c4dff);
+          color: white;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 0;
+          transform: translateY(20px);
+          transition: all 0.3s ease;
+          z-index: 1000;
+          box-shadow: 0 4px 15px rgba(255, 64, 129, 0.3);
+        }
+
+        .back-to-top.visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .back-to-top:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 8px 20px rgba(255, 64, 129, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+          .footer {
+            padding: 40px 0 20px;
+          }
+
+          .footer-grid {
+            grid-template-columns: 1fr;
+            gap: 30px;
+          }
+
+          .footer-column {
+            text-align: ${isRTL() ? 'right' : 'left'};
+          }
+
+          .footer-bottom {
+            flex-direction: column;
+            gap: 20px;
+            text-align: center;
+          }
+
+          .footer-legal {
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+          }
+
+          .back-to-top {
+            bottom: 20px;
+            right: ${isRTL() ? 'auto' : '20px'};
+            left: ${isRTL() ? '20px' : 'auto'};
+            width: 45px;
+            height: 45px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .footer-logo {
+            font-size: 2.5rem;
+          }
+
+          .footer-tagline {
+            font-size: 1rem;
+          }
+
+          .social-links {
+            justify-content: center;
+          }
+        }
+      `}</style>
     </>
   );
 };

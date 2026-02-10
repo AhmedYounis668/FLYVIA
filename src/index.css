@@ -6840,3 +6840,1265 @@ html {
     transform: translateY(0);
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* OurServices.css */
+
+/* Animation Keyframes */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-60px) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cardAppear {
+  from {
+    opacity: 0;
+    transform: translateY(100px) rotateY(20deg) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotateY(0) scale(1);
+  }
+}
+
+@keyframes iconSpin {
+  from {
+    transform: rotateY(0) scale(1);
+  }
+  to {
+    transform: rotateY(180deg) scale(1.1);
+  }
+}
+
+@keyframes iconSpinReverse {
+  from {
+    transform: rotateY(180deg) scale(1.1);
+  }
+  to {
+    transform: rotateY(0) scale(1);
+  }
+}
+
+/* Animation Classes */
+.animate-slide-down {
+  opacity: 0;
+  animation: slideDown 1.2s ease-out forwards;
+  animation-play-state: paused;
+}
+
+.animate-slide-down.visible {
+  animation-play-state: running;
+}
+
+.animate-slide-up {
+  opacity: 0;
+  animation: slideUp 1s ease-out 0.4s forwards;
+  animation-play-state: paused;
+}
+
+.animate-slide-up.visible {
+  animation-play-state: running;
+}
+
+.animate-card {
+  opacity: 0;
+  animation: cardAppear 1.2s ease-out forwards;
+  animation-play-state: paused;
+  transform-style: preserve-3d;
+  transition: all 0.4s ease-out;
+}
+
+.animate-card.visible {
+  animation-play-state: running;
+}
+
+/* Hover Effects */
+.feature-card-under {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+}
+
+.feature-card-under:hover {
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.15);
+  transform: translateY(-15px) !important;
+}
+
+.card-icon-under {
+  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-style: preserve-3d;
+}
+
+.card-icon-under.icon-hover {
+  animation: iconSpin 0.6s ease-out forwards;
+}
+
+.feature-card-under:not(:hover) .card-icon-under.icon-hover {
+  animation: iconSpinReverse 0.4s ease-out forwards;
+}
+
+.card-link-under {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.4s ease-out;
+}
+
+.card-link-under.link-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Pulse Effect on Hover */
+.feature-card-under::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  opacity: 0;
+  box-shadow: 0 0 20px currentColor;
+  transition: opacity 0.3s ease-out;
+  pointer-events: none;
+}
+
+.feature-card-under:hover::after {
+  opacity: 0.1;
+}
+
+/* Discover More Button */
+.discover-more-btn {
+  background: linear-gradient(45deg, #2196F3, #21CBF3);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.discover-more-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, #21CBF3, #2196F3);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.discover-more-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(33, 150, 243, 0.4);
+}
+
+.discover-more-btn:hover::before {
+  opacity: 1;
+}
+
+.discover-more-btn:active {
+  transform: translateY(-1px);
+}
+
+/* Language change animation */
+@keyframes languageChange {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cards-section-title,
+.cards-section-subtitle,
+.feature-card-under {
+  animation: languageChange 0.5s ease-out forwards;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .animate-slide-down {
+    animation: slideDown 0.8s ease-out forwards;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.6s ease-out 0.2s forwards;
+  }
+  
+  .animate-card {
+    animation: cardAppear 0.8s ease-out forwards;
+  }
+}
+
+/* For reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-down,
+  .animate-slide-up,
+  .animate-card,
+  .card-icon-under,
+  .card-link-under,
+  .discover-more-btn,
+  .feature-card-under {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .animate-slide-down.visible,
+  .animate-slide-up.visible,
+  .animate-card.visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* HeroSection.css */
+
+/* ========== KEYFRAMES ========== */
+@keyframes videoAppear {
+  from {
+    transform: scale(1.1);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes brandNameFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes titleSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes descriptionSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes btnScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0) rotate(-180deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes dividerGrow {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+@keyframes phoneSectionSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes successMessagePop {
+  0% {
+    transform: scale(0.8) translateY(-20px);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.1) translateY(0);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes cardAppear {
+  from {
+    opacity: 0;
+    transform: translateY(100px) rotateY(20deg) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotateY(0) scale(1);
+  }
+}
+
+@keyframes iconSpin {
+  from {
+    transform: rotateY(0) scale(1);
+  }
+  to {
+    transform: rotateY(180deg) scale(1.1);
+  }
+}
+
+@keyframes iconSpinReverse {
+  from {
+    transform: rotateY(180deg) scale(1.1);
+  }
+  to {
+    transform: rotateY(0) scale(1);
+  }
+}
+
+@keyframes subtitleSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px) translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
+}
+
+@keyframes btnPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(231, 62, 140, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px 10px rgba(231, 62, 140, 0.3);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes languageChange {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========== ANIMATION CLASSES ========== */
+.animate-video {
+  opacity: 0;
+  animation: videoAppear 1.5s ease-out forwards;
+  animation-play-state: paused;
+}
+
+.animate-video.visible {
+  animation-play-state: running;
+}
+
+.animate-brand-name {
+  opacity: 0;
+}
+
+.animate-brand-name.visible {
+  animation: brandNameFloat 0.8s ease-out forwards;
+}
+
+.animate-title {
+  opacity: 0;
+  animation: titleSlideDown 1s ease-out forwards;
+  animation-play-state: paused;
+}
+
+.animate-title.visible {
+  animation-play-state: running;
+}
+
+.animate-description {
+  opacity: 0;
+  animation: descriptionSlideUp 0.8s ease-out 0.4s forwards;
+  animation-play-state: paused;
+}
+
+.animate-description.visible {
+  animation-play-state: running;
+}
+
+.animate-btn {
+  opacity: 0;
+  animation: btnScaleIn 0.6s ease-out 0.6s forwards;
+  animation-play-state: paused;
+}
+
+.animate-btn.visible {
+  animation-play-state: running;
+}
+
+.animate-divider {
+  opacity: 0;
+  animation: dividerGrow 0.8s ease-out 0.8s forwards;
+  animation-play-state: paused;
+}
+
+.animate-divider.visible {
+  animation-play-state: running;
+}
+
+.animate-phone {
+  opacity: 0;
+  animation: phoneSectionSlideUp 0.8s ease-out 1s forwards;
+  animation-play-state: paused;
+}
+
+.animate-phone.visible {
+  animation-play-state: running;
+}
+
+.animate-success {
+  animation: successMessagePop 0.6s ease-out forwards;
+}
+
+.animate-subtitle {
+  opacity: 0;
+  animation: subtitleSlideIn 1s ease-out 0.4s forwards;
+  animation-play-state: paused;
+}
+
+.animate-subtitle.visible {
+  animation-play-state: running;
+}
+
+.animate-card {
+  opacity: 0;
+  animation: cardAppear 1.2s ease-out forwards;
+  animation-play-state: paused;
+  transform-style: preserve-3d;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.animate-card.visible {
+  animation-play-state: running;
+}
+
+/* ========== HOVER EFFECTS ========== */
+.discover-btn:hover {
+  animation: btnPulse 2s infinite;
+  transform: translateY(-3px);
+}
+
+.about-us-card {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+}
+
+.about-us-card:hover {
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.15);
+  transform: translateY(-15px) !important;
+}
+
+.about-us-icon {
+  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-style: preserve-3d;
+}
+
+.about-us-icon.icon-hover {
+  animation: iconSpin 0.6s ease-out forwards;
+}
+
+.about-us-card:not(:hover) .about-us-icon.icon-hover {
+  animation: iconSpinReverse 0.4s ease-out forwards;
+}
+
+.about-us-link {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.4s ease-out;
+}
+
+.about-us-link.link-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Input focus effect */
+.phone-input-group {
+  transition: transform 0.3s ease-out;
+}
+
+.phone-input:focus + .phone-input-group {
+  transform: scale(1.02);
+}
+
+/* Video control button hover */
+.video-control-btn {
+  transition: all 0.3s ease-out;
+}
+
+.video-control-btn:hover {
+  transform: scale(1.1) rotate(90deg);
+}
+
+/* Button hover scale */
+.discover-btn, .submit-btn {
+  transition: transform 0.3s ease-out;
+}
+
+.discover-btn:hover, .submit-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+/* Language change animation */
+.main-title,
+.description,
+.discover-btn,
+.brand-name,
+.about-us-title,
+.about-us-subtitle,
+.about-us-card {
+  animation: languageChange 0.5s ease-out forwards;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+  .animate-video {
+    animation: videoAppear 1s ease-out forwards;
+  }
+  
+  .animate-title {
+    animation: titleSlideDown 0.8s ease-out forwards;
+  }
+  
+  .animate-description {
+    animation: descriptionSlideUp 0.6s ease-out 0.3s forwards;
+  }
+  
+  .animate-btn {
+    animation: btnScaleIn 0.5s ease-out 0.4s forwards;
+  }
+  
+  .animate-divider {
+    animation: dividerGrow 0.6s ease-out 0.5s forwards;
+  }
+  
+  .animate-phone {
+    animation: phoneSectionSlideUp 0.6s ease-out 0.7s forwards;
+  }
+  
+  .animate-card {
+    animation: cardAppear 0.8s ease-out forwards;
+  }
+  
+  .animate-subtitle {
+    animation: subtitleSlideIn 0.8s ease-out 0.3s forwards;
+  }
+}
+
+/* For reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .animate-video,
+  .animate-brand-name,
+  .animate-title,
+  .animate-description,
+  .animate-btn,
+  .animate-divider,
+  .animate-phone,
+  .animate-success,
+  .animate-subtitle,
+  .animate-card,
+  .about-us-card,
+  .about-us-icon,
+  .about-us-link,
+  .discover-btn,
+  .submit-btn,
+  .video-control-btn,
+  .phone-input-group {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .animate-video.visible,
+  .animate-brand-name.visible,
+  .animate-title.visible,
+  .animate-description.visible,
+  .animate-btn.visible,
+  .animate-divider.visible,
+  .animate-phone.visible,
+  .animate-subtitle.visible,
+  .animate-card.visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ========== CUSTOM STYLES ========== */
+.animated-arrow {
+  animation: bounce 2s infinite;
+}
+
+/* Card glow effect on hover */
+.about-us-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  opacity: 0;
+  box-shadow: 0 0 20px currentColor;
+  transition: opacity 0.3s ease-out;
+  pointer-events: none;
+}
+
+.about-us-card:hover::after {
+  opacity: 0.1;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ClientOpinion.css */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Animation styles for Blogs section */
+.blogs-title {
+  position: relative;
+  text-align: center !important;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.blogs-title.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.blogs-title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 100px;
+  height: 3px;
+  background: linear-gradient(90deg, #e83e8c, #2196F3);
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
+}
+
+.blogs-title.visible::after {
+  transform: translateX(-50%) scaleX(1);
+}
+
+.blogs-subtitle {
+  text-align: center !important;
+  max-width: 800px;
+  margin: 0 auto 3rem;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;
+}
+
+.blogs-subtitle.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* RTL support */
+[dir="rtl"] .blogs-title::after {
+  left: auto;
+  right: 50%;
+  transform: translateX(50%) scaleX(0);
+}
+
+[dir="rtl"] .blogs-title.visible::after {
+  transform: translateX(50%) scaleX(1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .blogs-title {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .blogs-subtitle {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .blogs-title::after {
+    width: 80px;
+  }
+}
+
+
+
+
+
+
+
+
+/* Animation styles for Contact section */
+.contact-title {
+  position: relative;
+  text-align: center !important;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.contact-title.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.contact-title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 100px;
+  height: 3px;
+  background: linear-gradient(90deg, #e83e8c, #2196F3);
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
+}
+
+.contact-title.visible::after {
+  transform: translateX(-50%) scaleX(1);
+}
+
+.contact-subtitle {
+  text-align: center !important;
+  max-width: 600px;
+  margin: 0 auto 3rem;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;
+}
+
+.contact-subtitle.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* RTL support */
+[dir="rtl"] .contact-title::after {
+  left: auto;
+  right: 50%;
+  transform: translateX(50%) scaleX(0);
+}
+
+[dir="rtl"] .contact-title.visible::after {
+  transform: translateX(50%) scaleX(1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .contact-title {
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .contact-subtitle {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .contact-title::after {
+    width: 80px;
+  }
+}
+
+
+
+
+
+
+
+/* Navbar Animations */
+.brand-animate {
+  animation: fadeInScale 0.6s ease-out forwards;
+}
+
+.nav-link-animate {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideUpFade 0.5s ease forwards;
+}
+
+.lang-nav-animate {
+  opacity: 0;
+  transform: translateX(20px);
+  animation: slideLeftFade 0.5s ease forwards;
+}
+
+.hamburger-animate {
+  opacity: 0;
+  animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideLeftFade {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Hamburger Animations */
+.rotate-45 {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.rotate-minus-45 {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+.opacity-0 {
+  opacity: 0;
+}
+
+/* Mobile Menu */
+.mobile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 999;
+}
+
+.mobile-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 300px;
+  background: white;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  z-index: 1000;
+  padding: 80px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.mobile-menu.open {
+  transform: translateX(0);
+}
+
+/* Language Toggle */
+.modern-language-toggle {
+  margin-top: 20px;
+}
+
+.modern-toggle-btn {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.toggle-background {
+  position: relative;
+  width: 100px;
+  height: 40px;
+  background: #f0f0f0;
+  border-radius: 20px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.toggle-slider {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  background: white;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.toggle-slider.left {
+  transform: translateX(0);
+}
+
+.toggle-slider.right {
+  transform: translateX(60px);
+}
+
+.toggle-labels {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 15px;
+  pointer-events: none;
+}
+
+.toggle-labels span {
+  font-weight: bold;
+  font-size: 14px;
+  color: #666;
+  transition: color 0.3s ease;
+}
+
+.toggle-labels span.active {
+  color: #102dff;
+}
+
+.toggle-text {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+.toggle-icon {
+  color: #e83e8c;
+}
+
+/* Navbar Responsive */
+@media (max-width: 992px) {
+  .nav-menu {
+    display: none;
+  }
+  
+  .desktop-only {
+    display: none;
+  }
+  
+  .mobile-menu .nav-link-custom {
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+  }
+  
+  .mobile-menu .nav-link-custom:hover,
+  .mobile-menu .nav-link-custom.active {
+    background: rgba(232, 62, 140, 0.1);
+    color: #e83e8c;
+  }
+}
+
+
+
+
+/* Basic Navbar Styles */
+.custom-navbar-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.custom-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.custom-navbar.scrolled {
+  background: white;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  padding: 15px 40px;
+}
+
+.nav-menu {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+}
+
+.nav-link-custom {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  position: relative;
+  padding: 5px 0;
+}
+
+.nav-link-custom:hover,
+.nav-link-custom.active {
+  color: #e83e8c;
+}
+
+.nav-link-custom.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #e83e8c;
+  border-radius: 1px;
+}
+
+/* Hamburger Button */
+.hamburger-btn-custom {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.hamburger-line {
+  width: 100%;
+  height: 3px;
+  background: #333;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.hamburger-btn-custom.active .hamburger-line:first-child {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger-btn-custom.active .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-btn-custom.active .hamburger-line:last-child {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+@media (max-width: 992px) {
+  .custom-navbar {
+    padding: 20px;
+  }
+  
+  .hamburger-btn-custom {
+    display: flex;
+  }
+  
+  .nav-menu {
+    display: none;
+  }
+}
+
+
+
+.simple-navbar:not(.scrolled) .nav-link {
+  color: #fff; /* بدلاً من white */
+}
+
+.simple-navbar {
+  background: linear-gradient(to bottom, 
+    rgba(0,0,0,0.2) 0%, 
+    transparent 100%
+  );
+}
+
+
+
+
+

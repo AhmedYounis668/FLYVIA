@@ -7,34 +7,16 @@ import {
   alpha,
   IconButton,
   Stack,
-  Divider,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText
+  Divider
 } from '@mui/material';
 import {
   ArrowForward,
   LocationOn,
-  Business,
-  TrendingUp,
   Group,
-  Lightbulb,
-  Cloud,
-  DesignServices,
-  Store,
-  Restaurant,
-  LocalHotel,
-  MedicalServices,
-  Construction,
-  CheckCircle,
-  Circle
+  TrendingUp,
+  CheckCircle
 } from '@mui/icons-material';
-import gsap from 'gsap';
-import ScrollTrigger from 'gsap/ScrollTrigger';
 import { useLanguage } from '../component/LanguageProvider';
-
-gsap.registerPlugin(ScrollTrigger);
 
 // بيانات الخدمات لكل دولة مع دعم اللغات
 const getServicesData = (lang) => ({
@@ -377,88 +359,55 @@ const getStatsData = (lang) => [
   }
 ];
 
-const CountryServiceSection = ({ countryData, index, currentLang, animationKey }) => {
+const CountryServiceSection = ({ countryData, index, currentLang }) => {
   const sectionRef = useRef(null);
-  const animationRef = useRef(null);
-  const cleanupRef = useRef([]);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // تنظيف شامل للأنيميشن السابقة
-    if (animationRef.current) {
-      animationRef.current.kill();
-      const trigger = animationRef.current.scrollTrigger;
-      if (trigger) trigger.kill();
-    }
-
-    // تنظيف أي triggers أخرى مرتبطة بهذا العنصر
-    cleanupRef.current.forEach(cleanup => {
-      if (cleanup && typeof cleanup === 'function') {
-        cleanup();
-      }
-    });
-
-    // إعادة تعيين العنصر لحالته الأصلية
-    if (sectionRef.current) {
-      gsap.set(sectionRef.current, {
-        opacity: 1,
-        y: 0,
-        clearProps: "all" // تنظيف جميع الـ props
-      });
-    }
-
-    // إنشاء أنيميشن جديدة فقط بعد إعادة التصيير
-    if (sectionRef.current) {
-      // تأخير بسيط لضمان تحديث DOM
-      const timer = setTimeout(() => {
-        animationRef.current = gsap.fromTo(sectionRef.current,
-          {
-            opacity: 0,
-            y: 50
-          },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            delay: index * 0.2,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top 85%",
-              toggleActions: "play none none reverse",
-              id: `country-section-${animationKey}-${index}` // ID فريد
-            }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            observer.unobserve(entry.target);
           }
-        );
-      }, 50);
+        });
+      },
+      {
+        threshold: 0.2,
+        rootMargin: '50px'
+      }
+    );
 
-      cleanupRef.current.push(() => clearTimeout(timer));
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
     }
 
     return () => {
-      // تنظيف شامل عند unmount
-      if (animationRef.current) {
-        animationRef.current.kill();
-        const trigger = animationRef.current.scrollTrigger;
-        if (trigger) trigger.kill();
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current);
       }
-      
-      cleanupRef.current.forEach(cleanup => {
-        if (cleanup && typeof cleanup === 'function') {
-          cleanup();
-        }
-      });
-      
-      cleanupRef.current = [];
     };
-  }, [index, currentLang, animationKey]);
+  }, []);
 
   return (
     <Box 
       ref={sectionRef} 
       sx={{ 
         mb: 8,
-        opacity: 1, // تأكد من أن opacity يبدأ من 1
-        visibility: 'visible' // تأكد من أن العنصر مرئي
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible ? 'translateY(0)' : 'translateY(50px)',
+        transition: 'opacity 0.8s ease, transform 0.8s ease',
+        transitionDelay: `${index * 0.2}s`,
+        animation: isVisible ? 'float 3s ease-in-out infinite' : 'none',
+        '@keyframes float': {
+          '0%, 100%': {
+            transform: 'translateY(0)',
+          },
+          '50%': {
+            transform: 'translateY(-10px)',
+          }
+        }
       }}
       id={`country-${countryData.title.toLowerCase().replace(/\s+/g, '-')}`}
     >
@@ -474,6 +423,21 @@ const CountryServiceSection = ({ countryData, index, currentLang, animationKey }
           <IconButton sx={{ 
             backgroundColor: countryData.color, 
             color: 'white',
+            animation: 'pulse 2s infinite',
+            '@keyframes pulse': {
+              '0%': {
+                transform: 'scale(1)',
+                boxShadow: `0 0 0 0 ${alpha(countryData.color, 0.7)}`,
+              },
+              '70%': {
+                transform: 'scale(1.05)',
+                boxShadow: `0 0 0 10px ${alpha(countryData.color, 0)}`,
+              },
+              '100%': {
+                transform: 'scale(1)',
+                boxShadow: `0 0 0 0 ${alpha(countryData.color, 0)}`,
+              }
+            },
             '&:hover': {
               backgroundColor: alpha(countryData.color, 0.8)
             }
@@ -485,7 +449,21 @@ const CountryServiceSection = ({ countryData, index, currentLang, animationKey }
             sx={{
               fontWeight: 800,
               color: '#1a1a1a',
-              fontSize: { xs: '2rem', md: '2.5rem' }
+              fontSize: { xs: '2rem', md: '2.5rem' },
+              position: 'relative',
+              display: 'inline-block',
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                bottom: -10,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: isVisible ? '100px' : '0',
+                height: '4px',
+                backgroundColor: countryData.color,
+                transition: 'width 1s ease 0.5s',
+                borderRadius: '2px'
+              }
             }}
           >
             {countryData.title}
@@ -497,7 +475,10 @@ const CountryServiceSection = ({ countryData, index, currentLang, animationKey }
           sx={{
             color: countryData.color,
             fontWeight: 600,
-            mb: 1
+            mb: 1,
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+            transition: 'opacity 0.8s ease 0.3s, transform 0.8s ease 0.3s'
           }}
         >
           {countryData.subtitle}
@@ -509,7 +490,10 @@ const CountryServiceSection = ({ countryData, index, currentLang, animationKey }
             color: '#666666',
             maxWidth: '800px',
             mx: 'auto',
-            lineHeight: 1.6
+            lineHeight: 1.6,
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+            transition: 'opacity 0.8s ease 0.5s, transform 0.8s ease 0.5s'
           }}
         >
           {countryData.description}
@@ -519,7 +503,15 @@ const CountryServiceSection = ({ countryData, index, currentLang, animationKey }
       {/* قائمة الخدمات بشكل مقالي */}
       <Box sx={{ maxWidth: '1000px', mx: 'auto' }}>
         {countryData.services.map((service, idx) => (
-          <Box key={idx} sx={{ mb: 6 }}>
+          <Box 
+            key={idx} 
+            sx={{ 
+              mb: 6,
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+              transition: `opacity 0.8s ease ${0.7 + idx * 0.1}s, transform 0.8s ease ${0.7 + idx * 0.1}s`
+            }}
+          >
             {/* عنوان الخدمة */}
             <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
               <Box
@@ -527,7 +519,21 @@ const CountryServiceSection = ({ countryData, index, currentLang, animationKey }
                   width: 12,
                   height: 12,
                   borderRadius: '50%',
-                  backgroundColor: countryData.color
+                  backgroundColor: countryData.color,
+                  position: 'relative',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: isVisible ? '24px' : '12px',
+                    height: isVisible ? '24px' : '12px',
+                    borderRadius: '50%',
+                    backgroundColor: alpha(countryData.color, 0.2),
+                    transition: 'all 0.5s ease 0.2s',
+                    zIndex: -1
+                  }
                 }}
               />
               <Typography
@@ -540,7 +546,20 @@ const CountryServiceSection = ({ countryData, index, currentLang, animationKey }
                   pb: 1,
                   flexGrow: 1,
                   textAlign: currentLang === 'AR' ? 'right' : 'left',
-                  direction: currentLang === 'AR' ? 'rtl' : 'ltr'
+                  direction: currentLang === 'AR' ? 'rtl' : 'ltr',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  '&::after': {
+                    content: '""',
+                    position: 'absolute',
+                    bottom: 0,
+                    left: currentLang === 'AR' ? 'auto' : 0,
+                    right: currentLang === 'AR' ? 0 : 'auto',
+                    width: isVisible ? '100%' : '0%',
+                    height: '3px',
+                    backgroundColor: countryData.color,
+                    transition: 'width 1s ease 0.3s'
+                  }
                 }}
               >
                 {service.title}
@@ -562,12 +581,11 @@ const CountryServiceSection = ({ countryData, index, currentLang, animationKey }
               {service.description}
             </Typography>
 
-            {/* المميزات على شكل قائمة - استبدال List بـ Box للتحكم الكامل */}
+            {/* المميزات على شكل قائمة */}
             <Box sx={{ 
               mb: 4,
               direction: currentLang === 'AR' ? 'rtl' : 'ltr'
             }}>
-                {/* <CheckCircle sx={{ color: countryData.color }} /> */}
               <Typography
                 variant="h6"
                 sx={{
@@ -587,10 +605,8 @@ const CountryServiceSection = ({ countryData, index, currentLang, animationKey }
               <Box sx={{ 
                 pl: currentLang === 'AR' ? 0 : 2,
                 pr: currentLang === 'AR' ? 2 : 0,
-                direction: currentLang === 'AR' ? 'rtl' : 'ltr', // تأكيد الاتجاه
-              flexDirection: currentLang === 'AR' ? 'row-reverse' : 'row',
-                  justifyContent: currentLang === 'AR' ? 'flex-end' : 'flex-start'
-             }}>
+                direction: currentLang === 'AR' ? 'rtl' : 'ltr',
+              }}>
                 {service.features.map((feature, featureIdx) => (
                   <Box 
                     key={featureIdx}
@@ -602,37 +618,61 @@ const CountryServiceSection = ({ countryData, index, currentLang, animationKey }
                       mb: 1.5,
                       backgroundColor: alpha(countryData.color, 0.03),
                       borderRadius: 2,
-                      transition: 'all 0.2s ease',
+                      transition: 'all 0.3s ease',
+                      opacity: 0,
+                      animation: isVisible ? `fadeIn 0.5s ease forwards ${featureIdx * 0.1}s` : 'none',
+                      '@keyframes fadeIn': {
+                        'from': {
+                          opacity: 0,
+                          transform: currentLang === 'AR' ? 'translateX(20px)' : 'translateX(-20px)'
+                        },
+                        'to': {
+                          opacity: 1,
+                          transform: 'translateX(0)'
+                        }
+                      },
                       '&:hover': {
                         backgroundColor: alpha(countryData.color, 0.08),
                         transform: currentLang === 'AR' ? 'translateX(-5px)' : 'translateX(5px)',
                         borderLeft: currentLang === 'AR' ? 'none' : `3px solid ${countryData.color}`,
-                        borderRight: currentLang === 'AR' ? `3px solid ${countryData.color}` : 'none'
+                        borderRight: currentLang === 'AR' ? `3px solid ${countryData.color}` : 'none',
+                        boxShadow: `0 5px 15px ${alpha(countryData.color, 0.1)}`
                       },
                       display: 'flex',
                       alignItems: 'flex-start',
-                      gap: 2,
- flexDirection: currentLang === 'AR' ? 'row-reverse' : 'row',
-                  justifyContent: currentLang === 'AR' ? 'flex-end' : 'flex-start'                    }}
+                      gap: 2
+                    }}
                   >
-                    {/* <Circle sx={{ 
-                      fontSize: 10, 
-                      color: countryData.color,
-                      mt: 0.5,
-                      flexShrink: 0,
-                      marginLeft: currentLang === 'AR' ? 0 : undefined,
-                      marginRight: currentLang === 'AR' ? undefined : 0,
-                      
-                    }} /> */}
+                    <Box
+                      sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        backgroundColor: countryData.color,
+                        mt: 1,
+                        flexShrink: 0,
+                        position: 'relative',
+                        '&::after': {
+                          content: '""',
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          width: isVisible ? '16px' : '8px',
+                          height: isVisible ? '16px' : '8px',
+                          borderRadius: '50%',
+                          backgroundColor: alpha(countryData.color, 0.2),
+                          transition: 'all 0.3s ease'
+                        }
+                      }}
+                    />
                     <Typography 
                       sx={{ 
                         color: '#555555',
                         fontSize: '1rem',
                         lineHeight: 1.6,
                         textAlign: currentLang === 'AR' ? 'right' : 'left',
-                        direction: currentLang === 'AR' ? 'rtl' : 'ltr',
-                         flexDirection: currentLang === 'AR' ? 'row-reverse' : 'row',
-                  justifyContent: currentLang === 'AR' ? 'flex-end' : 'flex-start'
+                        direction: currentLang === 'AR' ? 'rtl' : 'ltr'
                       }}
                     >
                       {feature}
@@ -653,7 +693,10 @@ const CountryServiceSection = ({ countryData, index, currentLang, animationKey }
           borderRadius: 2,
           background: `linear-gradient(135deg, ${alpha(countryData.color, 0.08)} 0%, ${alpha('#ffffff', 0.1)} 100%)`,
           border: `1px solid ${alpha(countryData.color, 0.2)}`,
-          textAlign: 'center'
+          textAlign: 'center',
+          opacity: isVisible ? 1 : 0,
+          transform: isVisible ? 'scale(1)' : 'scale(0.9)',
+          transition: 'opacity 0.8s ease 1s, transform 0.8s ease 1s'
         }}
       >
         <Typography variant="h5" sx={{ color: '#1a1a1a', mb: 2, fontWeight: 600 }}>
@@ -678,9 +721,24 @@ const CountryServiceSection = ({ countryData, index, currentLang, animationKey }
             px: 4,
             py: 1.5,
             fontWeight: 600,
+            position: 'relative',
+            overflow: 'hidden',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: '-100%',
+              width: '100%',
+              height: '100%',
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+              transition: 'left 0.5s ease'
+            },
+            '&:hover::before': {
+              left: '100%'
+            },
             '&:hover': {
-              transform: 'translateY(-2px)',
-              boxShadow: `0 10px 30px ${alpha(countryData.color, 0.4)}`
+              transform: 'translateY(-3px)',
+              boxShadow: `0 15px 30px ${alpha(countryData.color, 0.4)}`
             },
             transition: 'all 0.3s'
           }}
@@ -697,10 +755,8 @@ export const Ourservicepage = () => {
   
   const heroRef = useRef(null);
   const titleRef = useRef(null);
-  const statsRef = useRef([]);
-  const [animationKey, setAnimationKey] = useState(0);
-  const titleAnimationRef = useRef(null);
-  const statsAnimationRef = useRef([]);
+  const [heroVisible, setHeroVisible] = useState(false);
+  const [statsVisible, setStatsVisible] = useState(false);
 
   // الحصول على البيانات بناءً على اللغة
   const servicesData = getServicesData(currentLang);
@@ -712,132 +768,59 @@ export const Ourservicepage = () => {
     { key: 'saudi', data: servicesData.saudi }
   ];
 
-  // تحديث animationKey عند تغيير اللغة
+  // Hero animation with Intersection Observer
   useEffect(() => {
-    setAnimationKey(prev => prev + 1);
-  }, [currentLang]);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setHeroVisible(true);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.1
+      }
+    );
 
-  // Hero animation - بدون ScrollTrigger
-  useEffect(() => {
-    // تنظيف الأنيميشن السابقة
-    if (titleAnimationRef.current) {
-      titleAnimationRef.current.kill();
-    }
-
-    // إعادة تعيين العنوان
-    if (titleRef.current) {
-      gsap.set(titleRef.current, {
-        opacity: 1,
-        y: 0,
-        clearProps: "all"
-      });
-
-      // إنشاء أنيميشن جديدة
-      titleAnimationRef.current = gsap.fromTo(titleRef.current,
-        { opacity: 0, y: 100 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1.5,
-          ease: "power3.out"
-        }
-      );
+    if (heroRef.current) {
+      observer.observe(heroRef.current);
     }
 
     return () => {
-      if (titleAnimationRef.current) {
-        titleAnimationRef.current.kill();
+      if (heroRef.current) {
+        observer.unobserve(heroRef.current);
       }
     };
-  }, [currentLang, animationKey]);
+  }, []);
 
   // Stats animation
   useEffect(() => {
-    // تنظيف الأنيميشن السابقة
-    statsAnimationRef.current.forEach(animation => {
-      if (animation) {
-        animation.kill();
-        const trigger = animation.scrollTrigger;
-        if (trigger) trigger.kill();
-      }
-    });
-
-    statsAnimationRef.current = [];
-
-    // إعادة تعيين العناصر الإحصائية
-    statsRef.current.forEach((stat, index) => {
-      if (stat) {
-        gsap.set(stat, {
-          opacity: 1,
-          scale: 1,
-          clearProps: "all"
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setStatsVisible(true);
+            observer.unobserve(entry.target);
+          }
         });
+      },
+      {
+        threshold: 0.2,
+        rootMargin: '50px'
       }
-    });
+    );
 
-    // إنشاء أنيميشن جديدة بعد تأخير لضمان تحديث DOM
-    const timer = setTimeout(() => {
-      statsRef.current.forEach((stat, index) => {
-        if (stat) {
-          // تنظيف أي triggers سابقة
-          const existingTriggers = ScrollTrigger.getAll().filter(t => 
-            t.vars && t.vars.id && t.vars.id.startsWith(`stat-${index}`)
-          );
-          existingTriggers.forEach(t => t.kill());
-
-          const animation = gsap.fromTo(stat,
-            {
-              scale: 0,
-              opacity: 0
-            },
-            {
-              scale: 1,
-              opacity: 1,
-              duration: 0.8,
-              delay: index * 0.2,
-              ease: "back.out(1.7)",
-              scrollTrigger: {
-                trigger: stat,
-                start: "top 90%",
-                toggleActions: "play none none reverse",
-                id: `stat-${index}-${animationKey}` // ID فريد
-              }
-            }
-          );
-          statsAnimationRef.current[index] = animation;
-        }
-      });
-
-      // إعادة حساب جميع الـ ScrollTriggers
-      ScrollTrigger.refresh();
-    }, 100);
+    const statsSection = document.querySelector('.stats-section');
+    if (statsSection) {
+      observer.observe(statsSection);
+    }
 
     return () => {
-      clearTimeout(timer);
-      statsAnimationRef.current.forEach(animation => {
-        if (animation) {
-          animation.kill();
-          const trigger = animation.scrollTrigger;
-          if (trigger) trigger.kill();
-        }
-      });
-    };
-  }, [currentLang, animationKey]);
-
-  // تنظيف شامل عند unmount
-  useEffect(() => {
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-      if (titleAnimationRef.current) {
-        titleAnimationRef.current.kill();
+      if (statsSection) {
+        observer.unobserve(statsSection);
       }
-      statsAnimationRef.current.forEach(animation => {
-        if (animation) {
-          animation.kill();
-          const trigger = animation.scrollTrigger;
-          if (trigger) trigger.kill();
-        }
-      });
     };
   }, []);
 
@@ -860,7 +843,7 @@ export const Ourservicepage = () => {
     <Box sx={{ 
       minHeight: '100vh', 
       bgcolor: '#ffffff',
-      direction: currentLang === 'AR' ? 'rtl' : 'ltr' // إضافة اتجاه الصفحة كاملة
+      direction: currentLang === 'AR' ? 'rtl' : 'ltr'
     }}>
       {/* Hero Section */}
       <Box
@@ -875,7 +858,17 @@ export const Ourservicepage = () => {
           alignItems: 'center',
           justifyContent: 'center',
           overflow: 'hidden',
-          color: 'white'
+          color: 'white',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'linear-gradient(45deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%)',
+            zIndex: 1
+          }
         }}
       >
         <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 2 }}>
@@ -888,7 +881,11 @@ export const Ourservicepage = () => {
                 fontWeight: 800,
                 fontSize: { xs: '2.5rem', md: '3.5rem' },
                 mb: 3,
-                lineHeight: 1.2
+                lineHeight: 1.2,
+                opacity: heroVisible ? 1 : 0,
+                transform: heroVisible ? 'translateY(0)' : 'translateY(50px)',
+                transition: 'opacity 1s ease, transform 1s ease',
+                textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
               }}
             >
               {currentLang === 'AR' ? 'خدماتنا العالمية' : 'Our Global Services'}
@@ -903,7 +900,11 @@ export const Ourservicepage = () => {
                 mb: 4,
                 fontSize: { xs: '1.25rem', md: '1.75rem' },
                 lineHeight: 1.5,
-                fontWeight: 500
+                fontWeight: 500,
+                opacity: heroVisible ? 1 : 0,
+                transform: heroVisible ? 'translateY(0)' : 'translateY(30px)',
+                transition: 'opacity 1s ease 0.3s, transform 1s ease 0.3s',
+                textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
               }}
             >
               {currentLang === 'AR' 
@@ -944,7 +945,7 @@ export const Ourservicepage = () => {
           }}>
             {countries.map((country, index) => (
               <Button
-                key={`${country.key}-${animationKey}`}
+                key={country.key}
                 variant="contained"
                 startIcon={<LocationOn />}
                 onClick={() => scrollToCountry(country.data.title.toLowerCase().replace(/\s+/g, '-'))}
@@ -958,11 +959,38 @@ export const Ourservicepage = () => {
                   textTransform: 'none',
                   minWidth: { xs: '100%', sm: 'auto' },
                   flex: { xs: '1 1 100%', sm: '0 1 auto' },
+                  position: 'relative',
+                  overflow: 'hidden',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: '-100%',
+                    width: '100%',
+                    height: '100%',
+                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                    transition: 'left 0.5s ease'
+                  },
+                  '&:hover::before': {
+                    left: '100%'
+                  },
                   '&:hover': {
                     transform: 'translateY(-3px)',
                     boxShadow: `0 10px 30px ${alpha(country.data.color, 0.4)}`
                   },
-                  transition: 'all 0.3s ease'
+                  transition: 'all 0.3s ease',
+                  animation: `slideIn 0.5s ease forwards ${index * 0.1}s`,
+                  opacity: 0,
+                  '@keyframes slideIn': {
+                    'from': {
+                      opacity: 0,
+                      transform: 'translateY(20px)'
+                    },
+                    'to': {
+                      opacity: 1,
+                      transform: 'translateY(0)'
+                    }
+                  }
                 }}
               >
                 {country.data.title}
@@ -974,6 +1002,7 @@ export const Ourservicepage = () => {
 
       {/* Global Stats */}
       <Box
+        className="stats-section"
         sx={{
           py: 8,
           background: '#f8f9fa',
@@ -987,7 +1016,10 @@ export const Ourservicepage = () => {
               textAlign: 'center',
               mb: 6,
               color: '#1a1a1a',
-              fontWeight: 700
+              fontWeight: 700,
+              opacity: statsVisible ? 1 : 0,
+              transform: statsVisible ? 'translateY(0)' : 'translateY(20px)',
+              transition: 'opacity 0.8s ease, transform 0.8s ease'
             }}
           >
             {currentLang === 'AR' ? 'أرقامنا في العالم' : 'Our Global Numbers'}
@@ -997,17 +1029,19 @@ export const Ourservicepage = () => {
             flexWrap: 'wrap', 
             justifyContent: 'center', 
             gap: 4,
-            direction: 'ltr' // الإحصائيات تبقى بنفس الاتجاه
+            direction: 'ltr'
           }}>
             {statsData.map((stat, index) => (
               <Box
-                key={`${index}-${animationKey}`}
-                ref={el => statsRef.current[index] = el}
+                key={index}
                 sx={{ 
                   textAlign: 'center', 
                   p: 3,
                   flex: '1 1 200px',
-                  maxWidth: '250px'
+                  maxWidth: '250px',
+                  opacity: statsVisible ? 1 : 0,
+                  transform: statsVisible ? 'scale(1)' : 'scale(0.8)',
+                  transition: `opacity 0.5s ease ${index * 0.1}s, transform 0.5s ease ${index * 0.1}s`
                 }}
               >
                 <Box
@@ -1021,10 +1055,31 @@ export const Ourservicepage = () => {
                     justifyContent: 'center',
                     mx: 'auto',
                     mb: 2,
-                    border: `2px solid ${alpha(stat.color, 0.2)}`
+                    border: `2px solid ${alpha(stat.color, 0.2)}`,
+                    animation: statsVisible ? 'rotate 10s linear infinite' : 'none',
+                    '@keyframes rotate': {
+                      'from': {
+                        transform: 'rotate(0deg)'
+                      },
+                      'to': {
+                        transform: 'rotate(360deg)'
+                      }
+                    }
                   }}
                 >
-                  <IconButton sx={{ color: stat.color, fontSize: 32 }}>
+                  <IconButton sx={{ 
+                    color: stat.color, 
+                    fontSize: 32,
+                    animation: statsVisible ? 'bounce 2s ease infinite' : 'none',
+                    '@keyframes bounce': {
+                      '0%, 100%': {
+                        transform: 'translateY(0)'
+                      },
+                      '50%': {
+                        transform: 'translateY(-10px)'
+                      }
+                    }
+                  }}>
                     {stat.icon}
                   </IconButton>
                 </Box>
@@ -1034,7 +1089,11 @@ export const Ourservicepage = () => {
                     color: '#1a1a1a',
                     fontWeight: 800,
                     mb: 1,
-                    fontSize: { xs: '2rem', md: '2.5rem' }
+                    fontSize: { xs: '2rem', md: '2.5rem' },
+                    background: `linear-gradient(45deg, ${stat.color}, ${alpha(stat.color, 0.7)})`,
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    color: 'transparent'
                   }}
                 >
                   {stat.value}
@@ -1052,13 +1111,34 @@ export const Ourservicepage = () => {
       <Container maxWidth="xl" sx={{ py: { xs: 6, md: 8 } }}>
         <Box sx={{ mb: 8, textAlign: 'center' }}>
           <Typography
-            key={`services-title-${animationKey}`}
             variant="h2"
             sx={{
               color: '#1a1a1a',
               mb: 2,
               fontWeight: 800,
-              fontSize: { xs: '2rem', md: '2.5rem' }
+              fontSize: { xs: '2rem', md: '2.5rem' },
+              position: 'relative',
+              display: 'inline-block',
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                bottom: -10,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '100px',
+                height: '4px',
+                backgroundColor: '#2196F3',
+                borderRadius: '2px',
+                animation: 'widthGrow 1.5s ease forwards',
+                '@keyframes widthGrow': {
+                  'from': {
+                    width: '0'
+                  },
+                  'to': {
+                    width: '100px'
+                  }
+                }
+              }
             }}
           >
             {currentLang === 'AR' ? 'خدماتنا في مختلف الدول' : 'Our Services Across Countries'}
@@ -1081,23 +1161,28 @@ export const Ourservicepage = () => {
 
         {/* عرض خدمات كل دولة */}
         {countries.map((country, index) => (
-          <React.Fragment key={`${country.key}-${animationKey}`}>
+          <React.Fragment key={country.key}>
             <CountryServiceSection 
               countryData={country.data} 
               index={index} 
               currentLang={currentLang}
-              animationKey={animationKey}
             />
             {index < countries.length - 1 && (
-              <Divider sx={{ my: 8, borderColor: 'rgba(0, 0, 0, 0.1)' }} />
+              <Divider sx={{ 
+                my: 8, 
+                borderColor: 'rgba(0, 0, 0, 0.1)',
+                opacity: 0,
+                animation: `fadeIn 0.5s ease forwards ${1 + index * 0.5}s`,
+                '@keyframes fadeIn': {
+                  'to': {
+                    opacity: 1
+                  }
+                }
+              }} />
             )}
           </React.Fragment>
         ))}
       </Container>
-
-     
-
-     
     </Box>
   );
 };
