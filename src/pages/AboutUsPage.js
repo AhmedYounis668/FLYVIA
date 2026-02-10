@@ -384,10 +384,11 @@ export const AboutUsPage = ({
       direction: currentLang === 'ar' ? 'rtl' : 'ltr'
     }} ref={pageRef}>
       
-      {/* Hero Section */}
+      {/* Hero Section - المعدل */}
       <Box
         sx={{
-          height: { xs: '50vh', md: '60vh' },
+          height: { xs: 'calc(100vh - 140px)', md: '75vh' },
+          minHeight: { xs: '500px', md: '650px' },
           backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -397,25 +398,37 @@ export const AboutUsPage = ({
           textAlign: 'center',
           color: 'white',
           position: 'relative',
-          mb: 8
+          mb: 8,
+          pt: { xs: '90px', md: '0' },
+          mt: { xs: '-70px', md: '0' }
         }}
       >
         <Container maxWidth="lg">
-          <Box>
+          <Box sx={{ 
+            mt: { xs: 6, md: 0 },
+            transform: { xs: 'translateY(40px)', md: 'translateY(0)' }
+          }}>
             <Typography
               variant={isMobile ? 'h3' : 'h2'}
               sx={{
                 fontWeight: 700,
-                mb: 2,
+                mb: 3,
                 background: 'linear-gradient(45deg, #fff, #2196F3)',
                 WebkitBackgroundClip: 'text',
                 backgroundClip: 'text',
-                color: 'transparent'
+                color: 'transparent',
+                fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem' }
               }}
             >
               {t('heroTitle')}
             </Typography>
-            <Typography variant={isMobile ? 'h6' : 'h5'} sx={{ mb: 4, opacity: 0.9 }}>
+            <Typography variant={isMobile ? 'h6' : 'h5'} sx={{ 
+              mb: 5, 
+              opacity: 0.9,
+              px: { xs: 2, md: 0 },
+              fontSize: { xs: '1.1rem', md: '1.25rem' },
+              lineHeight: 1.6
+            }}>
               {t('heroSubtitle')}
             </Typography>
             <Button
@@ -425,15 +438,17 @@ export const AboutUsPage = ({
               startIcon={<ArrowBackIcon sx={{ transform: currentLang === 'ar' ? 'scaleX(-1)' : 'none' }} />}
               onClick={goToHome}
               sx={{
-                px: 4,
-                py: 1.5,
-                borderRadius: '25px',
+                px: 5,
+                py: 1.8,
+                borderRadius: '30px',
                 fontWeight: 600,
+                fontSize: '1rem',
                 '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: 4
+                  transform: 'translateY(-3px)',
+                  boxShadow: '0 10px 25px rgba(33, 150, 243, 0.4)'
                 },
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s ease',
+                mt: { xs: 3, md: 0 }
               }}
             >
               {t('backToHome')}

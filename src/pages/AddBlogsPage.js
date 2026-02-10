@@ -183,7 +183,7 @@ const AddBlogsPage = () => {
 
       // API call
       await axios.post(
-        'http://localhost:8000/api/v1/blogs',
+        'https://apirender-3.onrender.com/api/v1/blogs',
         formData,
         {
           headers: {

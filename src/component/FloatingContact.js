@@ -2,18 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   FaWhatsapp, 
   FaPhone, 
-  FaTimes,
-  FaPaperPlane,
   FaBell,
-  FaGlobe,
-  FaExchangeAlt,
-  FaLanguage
+  FaArrowUp
 } from 'react-icons/fa';
-import gsap from 'gsap';
-import ScrollTrigger from 'gsap/ScrollTrigger'; // أضف هذا السطر
-import { useLanguage } from './LanguageProvider';
-
-gsap.registerPlugin(ScrollTrigger); // سجل الـ plugin
 
 export const FloatingContact = () => {
   const [showForm, setShowForm] = useState(false);
@@ -26,15 +17,15 @@ export const FloatingContact = () => {
   const [showNotification, setShowNotification] = useState(true);
   const [pulseAnimation, setPulseAnimation] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  const [isSwitchingLang, setIsSwitchingLang] = useState(false);
+  const [buttonsVisible, setButtonsVisible] = useState(false);
+  const [formVisible, setFormVisible] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
   
   const containerRef = useRef(null);
   const whatsappBtnRef = useRef(null);
   const callBtnRef = useRef(null);
+  const backToTopRef = useRef(null);
   const formRef = useRef(null);
-  const langBtnRef = useRef(null);
-
-  const { currentLang, changeLanguage } = useLanguage();
 
   const phoneNumber = "+201234567890";
   const whatsappNumber = "+201234567890";
@@ -52,16 +43,51 @@ export const FloatingContact = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Show buttons with delay
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setButtonsVisible(true);
+    }, 1000); // تأخير 1 ثانية
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Handle scroll for back to top button
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowBackToTop(true);
+      } else {
+        setShowBackToTop(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Handle form visibility
+  useEffect(() => {
+    if (showForm) {
+      setFormVisible(true);
+    } else {
+      const timer = setTimeout(() => {
+        setFormVisible(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [showForm]);
+
   const handleWhatsAppClick = () => {
     const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
     window.open(url, '_blank');
     
-    gsap.to(whatsappBtnRef.current, {
-      scale: 0.8,
-      duration: 0.1,
-      yoyo: true,
-      repeat: 1
-    });
+    if (whatsappBtnRef.current) {
+      whatsappBtnRef.current.classList.add('click-animation');
+      setTimeout(() => {
+        whatsappBtnRef.current.classList.remove('click-animation');
+      }, 300);
+    }
     
     setShowNotification(false);
   };
@@ -69,12 +95,26 @@ export const FloatingContact = () => {
   const handleCallClick = () => {
     window.location.href = `tel:${phoneNumber}`;
     
-    gsap.to(callBtnRef.current, {
-      scale: 0.8,
-      duration: 0.1,
-      yoyo: true,
-      repeat: 1
+    if (callBtnRef.current) {
+      callBtnRef.current.classList.add('click-animation');
+      setTimeout(() => {
+        callBtnRef.current.classList.remove('click-animation');
+      }, 300);
+    }
+  };
+
+  const handleBackToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
     });
+    
+    if (backToTopRef.current) {
+      backToTopRef.current.classList.add('click-animation');
+      setTimeout(() => {
+        backToTopRef.current.classList.remove('click-animation');
+      }, 300);
+    }
   };
 
   const handleFormSubmit = (e) => {
@@ -89,11 +129,6 @@ export const FloatingContact = () => {
     
     setTimeout(() => {
       console.log('Quick form submitted:', formData);
-      
-      gsap.fromTo('.quick-success-message',
-        { y: -20, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.6, ease: 'back.out(1.7)' }
-      );
       
       setIsSubmitting(false);
       setShowForm(false);
@@ -113,176 +148,12 @@ export const FloatingContact = () => {
     }));
   };
 
-  // ========== دالة تبديل اللغة بدون reload ==========
-  const toggleLanguage = () => {
-    if (isSwitchingLang) return;
-    
-    const newLang = currentLang === 'EN' ? 'AR' : 'EN';
-    
-    setIsSwitchingLang(true);
-    
-    // تنظيف GSAP animations قبل التغيير
-    if (ScrollTrigger) {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    }
-    gsap.globalTimeline.clear();
-    
-    // حفظ اللغة الجديدة في localStorage
-    localStorage.setItem('appLanguage', newLang);
-    
-    // Animation للزر
-    if (langBtnRef.current) {
-      gsap.to(langBtnRef.current, {
-        rotation: 360,
-        scale: 1.2,
-        duration: 0.3,
-        ease: 'back.out(1.7)',
-        onComplete: () => {
-          // تغيير direction بدون reload
-          if (newLang === 'AR') {
-            document.documentElement.dir = 'rtl';
-            document.documentElement.lang = 'ar';
-            document.body.classList.add('rtl');
-            document.body.classList.remove('ltr');
-          } else {
-            document.documentElement.dir = 'ltr';
-            document.documentElement.lang = 'en';
-            document.body.classList.add('ltr');
-            document.body.classList.remove('rtl');
-          }
-          
-          // تغيير اللغة
-          changeLanguage(newLang);
-          
-          // إرسال حدث لتحديث الصفحة
-          window.dispatchEvent(new CustomEvent('languageChanged', { detail: newLang }));
-          
-          // إعادة تحميل الـ ScrollTrigger بعد تغيير اللغة
-          setTimeout(() => {
-            if (ScrollTrigger) {
-              ScrollTrigger.refresh();
-            }
-            setIsSwitchingLang(false);
-          }, 300);
-        }
-      });
-    } else {
-      // تغيير direction بدون reload
-      if (newLang === 'AR') {
-        document.documentElement.dir = 'rtl';
-        document.documentElement.lang = 'ar';
-        document.body.classList.add('rtl');
-        document.body.classList.remove('ltr');
-      } else {
-        document.documentElement.dir = 'ltr';
-        document.documentElement.lang = 'en';
-        document.body.classList.add('ltr');
-        document.body.classList.remove('rtl');
-      }
-      
-      changeLanguage(newLang);
-      
-      window.dispatchEvent(new CustomEvent('languageChanged', { detail: newLang }));
-      
-      setTimeout(() => {
-        if (ScrollTrigger) {
-          ScrollTrigger.refresh();
-        }
-        setIsSwitchingLang(false);
-      }, 300);
-    }
-  };
-
-  // GSAP Animations
+  // Pulse animation toggle
   useEffect(() => {
-    // Adjust animation based on screen size
-    const fromY = isMobile ? -100 : 100;
-    
-    const tl = gsap.timeline({ delay: 1 });
-    
-    // Animation للأزرار الأساسية
-    tl.fromTo(whatsappBtnRef.current,
-      {
-        y: fromY,
-        opacity: 0,
-        rotation: isMobile ? -180 : 180,
-        scale: 0
-      },
-      {
-        y: 0,
-        opacity: 1,
-        rotation: 0,
-        scale: 1,
-        duration: 0.8,
-        ease: 'back.out(1.7)'
-      }
-    )
-    .fromTo(callBtnRef.current,
-      {
-        y: fromY,
-        opacity: 0,
-        rotation: isMobile ? 180 : -180,
-        scale: 0
-      },
-      {
-        y: 0,
-        opacity: 1,
-        rotation: 0,
-        scale: 1,
-        duration: 0.8,
-        ease: 'back.out(1.7)'
-      },
-      '-=0.5'
-    );
-
-    // ========== Animation لزر اللغة في الموبايل فقط ==========
-    if (isMobile && langBtnRef.current) {
-      gsap.fromTo(langBtnRef.current,
-        {
-          y: fromY,
-          opacity: 0,
-          rotation: 90,
-          scale: 0
-        },
-        {
-          y: 0,
-          opacity: 1,
-          rotation: 0,
-          scale: 1,
-          duration: 0.8,
-          delay: 0.2,
-          ease: 'back.out(1.7)'
-        }
-      );
-    }
-    // =========================================================
-
-    // Form animation
-    if (showForm && formRef.current) {
-      gsap.fromTo(formRef.current,
-        {
-          x: isMobile ? 0 : 100,
-          y: isMobile ? 100 : 0,
-          opacity: 0,
-          scale: 0.8
-        },
-        {
-          x: 0,
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          duration: 0.5,
-          ease: 'back.out(1.7)'
-        }
-      );
-    }
-
-    // Pulse animation toggle
     const pulseInterval = setInterval(() => {
       setPulseAnimation(prev => !prev);
     }, 4000);
 
-    // Auto-hide notification after 30 seconds
     const notificationTimeout = setTimeout(() => {
       setShowNotification(false);
     }, 30000);
@@ -291,29 +162,31 @@ export const FloatingContact = () => {
       clearInterval(pulseInterval);
       clearTimeout(notificationTimeout);
     };
-  }, [showForm, isMobile]);
-
-  // Handle form close animation
-  useEffect(() => {
-    if (!showForm && formRef.current) {
-      gsap.to(formRef.current, {
-        x: isMobile ? 0 : 100,
-        y: isMobile ? 100 : 0,
-        opacity: 0,
-        duration: 0.3,
-        ease: 'power2.in'
-      });
-    }
-  }, [showForm, isMobile]);
+  }, []);
 
   return (
     <>
       {/* Floating Buttons Container */}
       <div className={`floating-contact-container ${isMobile ? 'mobile-view' : ''}`} ref={containerRef}>
+        {/* Back to Top Button - Desktop (فوق الأزرار) */}
+        {!isMobile && showBackToTop && (
+          <button
+            ref={backToTopRef}
+            className="floating-btn back-to-top-btn"
+            onClick={handleBackToTop}
+            aria-label="Back to top"
+          >
+            <FaArrowUp />
+            <span className="floating-tooltip">
+              Back to top
+            </span>
+          </button>
+        )}
+
         {/* WhatsApp Button */}
         <button
           ref={whatsappBtnRef}
-          className={`floating-btn whatsapp-btn ${pulseAnimation ? 'pulse' : ''}`}
+          className={`floating-btn whatsapp-btn ${buttonsVisible ? 'visible' : ''} ${pulseAnimation ? 'pulse' : ''}`}
           onClick={handleWhatsAppClick}
           aria-label="Contact via WhatsApp"
         >
@@ -331,7 +204,7 @@ export const FloatingContact = () => {
         {/* Call Button */}
         <button
           ref={callBtnRef}
-          className={`floating-btn call-btn ${pulseAnimation ? 'pulse' : ''}`}
+          className={`floating-btn call-btn ${buttonsVisible ? 'visible' : ''} ${pulseAnimation ? 'pulse' : ''}`}
           onClick={handleCallClick}
           aria-label="Call us"
         >
@@ -341,31 +214,387 @@ export const FloatingContact = () => {
           </span>
         </button>
 
-        {/* ========== زر تبديل اللغة البسيط للشاشات الصغيرة فقط ========== */}
-        {isMobile && (
+        {/* Back to Top Button - Mobile (مع الأزرار) */}
+        {isMobile && showBackToTop && (
           <button
-            ref={langBtnRef}
-            className="floating-lang-toggle"
-            onClick={toggleLanguage}
-            disabled={isSwitchingLang}
+            ref={backToTopRef}
+            className={`floating-btn back-to-top-btn ${buttonsVisible ? 'visible' : ''}`}
+            onClick={handleBackToTop}
+            aria-label="Back to top"
           >
-            <div className="lang-toggle-inner">
-              <span className="toggle-text">
-                {currentLang === 'EN' ? 'EN' : 'AR'}
-                <FaExchangeAlt className="toggle-icon" />
-                {currentLang === 'EN' ? 'AR' : 'EN'}
-              </span>
-            </div>
-            
+            <FaArrowUp />
             <span className="floating-tooltip">
-              Switch language
+              Back to top
             </span>
           </button>
         )}
-        {/* ============================================================== */}
       </div>
 
-     
+      <style jsx>{`
+        /* Base Styles - Desktop */
+        .floating-contact-container {
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          z-index: 1000;
+          display: flex;
+          flex-direction: column-reverse; /* لجعل زر Back to Top فوق */
+          gap: 15px;
+          align-items: flex-end;
+        }
+        
+        /* Mobile Styles - الأيقونات جنبًا إلى جنب */
+        .floating-contact-container.mobile-view {
+          bottom: 20px;
+          right: 20px;
+          flex-direction: row; /* تغيير إلى row لجعل الأيقونات جنبًا إلى جنب */
+          gap: 10px;
+          align-items: center;
+        }
+        
+        /* Floating Buttons */
+        .floating-btn {
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 24px;
+          color: white;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+          transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+          position: relative;
+          opacity: 0;
+          transform: translateY(100px) rotate(180deg) scale(0);
+        }
+        
+        .floating-btn.visible {
+          opacity: 1;
+          transform: translateY(0) rotate(0) scale(1);
+          animation: floatIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+        
+        /* Back to Top Button */
+        .back-to-top-btn {
+          background: linear-gradient(135deg, #8B5CF6, #7C3AED); /* لون أرجواني */
+          animation-delay: 0.1s;
+        }
+        
+        .back-to-top-btn:hover {
+          background: linear-gradient(135deg, #7C3AED, #8B5CF6);
+          transform: translateY(-5px) scale(1.1);
+          box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+        }
+        
+        /* WhatsApp Button */
+        .whatsapp-btn {
+          background: linear-gradient(135deg, #25D366, #128C7E);
+          animation-delay: 0.2s;
+        }
+        
+        .whatsapp-btn:hover {
+          background: linear-gradient(135deg, #128C7E, #25D366);
+          transform: translateY(-5px) scale(1.1);
+          box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4);
+        }
+        
+        /* Call Button */
+        .call-btn {
+          background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+          animation-delay: 0.3s;
+        }
+        
+        .call-btn:hover {
+          background: linear-gradient(135deg, #1D4ED8, #3B82F6);
+          transform: translateY(-5px) scale(1.1);
+          box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+        
+        /* Mobile view adjustments */
+        .mobile-view .floating-btn {
+          width: 55px;
+          height: 55px;
+          font-size: 22px;
+          transform: translateY(100px) rotate(180deg) scale(0);
+        }
+        
+        .mobile-view .floating-btn.visible {
+          transform: translateY(0) rotate(0) scale(1);
+        }
+        
+        /* تأخير ظهور الأيقونات في الموبايل */
+        .mobile-view .call-btn.visible {
+          animation-delay: 0.2s;
+        }
+        
+        .mobile-view .back-to-top-btn.visible {
+          animation-delay: 0.3s;
+        }
+        
+        /* Pulse Animation */
+        .floating-btn.pulse::before {
+          content: '';
+          position: absolute;
+          top: -10px;
+          left: -10px;
+          right: -10px;
+          bottom: -10px;
+          border-radius: 50%;
+          border: 2px solid;
+          opacity: 0;
+          animation: pulseRing 4s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        
+        .whatsapp-btn.pulse::before {
+          border-color: #25D366;
+        }
+        
+        .call-btn.pulse::before {
+          border-color: #3B82F6;
+        }
+        
+        .back-to-top-btn.pulse::before {
+          border-color: #8B5CF6;
+        }
+        
+        /* Click Animation */
+        .click-animation {
+          animation: clickEffect 0.3s ease;
+        }
+        
+        /* Tooltip */
+        .floating-tooltip {
+          position: absolute;
+          right: 70px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: rgba(0, 0, 0, 0.8);
+          color: white;
+          padding: 8px 15px;
+          border-radius: 4px;
+          font-size: 14px;
+          white-space: nowrap;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.3s ease;
+          z-index: 1001;
+        }
+        
+        .floating-btn:hover .floating-tooltip {
+          opacity: 1;
+        }
+        
+        /* Mobile tooltip - أعلى الأيقونة */
+        .mobile-view .floating-tooltip {
+          right: auto;
+          left: 50%;
+          top: -45px;
+          transform: translateX(-50%);
+          white-space: nowrap;
+          text-align: center;
+        }
+        
+        /* Notification Badge */
+        .notification-badge {
+          position: absolute;
+          top: -5px;
+          right: -5px;
+          background: #FF6B6B;
+          color: white;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          font-size: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          animation: bounce 2s ease infinite;
+        }
+        
+        /* Keyframe Animations */
+        @keyframes floatIn {
+          0% {
+            opacity: 0;
+            transform: translateY(100px) rotate(180deg) scale(0);
+          }
+          70% {
+            transform: translateY(-10px) rotate(-10deg) scale(1.1);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) rotate(0) scale(1);
+          }
+        }
+        
+        @keyframes pulseRing {
+          0% {
+            transform: scale(0.5);
+            opacity: 0;
+          }
+          25% {
+            opacity: 0.5;
+          }
+          50% {
+            transform: scale(1.2);
+            opacity: 0;
+          }
+          100% {
+            transform: scale(1.4);
+            opacity: 0;
+          }
+        }
+        
+        @keyframes clickEffect {
+          0% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(0.8);
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
+        
+        @keyframes bounce {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-5px);
+          }
+        }
+        
+        /* Back to Top Button Entrance Animation */
+        @keyframes slideInFromBottom {
+          0% {
+            opacity: 0;
+            transform: translateY(50px) scale(0.8);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        
+        .back-to-top-btn {
+          animation: slideInFromBottom 0.4s ease-out forwards;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 480px) {
+          .floating-contact-container.mobile-view {
+            bottom: 15px;
+            right: 15px;
+            gap: 8px;
+          }
+          
+          .mobile-view .floating-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+          }
+          
+          .mobile-view .floating-tooltip {
+            font-size: 12px;
+            padding: 6px 10px;
+            top: -40px;
+          }
+          
+          .notification-badge {
+            width: 18px;
+            height: 18px;
+            font-size: 9px;
+          }
+          
+          /* إخفاء زر Back to Top إذا كان هناك أكثر من 3 أزرار وشاشة صغيرة جدًا */
+          @media (max-width: 350px) {
+            .floating-contact-container.mobile-view {
+              gap: 6px;
+            }
+            
+            .mobile-view .floating-btn {
+              width: 45px;
+              height: 45px;
+              font-size: 18px;
+            }
+            
+            .mobile-view .floating-tooltip {
+              display: none; /* إخفاء الـ tooltip في الشاشات الصغيرة جدًا */
+            }
+          }
+        }
+        
+        @media (max-width: 360px) {
+          .floating-contact-container.mobile-view {
+            bottom: 10px;
+            right: 10px;
+            gap: 6px;
+          }
+          
+          .mobile-view .floating-btn {
+            width: 45px;
+            height: 45px;
+            font-size: 18px;
+          }
+          
+          .mobile-view .floating-tooltip {
+            font-size: 11px;
+            padding: 5px 8px;
+            top: -35px;
+          }
+        }
+        
+        /* Small devices - مثل iPhone SE */
+        @media (max-width: 320px) {
+          .floating-contact-container.mobile-view {
+            bottom: 8px;
+            right: 8px;
+            gap: 5px;
+          }
+          
+          .mobile-view .floating-btn {
+            width: 42px;
+            height: 42px;
+            font-size: 17px;
+          }
+          
+          .mobile-view .back-to-top-btn {
+            display: none; /* إخفاء زر Back to Top في الشاشات الصغيرة جدًا */
+          }
+        }
+        
+        /* تحسين لشاشات كبيرة لكن في وضع mobile (عرض بين 768 و 1024) */
+        @media (min-width: 769px) and (max-width: 1024px) {
+          .floating-btn {
+            width: 65px;
+            height: 65px;
+            font-size: 26px;
+          }
+          
+          .floating-tooltip {
+            font-size: 15px;
+            padding: 10px 18px;
+          }
+        }
+        
+        /* تحسين لشاشات كبيرة جدًا */
+        @media (min-width: 1440px) {
+          .floating-contact-container {
+            bottom: 30px;
+            right: 30px;
+          }
+          
+          .floating-btn {
+            width: 70px;
+            height: 70px;
+            font-size: 28px;
+          }
+        }
+      `}</style>
     </>
   );
 };

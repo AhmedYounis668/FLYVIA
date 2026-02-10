@@ -197,7 +197,7 @@ export const AdminAllblogs = () => {
       console.log('Fixing undefined/ prefix')
       // إزالة "undefined/" من البداية
       const cleanUrl = url.replace(/^undefined\//, '')
-      const fullUrl = `http://localhost:8000/${cleanUrl}`
+      const fullUrl = `https://apirender-3.onrender.com/${cleanUrl}`
       console.log('Fixed URL:', fullUrl)
       return fullUrl
     }
@@ -216,13 +216,13 @@ export const AdminAllblogs = () => {
       
       // إذا كان يبدأ بـ "/" فهو مسار مطلق
       if (cleanUrl.startsWith('/')) {
-        const fullUrl = `http://localhost:8000${cleanUrl}`
+        const fullUrl = `https://apirender-3.onrender.com${cleanUrl}`
         console.log('Fixed to absolute path:', fullUrl)
         return fullUrl
       }
       
       // وإلا فهو مسار نسبي
-      const fullUrl = `http://localhost:8000/${cleanUrl}`
+      const fullUrl = `https://apirender-3.onrender.com/${cleanUrl}`
       console.log('Fixed to relative path:', fullUrl)
       return fullUrl
     }
@@ -234,12 +234,12 @@ export const AdminAllblogs = () => {
     }
     
     if (url.startsWith('/')) {
-      const fullUrl = `http://localhost:8000${url}`
+      const fullUrl = `https://apirender-3.onrender.com${url}`
       console.log('Absolute path to full URL:', fullUrl)
       return fullUrl
     }
     
-    const fullUrl = `http://localhost:8000/${url}`
+    const fullUrl = `https://apirender-3.onrender.com/${url}`
     console.log('Relative path to full URL:', fullUrl)
     return fullUrl
   }

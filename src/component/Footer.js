@@ -398,7 +398,7 @@ export const Footer = () => {
         </Container>
       </footer>
 
-      <button
+      {/* <button
         ref={backToTopRef}
         className={`back-to-top ${showBackToTop ? 'visible' : ''}`}
         onClick={scrollToTop}
@@ -406,7 +406,7 @@ export const Footer = () => {
         title={t('backToTop')}
       >
         <FaChevronUp />
-      </button>
+      </button> */}
 
       <style jsx>{`
         .footer {

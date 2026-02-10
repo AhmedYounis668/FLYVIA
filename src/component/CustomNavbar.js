@@ -1,19 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import logo from '../Images/Flyvia Logo.png';
-import { FaGlobe, FaTimes } from 'react-icons/fa';
+import { FaGlobe } from 'react-icons/fa';
 import { useLanguage } from '../component/LanguageProvider';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Navbar, Nav, Container, Offcanvas, Button } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 export const CustomNavbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeItem, setActiveItem] = useState('home');
   const [scrolled, setScrolled] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   
   const { currentLang, changeLanguage } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   
-  // ترجمات عناصر الـ navbar
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
   const navTranslations = {
     en: {
       home: 'Home',
@@ -31,7 +44,6 @@ export const CustomNavbar = () => {
     }
   };
 
-  // الحصول على الترجمة المناسبة للعنصر
   const getNavText = (key) => {
     return navTranslations[currentLang]?.[key] || navTranslations.en[key];
   };
@@ -44,7 +56,6 @@ export const CustomNavbar = () => {
     { id: 'contact', path: '/#contact', nameKey: 'contact' }
   ];
 
-  // تحقق من التمرير
   useEffect(() => {
     const handleScroll = () => {
       const isScrolled = window.scrollY > 50;
@@ -67,15 +78,18 @@ export const CustomNavbar = () => {
   }, [location]);
 
   const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
+    if (isMobile) {
+      setMenuOpen(!menuOpen);
+    }
   };
 
   const handleNavigation = (path, id) => {
     setActiveItem(id);
-    setMenuOpen(false);
+    if (isMobile) {
+      setMenuOpen(false);
+    }
     
     if (path === '/#contact') {
-      // إذا كان الرابط إلى contact، انتقل إلى القسم المحدد
       if (location.pathname === '/') {
         const contactSection = document.getElementById('contact');
         if (contactSection) {
@@ -98,7 +112,6 @@ export const CustomNavbar = () => {
   const handleLanguageChange = (lang) => {
     changeLanguage(lang);
     
-    // عند تغيير اللغة، قم بتحديث اتجاه الصفحة
     if (lang === 'ar') {
       document.documentElement.setAttribute('dir', 'rtl');
       document.documentElement.setAttribute('lang', 'ar');
@@ -108,7 +121,6 @@ export const CustomNavbar = () => {
     }
   };
 
-  // دعم RTL/LTR بناءً على اللغة
   useEffect(() => {
     if (currentLang === 'ar') {
       document.documentElement.setAttribute('dir', 'rtl');
@@ -121,121 +133,176 @@ export const CustomNavbar = () => {
 
   return (
     <>
-      <nav className={`simple-navbar ${scrolled ? 'scrolled' : ''} ${currentLang === 'ar' ? 'rtl' : 'ltr'}`}>
-        <div className="nav-container">
-          <div className="nav-logo" onClick={() => handleNavigation('/', 'home')}>
+      <Navbar 
+        expand="lg" 
+        fixed="top"
+        className={`simple-navbar ${scrolled ? 'scrolled' : ''} ${currentLang === 'ar' ? 'rtl' : 'ltr'}`}
+        style={{
+          marginTop: '20px',
+          marginLeft: '20px',
+          marginRight: '20px',
+          borderRadius: '15px'
+        }}
+      >
+        <Container fluid className="nav-container">
+          {/* اللوجو */}
+          <Navbar.Brand 
+            className="nav-logo" 
+            onClick={() => handleNavigation('/', 'home')}
+            style={{ cursor: 'pointer' }}
+          >
             <img 
               src={logo} 
               alt="FLYVIA" 
               className="logo-img"
             />
-          </div>
+          </Navbar.Brand>
           
-          <div className={`nav-menu ${menuOpen ? 'open' : ''}`} style={{zIndex: 10000}}>
-            {/* Mobile Header مع اللوجو وزر الإغلاق */}
-            <div className="mobile-menu-header" style={{zIndex: 10000}}>
-              <div className="mobile-logo" onClick={() => handleNavigation('/', 'home')}>
-                <img 
-                  src={logo} 
-                  alt="FLYVIA" 
-                  className="mobile-logo-img"
-                />
+          {/* Desktop Navigation */}
+          <Navbar.Collapse id="navbar-nav">
+            <Nav className="nav-desktop-menu">
+              {navItems.map((item) => (
+                <Nav.Link
+                  key={item.id}
+                  href="#"
+                  className={`nav-link ${activeItem === item.id ? 'active' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigation(item.path, item.id);
+                  }}
+                >
+                  {getNavText(item.nameKey)}
+                </Nav.Link>
+              ))}
+              
+              <div className="language-selector">
+                <button
+                  onClick={() => handleLanguageChange(currentLang === 'en' ? 'ar' : 'en')}
+                  className="lang-btn"
+                >
+                  <FaGlobe />
+                  <span>{currentLang === 'en' ? 'العربية' : 'English'}</span>
+                </button>
               </div>
-             <button className="mobile-close-btn blue-gradient-close" onClick={toggleMenu}>
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 6L6 18" stroke="url(#gradient1)" strokeWidth="2" strokeLinecap="round"/>
-    <path d="M6 6L18 18" stroke="url(#gradient1)" strokeWidth="2" strokeLinecap="round"/>
-    <defs>
-      <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#3B82F6" />
-        <stop offset="100%" stopColor="#1D4ED8" />
-      </linearGradient>
-    </defs>
-  </svg>
-</button>
-            </div>
-            
-            {navItems.map((item) => (
-              <a
-                key={item.id}
-                href="#"
-                className={`nav-link ${activeItem === item.id ? 'active' : ''}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavigation(item.path, item.id);
-                }}
-              >
-                {getNavText(item.nameKey)}
-              </a>
-            ))}
-            
-            <div className="language-selector">
-              <button
-                onClick={() => handleLanguageChange(currentLang === 'en' ? 'ar' : 'en')}
-                className="lang-btn"
-              >
-                <FaGlobe />
-                <span>{currentLang === 'en' ? 'العربية' : 'English'}</span>
-              </button>
-            </div>
-          </div>
+            </Nav>
+          </Navbar.Collapse>
           
-          <button className={`hamburger ${menuOpen ? 'active' : ''}`} onClick={toggleMenu}>
+          {/* Mobile Toggle */}
+          <button 
+            className={`hamburger ${menuOpen ? 'active' : ''}`}
+            onClick={toggleMenu}
+            style={{ display: isMobile ? 'flex' : 'none' }}
+          >
             <span></span>
             <span></span>
             <span></span>
           </button>
-        </div>
-      </nav>
+        </Container>
+      </Navbar>
+      
+      {/* Mobile Offcanvas Menu */}
+      {isMobile && (
+        <Offcanvas
+          show={menuOpen}
+          onHide={() => setMenuOpen(false)}
+          placement={currentLang === 'ar' ? 'end' : 'start'}
+          className="mobile-menu-offcanvas"
+        >
+          <Offcanvas.Header className="mobile-menu-header">
+            <Offcanvas.Title className="mobile-logo">
+              <img 
+                src={logo} 
+                alt="FLYVIA" 
+                className="mobile-logo-img"
+              />
+            </Offcanvas.Title>
+            <button className="mobile-close-btn" onClick={() => setMenuOpen(false)}>
+              ✕
+            </button>
+          </Offcanvas.Header>
+          
+          <Offcanvas.Body className="mobile-menu-body">
+            <Nav className="flex-column w-100">
+              {navItems.map((item) => (
+                <Nav.Link
+                  key={item.id}
+                  href="#"
+                  className={`mobile-nav-link ${activeItem === item.id ? 'active' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigation(item.path, item.id);
+                  }}
+                >
+                  <span className="mobile-nav-text">{getNavText(item.nameKey)}</span>
+                  {activeItem === item.id && <span className="mobile-nav-indicator">●</span>}
+                </Nav.Link>
+              ))}
+              
+              <div className="mobile-language-selector mt-4">
+                <Button
+                  onClick={() => handleLanguageChange(currentLang === 'en' ? 'ar' : 'en')}
+                  className="mobile-lang-btn w-100"
+                >
+                  <FaGlobe />
+                  <span>{currentLang === 'en' ? 'العربية' : 'English'}</span>
+                </Button>
+              </div>
+            </Nav>
+          </Offcanvas.Body>
+        </Offcanvas>
+      )}
 
       <style>{`
-        /* Navbar ارتفاع منخفض */
+        /* Navbar الأساسي */
         .simple-navbar {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 60px; /* ارتفاع منخفض */
-          background: transparent; /* شفاف في البداية */
-          z-index: 1000;
-          transition: all 0.3s ease;
-          display: flex;
-          align-items: center;
+          height: 70px !important;
+          background: transparent !important;
+          transition: all 0.3s ease !important;
+          padding: 0 !important;
+          max-width: calc(100% - 20px) !important;
+          margin: 10px auto !important;
+          border-radius: 15px !important;
         }
         
-        /* عندما يبدأ التمرير */
         .simple-navbar.scrolled {
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(10px);
-          box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-          height: 65px; /* ارتفاع أكثر قليلاً بعد التمرير */
+          background: rgba(255, 255, 255, 0.95) !important;
+          backdrop-filter: blur(10px) !important;
+          box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
         }
         
+        .simple-navbar:not(.scrolled) {
+          background: rgba(0, 0, 0, 0.2) !important;
+          backdrop-filter: blur(2px) !important;
+        }
+        
+        /* الحاوية - هنا المساواة */
         .nav-container {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          width: 100%;
-          max-width: 1200px;
+          max-width: 1400px;
           margin: 0 auto;
-          padding: 0 20px;
+          padding: 0 25px !important;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: space-between; /* هنا space between */
+          width: 100%;
         }
         
-        /* تحسينات اللوجو */
+        /* اللوجو */
         .nav-logo {
+          padding: 0 !important;
+          margin: 0 !important;
           cursor: pointer;
-          z-index: 1001;
-          transition: transform 0.3s ease;
           display: flex;
           align-items: center;
-          height: 60px;
+          height: 100%;
+          flex-shrink: 0;
         }
         
         .logo-img {
-          width: 100px;
-          height: auto;
-          max-height: 100px;
-          object-fit: contain;
+          height: 105px !important;
+          width: auto !important;
+          max-width: 250px !important;
+          object-fit: contain !important;
           transition: all 0.3s ease;
         }
         
@@ -243,36 +310,53 @@ export const CustomNavbar = () => {
           transform: scale(1.05);
         }
         
-        /* الروابط في حالة شفافية */
-        .nav-menu {
+        /* قائمة التنقل للديسكتوب */
+        .navbar-collapse {
+          flex-grow: 0 !important; /* مهم: لا تأخذ كل المساحة */
+        }
+        
+        .nav-desktop-menu {
           display: flex;
-          gap: 30px;
           align-items: center;
+          gap: 30px;
+          height: 100%;
         }
         
-        /* دعم RTL للقائمة */
-        .simple-navbar.rtl .nav-menu {
-          flex-direction: row-reverse;
+        /* الإنجليزية: اللينكات على اليمين */
+        .simple-navbar:not(.rtl) .nav-desktop-menu {
+          justify-content: flex-end;
+          flex-direction: row;
         }
         
+        /* العربية: اللينكات على اليسار */
+        .simple-navbar.rtl .nav-desktop-menu {
+          justify-content: flex-start;
+          flex-direction: row;
+        }
+        
+        /* الروابط */
         .nav-link {
           text-decoration: none;
-          color: ${scrolled ? '#333' : 'white'}; /* أبيض في البداية، أسود بعد التمرير */
+          color: var(--nav-link-color, white);
           font-weight: 500;
-          font-size: 14px; /* خط أصغر */
-          padding: 5px 0;
+          font-size: 15px;
+          padding: 5px 0 !important;
           position: relative;
           transition: all 0.3s ease;
           font-family: ${currentLang === 'ar' ? "'Cairo', 'Noto Sans Arabic', sans-serif" : "'Nunito', sans-serif"};
+          background: transparent !important;
+          border: none !important;
+          white-space: nowrap;
         }
         
         .nav-link:hover {
-          color: #e83e8c;
+          color: #e83e8c !important;
           transform: translateY(-1px);
         }
         
+        /* العنصر النشط فقط يكون تحته خط */
         .nav-link.active {
-          color: #e83e8c;
+          color: #e83e8c !important;
           font-weight: 600;
         }
         
@@ -285,270 +369,420 @@ export const CustomNavbar = () => {
           height: 2px;
           background: #e83e8c;
           transform: scaleX(1);
-          transition: transform 0.3s ease;
         }
         
-        .simple-navbar.rtl .nav-link.active::after {
-          left: 0;
-          right: 0;
+        /* العناصر غير النشطة بدون خط */
+        .nav-link:not(.active)::after {
+          display: none;
         }
         
         /* زر اللغة */
+        .language-selector {
+          display: flex;
+          align-items: center;
+          margin-left: 20px;
+        }
+        
+        .simple-navbar.rtl .language-selector {
+          margin-left: 0;
+          margin-right: 20px;
+        }
+        
         .lang-btn {
           display: flex;
           align-items: center;
-          gap: 5px;
-          background: ${scrolled ? '#f0f0f0' : 'rgba(255, 255, 255, 0.2)'};
-          border: 1px solid ${scrolled ? '#ddd' : 'rgba(255, 255, 255, 0.3)'};
-          padding: 6px 12px; /* أصغر */
+          gap: 6px;
+          background: var(--lang-btn-bg, rgba(255, 255, 255, 0.2));
+          border: 1px solid var(--lang-btn-border, rgba(255, 255, 255, 0.3));
+          padding: 6px 14px;
           border-radius: 20px;
           cursor: pointer;
           font-weight: 500;
           font-size: 14px;
-          color: ${scrolled ? '#333' : 'white'};
+          color: var(--lang-btn-color, white);
           transition: all 0.3s ease;
           font-family: ${currentLang === 'ar' ? "'Cairo', 'Noto Sans Arabic', sans-serif" : "'Nunito', sans-serif"};
         }
         
         .lang-btn:hover {
-          background: ${scrolled ? '#e0e0e0' : 'rgba(255, 255, 255, 0.3)'};
+          background: var(--lang-btn-hover-bg, rgba(255, 255, 255, 0.3));
           transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        
-        .lang-btn svg {
-          font-size: 14px;
         }
         
         /* زر الهامبرجر */
         .hamburger {
-          display: none;
+          display: flex;
           flex-direction: column;
           gap: 4px;
           background: none;
-          border: none;
+          border: none !important;
           cursor: pointer;
-          padding: 5px;
+          padding: 5px !important;
           z-index: 1001;
+          box-shadow: none !important;
+          flex-shrink: 0;
         }
         
         .hamburger span {
-          width: 22px; /* أصغر */
-          height: 2px; /* أنحف */
-          background: ${scrolled ? '#333' : 'white'};
+          width: 22px;
+          height: 2px;
+          background: var(--hamburger-color, white);
           border-radius: 2px;
           transition: all 0.3s ease;
         }
         
-        .hamburger.active span:nth-child(1) {
-          transform: rotate(45deg) translate(5px, 5px);
+        /* Mobile Offcanvas */
+        .mobile-menu-offcanvas {
+          width: 85% !important;
+          max-width: 320px !important;
         }
         
-        .hamburger.active span:nth-child(2) {
+        .mobile-menu-header {
+          padding: 15px 20px !important;
+          border-bottom: 1px solid #eee;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          width: 100% !important;
+        }
+        
+        .mobile-logo {
+          margin: 0 !important;
+          padding: 0 !important;
+          flex-shrink: 0;
+        }
+        
+        .mobile-logo-img {
+          height: 105px !important;
+          width: auto !important;
+          max-width: 280px !important;
+          object-fit: contain !important;
+        }
+        
+        .mobile-close-btn {
+          background: none !important;
+          border: none !important;
+          font-size: 24px !important;
+          cursor: pointer !important;
+          color: #333 !important;
+          width: 30px !important;
+          height: 30px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          flex-shrink: 0;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+        
+        .mobile-close-btn:hover {
+          color: #e83e8c !important;
+        }
+        
+        .mobile-menu-body {
+          padding: 20px 0 !important;
+        }
+        
+        .mobile-nav-link {
+          padding: 15px 25px !important;
+          border-bottom: 1px solid #f0f0f0 !important;
+          font-family: ${currentLang === 'ar' ? "'Cairo', 'Noto Sans Arabic', sans-serif" : "'Nunito', sans-serif"};
+          text-align: ${currentLang === 'ar' ? 'right' : 'left'};
+          font-size: 16px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          color: #333 !important;
+          transition: all 0.2s ease !important;
+          position: relative;
+          background: transparent !important;
+          border: none !important;
+          text-decoration: none !important;
+        }
+        
+        .mobile-nav-link:hover {
+          background-color: #f9f9f9 !important;
+          color: #e83e8c !important;
+        }
+        
+        /* العنصر النشط فقط يكون له مؤشر - الخط أسفل العنصر النشط فقط */
+        .mobile-nav-link.active {
+          color: #e83e8c !important;
+          font-weight: 600 !important;
+        }
+        
+        /* الخط أسفل العنصر النشط فقط */
+        .mobile-nav-link.active::before {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 25px;
+          right: 25px;
+          height: 2px;
+          background: #e83e8c;
+          border-radius: 2px;
+        }
+        
+        .simple-navbar.rtl .mobile-nav-link.active::before {
+          left: 25px;
+          right: 25px;
+        }
+        
+        /* المؤشر البسيط بدل السهم */
+        .mobile-nav-indicator {
+          color: #e83e8c;
+          font-size: 14px;
           opacity: 0;
+          transition: opacity 0.3s ease;
         }
         
-        .hamburger.active span:nth-child(3) {
-          transform: rotate(-45deg) translate(5px, -5px);
+        .mobile-nav-link.active .mobile-nav-indicator {
+          opacity: 1;
         }
         
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
+        .mobile-nav-text {
+          flex-grow: 1;
+        }
+        
+        .mobile-language-selector {
+          padding: 25px !important;
+          border-top: 1px solid #eee;
+          margin-top: 10px !important;
+        }
+        
+        .mobile-lang-btn {
+          background: linear-gradient(135deg, #e83e8c, #ff6b9d) !important;
+          color: white !important;
+          border: none !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 10px !important;
+          padding: 12px !important;
+          border-radius: 10px !important;
+          font-size: 16px !important;
+          font-weight: 600 !important;
+          transition: all 0.3s ease !important;
+          box-shadow: 0 4px 15px rgba(232, 62, 140, 0.2) !important;
+        }
+        
+        .mobile-lang-btn:hover {
+          transform: translateY(-2px) !important;
+          box-shadow: 0 6px 20px rgba(232, 62, 140, 0.3) !important;
+        }
+        
+        /* CSS Variables */
+        .simple-navbar:not(.scrolled) {
+          --nav-link-color: white;
+          --lang-btn-bg: rgba(255, 255, 255, 0.2);
+          --lang-btn-border: rgba(255, 255, 255, 0.3);
+          --lang-btn-color: white;
+          --lang-btn-hover-bg: rgba(255, 255, 255, 0.3);
+          --hamburger-color: white;
+        }
+        
+        .simple-navbar.scrolled {
+          --nav-link-color: #333;
+          --lang-btn-bg: #f0f0f0;
+          --lang-btn-border: #ddd;
+          --lang-btn-color: #333;
+          --lang-btn-hover-bg: #e0e0e0;
+          --hamburger-color: #333;
+        }
+        
+        /* Desktop Styles */
+        @media (min-width: 769px) {
+          .simple-navbar {
+            margin-top: 5px !important;
+          }
+          
           .hamburger {
-            display: flex;
+            display: none !important;
           }
           
-          .nav-menu {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: white;
-            flex-direction: column;
-            padding: 80px 20px 20px;
-            gap: 0;
-            display: none;
-            z-index: 1000;
-            overflow-y: auto;
+          /* المحاذاة الأساسية: space between */
+          .nav-container {
+            justify-content: space-between !important;
           }
           
-          .simple-navbar.rtl .nav-menu {
-            text-align: right;
+          /* الإنجليزية: اللوجو على اليسار، اللينكات على اليمين */
+          .simple-navbar:not(.rtl) .nav-logo {
+            /* تلقائياً على اليسار بسبب space-between */
           }
           
-          .nav-menu.open {
-            display: flex;
+          .simple-navbar:not(.rtl) .navbar-collapse {
+            /* تلقائياً على اليمين بسبب space-between */
           }
           
-          /* Mobile Header - محسّن */
-          .mobile-menu-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 70px; /* ارتفاع أكبر */
-            background: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            border-bottom: 1px solid #eee;
-            z-index: 1002;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          .simple-navbar:not(.rtl) .nav-desktop-menu {
+            justify-content: flex-end;
           }
           
-          .mobile-logo {
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            height: 100%;
-            padding: 20px 0;
+          /* العربية: اللينكات على اليسار، اللوجو على اليمين */
+          .simple-navbar.rtl .nav-container {
+            flex-direction: row;
           }
           
-          .mobile-logo-img {
-            width: 100px;
-            height: auto;
-            max-height: 80px;
-            object-fit: contain;
+          .simple-navbar.rtl .nav-logo {
+            order: 2; /* اللوجو يأتي في النهاية (اليمين) */
           }
           
-          .mobile-close-btn {
-            background: none;
-            border: none;
-            font-size: 28px; /* أكبر حجم */
-            color: #333;
-            cursor: pointer;
-            width: 50px; /* عرض أكبر */
-            height: 50px; /* ارتفاع أكبر */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          .simple-navbar.rtl .navbar-collapse {
+            order: 1; /* القائمة تأتي في البداية (اليسار) */
           }
           
-          .mobile-close-btn:hover {
-            background: #f5f5f5;
-            color: #e83e8c;
-            transform: scale(1.1);
+          .simple-navbar.rtl .nav-desktop-menu {
+            justify-content: flex-start;
           }
           
-          .nav-menu.open .nav-link {
-            width: 100%;
-            text-align: ${currentLang === 'ar' ? 'right' : 'left'};
-            padding: 18px 15px;
-            color: #333;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 16px;
-            font-weight: 500;
-            margin-top: 0;
+          /* إخفاء القائمة المتنقلة على الديسكتوب */
+          .mobile-menu-offcanvas {
+            display: none !important;
+          }
+        }
+        
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+          .simple-navbar {
+            margin-top: 15px !important;
+            margin-left: 15px !important;
+            margin-right: 15px !important;
           }
           
-          .nav-menu.open .nav-link:hover,
-          .nav-menu.open .nav-link.active {
-            background: rgba(232, 62, 140, 0.1);
-            color: #e83e8c;
+          .navbar-collapse {
+            display: none !important;
           }
           
-          .nav-menu.open .nav-link.active::after {
-            display: none;
+          .nav-container {
+            justify-content: space-between !important;
+            padding: 0 15px !important;
           }
           
-          .nav-menu.open .language-selector {
-            margin-top: 30px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            padding: 15px;
+          /* تعديل مهم: اللوجو على الجنب (اليسار) بدل المنتصف */
+          .nav-logo {
+            position: static !important;
+            transform: none !important;
+            max-width: 240px;
+            margin: 0 !important;
+            flex-shrink: 0;
           }
           
-          .nav-menu.open .lang-btn {
-            background: #f0f0f0;
-            color: #333;
-            border-color: #ddd;
-            padding: 12px 24px;
-            font-size: 16px;
-            width: 100%;
-            max-width: 200px;
-            justify-content: center;
+          .simple-navbar.rtl .nav-logo {
+            position: static !important;
+            transform: none !important;
           }
           
-          /* تحسين عرض اللوجو على الموبايل */
-          .simple-navbar:not(.scrolled) .logo-img {
-            filter: brightness(0) invert(1);
-            -webkit-filter: brightness(0) invert(1);
+          /* مسافة بين اللوجو وزر الهامبرجر */
+          .nav-container {
+            gap: 20px;
           }
           
-          /* ضمان وضوح اللوجو في القائمة المفتوحة */
-          .nav-menu.open .mobile-logo-img {
-            filter: none !important;
-            -webkit-filter: none !important;
+          .logo-img {
+            height: 105px !important;
+            max-width: 240px !important;
           }
           
-          /* تحسين للقائمة في وضع RTL على الموبايل */
-          .simple-navbar.rtl .hamburger {
-            margin-left: 0;
-            margin-right: auto;
+          /* تحسينات إضافية للشاشات الصغيرة جداً */
+          @media (max-width: 480px) {
+            .simple-navbar {
+              margin-left: 10px !important;
+              margin-right: 10px !important;
+              margin-top: 10px !important;
+            }
+            
+            .nav-container {
+              padding: 0 10px !important;
+              gap: 15px;
+            }
+            
+            .logo-img {
+              height: 105px !important;
+              max-width: 220px !important;
+            }
+            
+            .nav-logo {
+              max-width: 220px;
+            }
+            
+            .hamburger {
+              padding: 3px !important;
+            }
+            
+            .hamburger span {
+              width: 20px;
+            }
+            
+            .mobile-menu-header {
+              padding: 12px 15px !important;
+            }
+            
+            .mobile-logo-img {
+              height: 105px !important;
+              max-width: 250px !important;
+            }
+            
+            .mobile-nav-link {
+              padding: 12px 20px !important;
+              font-size: 15px !important;
+            }
           }
           
-          /* تعديل padding للقائمة بعد إضافة الهيدر */
-          .nav-menu.open {
-            padding-top: 90px; /* أقل ليكون تحت الهيدر مباشرة */
-          }
-          
-          /* ضمان عدم تقطيع اللوجو */
-          .logo-img, .mobile-logo-img {
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
-            image-rendering: pixelated;
-          }
-          
-          /* تحسين للشاشات عالية الدقة */
-          @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-            .logo-img, .mobile-logo-img {
-              image-rendering: auto;
+          /* تحسينات للشاشات متوسطة الحجم */
+          @media (min-width: 481px) and (max-width: 768px) {
+            .logo-img {
+              height: 75px !important;
+              max-width: 160px !important;
+            }
+            
+            .nav-logo {
+              max-width: 160px;
+            }
+            
+            .mobile-menu-header {
+              padding: 15px 25px !important;
+            }
+            
+            .mobile-logo-img {
+              height: 75px !important;
+              max-width: 180px !important;
             }
           }
         }
         
-        /* تحسينات إضافية للـ desktop */
-        @media (min-width: 769px) {
-          .mobile-menu-header {
-            display: none;
-          }
-          
-          .simple-navbar:not(.scrolled) .nav-link:hover {
-            color: rgba(255, 255, 255, 0.9);
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-          }
-          
-          .simple-navbar:not(.scrolled) .lang-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          }
-          
-          /* تحسين الترتيب في وضع RTL */
-          .simple-navbar.rtl .nav-container {
-            flex-direction: row-reverse;
-          }
-          
-          .simple-navbar.rtl .hamburger {
-            margin-left: auto;
-            margin-right: 0;
-          }
+        /* تحسين التمرير */
+        .mobile-nav-link {
+          user-select: none;
+          -webkit-tap-highlight-color: transparent;
         }
         
-        /* تحسينات للأجهزة اللوحية */
-        @media (max-width: 1024px) and (min-width: 769px) {
-          .nav-menu {
-            gap: 20px;
-          }
-          
-          .nav-link {
-            font-size: 13px;
-          }
+        /* تحسين الظهور للقائمة المتنقلة */
+        .mobile-menu-offcanvas.showing,
+        .mobile-menu-offcanvas.show {
+          transition: transform 0.3s ease-out !important;
+        }
+        
+        /* تحسينات للعربية */
+        .simple-navbar.rtl .mobile-menu-header {
+          flex-direction: row-reverse;
+        }
+        
+        .simple-navbar.rtl .mobile-nav-link {
+          text-align: right;
+          flex-direction: row;
+        }
+        
+        .simple-navbar.rtl .mobile-language-selector {
+          text-align: center;
+        }
+        
+        /* إزالة الخطوط الافتراضية من جميع العناصر */
+        .mobile-nav-link {
+          border-bottom: 1px solid #f0f0f0 !important;
+        }
+        
+        /* التأكد من أن الخط أسفل العنصر النشط فقط */
+        .mobile-nav-link:not(.active)::before {
+          display: none !important;
         }
       `}</style>
     </>
