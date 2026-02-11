@@ -8,9 +8,12 @@ import {
 import { useLanguage } from './LanguageProvider';
 import { useDispatch } from 'react-redux';
 import { Add_Client_Action } from '../Redux/Actions/ClientAction';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 
 export const Footer = () => {
   const { currentLang } = useLanguage();
+  const navigate = useNavigate();
+  const location = useLocation(); // مهم: لمعرفة المسار الحالي
   
   const [phone, setPhone] = useState('');
   const [subscribed, setSubscribed] = useState(false);
@@ -101,39 +104,131 @@ export const Footer = () => {
   // دالة الترجمة
   const t = (key) => {
     try {
-      const langKey = currentLang?.toUpperCase?.();
+      const langKey = currentLang === 'ar' ? 'AR' : 'EN';
       return translations[langKey]?.[key] || translations.EN[key] || key;
     } catch (error) {
       return translations.EN[key] || key;
     }
   };
 
-  // إنشاء quickLinks
+  // دالة لتمرير الصفحة للأعلى
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
+  // دالة التنقل للـ contact - نفس طريقة النافبار بالضبط
+  const handleContactNavigation = () => {
+    if (location.pathname === '/') {
+      // لو في الصفحة الرئيسية، دور على عنصر contact
+      const contactSection = document.getElementById('contact');
+      if (contactSection) {
+        contactSection.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        // لو مش لاقي العنصر، حاول بعد شوية
+        setTimeout(() => {
+          const contactSection = document.getElementById('contact');
+          if (contactSection) {
+            contactSection.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 100);
+      }
+    } else {
+      // لو في صفحة تانية، روح للصفحة الرئيسية وبعدين دور على contact
+      navigate('/');
+      setTimeout(() => {
+        const contactSection = document.getElementById('contact');
+        if (contactSection) {
+          contactSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 300); // زودنا التأخير شوية عشان نضمن تحميل الصفحة
+    }
+  };
+
+  // دالة التنقل للـ testimonials
+  const handleTestimonialsNavigation = () => {
+    if (location.pathname === '/') {
+      const testimonialsSection = document.getElementById('testimonials');
+      if (testimonialsSection) {
+        testimonialsSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      navigate('/');
+      setTimeout(() => {
+        const testimonialsSection = document.getElementById('testimonials');
+        if (testimonialsSection) {
+          testimonialsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 300);
+    }
+  };
+
+  // دالة التنقل العامة - نفس طريقة النافبار
+  const handleNavigation = (path, id) => {
+    // التمرير للأعلى أولاً
+    window.scrollTo(0, 0);
+    
+    if (path === '/#contact') {
+      handleContactNavigation();
+    } else if (path === '/#testimonials') {
+      handleTestimonialsNavigation();
+    } else {
+      navigate(path);
+    }
+  };
+
+  // إنشاء quickLinks مع مسارات حقيقية - نفس طريقة النافبار
   const quickLinks = useMemo(() => [
-    { label: t('home'), href: '#home' },
-    { label: t('aboutUs'), href: '#about' },
-    { label: t('services'), href: '#services' },
-    { label: t('testimonials'), href: '#testimonials' },
-    { label: t('blog'), href: '#blog' },
-    { label: t('contact'), href: '#contact' }
+    { 
+      id: 'home',
+      label: t('home'), 
+      path: '/'
+    },
+    { 
+      id: 'about',
+      label: t('aboutUs'), 
+      path: '/Aboutuspage'
+    },
+    { 
+      id: 'services',
+      label: t('services'), 
+      path: '/ourservicepage'
+    },
+    { 
+      id: 'testimonials',
+      label: t('testimonials'), 
+      path: '/#testimonials' // نفس نظام الهاش
+    },
+    { 
+      id: 'blog',
+      label: t('blog'), 
+      path: '/MainBlogsCardspage'
+    },
+    { 
+      id: 'contact',
+      label: t('contact'), 
+      path: '/#contact' // نفس نظام الهاش في النافبار
+    }
   ], [currentLang, t]);
 
   // إنشاء services
   const services = useMemo(() => [
-    { label: t('growthStrategy'), href: '#' },
-    { label: t('digitalMarketing'), href: '#' },
-    { label: t('brandDevelopment'), href: '#' },
-    { label: t('webDevelopment'), href: '#' },
-    { label: t('seoOptimization'), href: '#' },
-    { label: t('socialMedia'), href: '#' }
+    { label: t('growthStrategy'), path: '/ourservicepage' },
+    { label: t('digitalMarketing'), path: '/ourservicepage' },
+    { label: t('brandDevelopment'), path: '/ourservicepage' },
+    { label: t('webDevelopment'), path: '/ourservicepage' },
+    { label: t('seoOptimization'), path: '/ourservicepage' },
+    { label: t('socialMedia'), path: '/ourservicepage' }
   ], [currentLang, t]);
 
   const socialLinks = [
-    { icon: <FaFacebook />, href: '#', label: 'Facebook' },
-    { icon: <FaTwitter />, href: '#', label: 'Twitter' },
-    { icon: <FaLinkedin />, href: '#', label: 'LinkedIn' },
-    { icon: <FaInstagram />, href: '#', label: 'Instagram' },
-    { icon: <FaYoutube />, href: '#', label: 'YouTube' }
+    { icon: <FaFacebook />, href: 'https://facebook.com', label: 'Facebook' },
+    { icon: <FaTwitter />, href: 'https://twitter.com', label: 'Twitter' },
+    { icon: <FaLinkedin />, href: 'https://linkedin.com', label: 'LinkedIn' },
+    { icon: <FaInstagram />, href: 'https://instagram.com', label: 'Instagram' },
+    { icon: <FaYoutube />, href: 'https://youtube.com', label: 'YouTube' }
   ];
 
   const dispatch = useDispatch();
@@ -168,26 +263,60 @@ export const Footer = () => {
     }
   };
 
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  };
+  // استماع للتغييرات في الـ URL للتعامل مع الـ hash - نفس طريقة النافبار
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash === '#contact') {
+        setTimeout(() => {
+          const contactSection = document.getElementById('contact');
+          if (contactSection) {
+            contactSection.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 300);
+      } else if (hash === '#testimonials') {
+        setTimeout(() => {
+          const testimonialsSection = document.getElementById('testimonials');
+          if (testimonialsSection) {
+            testimonialsSection.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 300);
+      }
+    };
 
-  const scrollToContact = () => {
-    const contactSection = document.getElementById('contact');
-    if (contactSection) {
-      const headerHeight = 80;
-      const elementPosition = contactSection.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
-      
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
+    // تنفيذ عند تحميل الصفحة
+    handleHashChange();
+
+    // إضافة مستمع للتغييرات
+    window.addEventListener('hashchange', handleHashChange);
+    
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, []);
+
+  // useEffect إضافي للتعامل مع التنقل من صفحة أخرى
+  useEffect(() => {
+    // لو دخلنا على الصفحة الرئيسية بـ #contact
+    if (location.pathname === '/' && location.hash === '#contact') {
+      setTimeout(() => {
+        const contactSection = document.getElementById('contact');
+        if (contactSection) {
+          contactSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 300);
     }
-  };
+    
+    // لو دخلنا على الصفحة الرئيسية بـ #testimonials
+    if (location.pathname === '/' && location.hash === '#testimonials') {
+      setTimeout(() => {
+        const testimonialsSection = document.getElementById('testimonials');
+        if (testimonialsSection) {
+          testimonialsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 300);
+    }
+  }, [location]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -249,10 +378,12 @@ export const Footer = () => {
         <Container>
           {/* Footer Top */}
           <div className="footer-top">
-            <div className="footer-logo">
-              <span className="softy">FLY</span>
-              <span className="pinko">VIA</span>
-            </div>
+            <Link to="/" className="footer-logo-link" onClick={() => window.scrollTo(0, 0)}>
+              <span className="footer-logo">
+                <span className="softy">FLY</span>
+                <span className="pinko">VIA</span>
+              </span>
+            </Link>
             <p className="footer-tagline">
               {t('tagline')}
             </p>
@@ -275,10 +406,16 @@ export const Footer = () => {
               <ul className="footer-links">
                 {quickLinks.map((link, index) => (
                   <li key={index} style={{ animationDelay: `${index * 0.1}s` }}>
-                    <a href={link.href}>
+                    <Link 
+                      to={link.path}
+                      onClick={(e) => {
+                        e.preventDefault(); // منع السلوك الافتراضي
+                        handleNavigation(link.path, link.id);
+                      }}
+                    >
                       <FaArrowRight className={`footer-link-arrow ${isRTL() ? 'rtl-arrow' : ''}`} />
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -299,10 +436,13 @@ export const Footer = () => {
               <ul className="footer-links">
                 {services.map((service, index) => (
                   <li key={index} style={{ animationDelay: `${index * 0.1}s` }}>
-                    <a href={service.href}>
+                    <Link 
+                      to={service.path}
+                      onClick={() => window.scrollTo(0, 0)}
+                    >
                       <FaArrowRight className={`footer-link-arrow ${isRTL() ? 'rtl-arrow' : ''}`} />
                       {service.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -342,6 +482,8 @@ export const Footer = () => {
                     href={social.href}
                     className="social-link"
                     aria-label={social.label}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     {social.icon}
@@ -350,7 +492,7 @@ export const Footer = () => {
               </div>
             </div>
 
-            {/* Contact Column */}
+            {/* Contact Column - هنا الزر */}
             <div 
               className={`footer-column column-4 ${isVisible ? 'animate' : ''}`} 
               ref={el => columnsRef.current[3] = el}
@@ -369,7 +511,7 @@ export const Footer = () => {
               <div className="contact-redirect">
                 <button 
                   className="contact-redirect-btn"
-                  onClick={scrollToContact}
+                  onClick={handleContactNavigation} // نفس الدالة المستخدمة في النافبار
                 >
                   {redirectButtonText}
                   <FaPaperPlane className={`contact-btn-icon ${isRTL() ? 'rtl-icon' : ''}`} />
@@ -384,20 +526,21 @@ export const Footer = () => {
               {t('copyright')}
             </div>
             <div className="footer-legal">
-              <a href="#">
+              <Link to="/" onClick={() => window.scrollTo(0, 0)}>
                 {t('privacyPolicy')}
-              </a>
-              <a href="#">
+              </Link>
+              <Link to="/" onClick={() => window.scrollTo(0, 0)}>
                 {t('termsService')}
-              </a>
-              <a href="#">
+              </Link>
+              <Link to="/" onClick={() => window.scrollTo(0, 0)}>
                 {t('cookiePolicy')}
-              </a>
+              </Link>
             </div>
           </div>
         </Container>
       </footer>
 
+      {/* Back to Top Button */}
       {/* <button
         ref={backToTopRef}
         className={`back-to-top ${showBackToTop ? 'visible' : ''}`}
@@ -409,6 +552,91 @@ export const Footer = () => {
       </button> */}
 
       <style jsx>{`
+        /* كل الاستايل كما هو - بدون تغيير */
+        .footer-links a,
+        .footer-link-button {
+          color: rgba(255, 255, 255, 0.8);
+          text-decoration: none;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          transition: all 0.3s ease;
+          padding: 8px 0;
+          position: relative;
+          overflow: hidden;
+          background: none;
+          border: none;
+          cursor: pointer;
+          width: 100%;
+          text-align: ${isRTL() ? 'right' : 'left'};
+          font-size: 1rem;
+        }
+
+        .footer-links a::before,
+        .footer-link-button::before {
+          content: '';
+          position: absolute;
+          left: ${isRTL() ? 'auto' : '0'};
+          right: ${isRTL() ? '0' : 'auto'};
+          bottom: 0;
+          width: 0;
+          height: 2px;
+          background: #ff4081;
+          transition: width 0.3s ease;
+        }
+
+        .footer-links a:hover,
+        .footer-link-button:hover {
+          color: #fff;
+          transform: translateX(${isRTL() ? '-5px' : '5px'});
+        }
+
+        .footer-links a:hover::before,
+        .footer-link-button:hover::before {
+          width: 100%;
+        }
+
+        .footer-logo-link {
+          text-decoration: none;
+        }
+
+        .footer-logo {
+          font-size: 3rem;
+          font-weight: 800;
+          margin-bottom: 20px;
+          display: inline-block;
+          background: linear-gradient(90deg, #fff, #ff4081);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          animation: logoGlow 2s infinite alternate;
+          cursor: pointer;
+          transition: transform 0.3s ease;
+        }
+
+        .footer-logo:hover {
+          transform: scale(1.05);
+        }
+
+        @keyframes logoGlow {
+          0% { filter: drop-shadow(0 0 5px rgba(255, 64, 129, 0.3)); }
+          100% { filter: drop-shadow(0 0 15px rgba(255, 64, 129, 0.6)); }
+        }
+
+        .softy {
+          background: linear-gradient(90deg, #fff, #ff4081);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .pinko {
+          background: linear-gradient(90deg, #ff4081, #7c4dff);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
         .footer {
           background: linear-gradient(135deg, #2E3959 0%, #2d2d2d 100%);
           color: #fff;
@@ -449,21 +677,11 @@ export const Footer = () => {
           animation: fadeInUp 0.8s 0.3s forwards;
         }
 
-        .footer-logo {
-          font-size: 3rem;
-          font-weight: 800;
-          margin-bottom: 20px;
-          display: inline-block;
-          background: linear-gradient(90deg, #fff, #ff4081);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          animation: logoGlow 2s infinite alternate;
-        }
-
-        @keyframes logoGlow {
-          0% { filter: drop-shadow(0 0 5px rgba(255, 64, 129, 0.3)); }
-          100% { filter: drop-shadow(0 0 15px rgba(255, 64, 129, 0.6)); }
+        @keyframes fadeInUp {
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
         .footer-tagline {
@@ -548,50 +766,22 @@ export const Footer = () => {
           }
         }
 
-        .footer-links a {
-          color: rgba(255, 255, 255, 0.8);
-          text-decoration: none;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          transition: all 0.3s ease;
-          padding: 8px 0;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .footer-links a::before {
-          content: '';
-          position: absolute;
-          left: ${isRTL() ? 'auto' : '0'};
-          right: ${isRTL() ? '0' : 'auto'};
-          bottom: 0;
-          width: 0;
-          height: 2px;
-          background: #ff4081;
-          transition: width 0.3s ease;
-        }
-
-        .footer-links a:hover {
-          color: #fff;
-          transform: translateX(${isRTL() ? '-5px' : '5px'});
-        }
-
-        .footer-links a:hover::before {
-          width: 100%;
-        }
-
         .footer-link-arrow {
           font-size: 0.8rem;
           transition: transform 0.3s ease;
         }
 
-        .footer-links a:hover .footer-link-arrow {
+        .footer-links a:hover .footer-link-arrow,
+        .footer-link-button:hover .footer-link-arrow {
           transform: translateX(${isRTL() ? '-3px' : '3px'});
         }
 
         .rtl-arrow {
           transform: rotate(180deg);
+        }
+
+        .footer-link-button:hover .rtl-arrow {
+          transform: rotate(180deg) translateX(${isRTL() ? '3px' : '-3px'});
         }
 
         .contact-info {
@@ -643,7 +833,7 @@ export const Footer = () => {
           transform: scale(0) rotate(-180deg);
         }
 
-        .social-link.animate {
+        .social-link {
           animation: popIn 0.6s forwards;
         }
 
@@ -712,6 +902,10 @@ export const Footer = () => {
 
         .rtl-icon {
           transform: rotate(180deg);
+        }
+
+        .contact-redirect-btn:hover .rtl-icon {
+          transform: rotate(180deg) translateX(${isRTL() ? '5px' : '-5px'});
         }
 
         .footer-bottom {
@@ -798,7 +992,6 @@ export const Footer = () => {
           box-shadow: 0 8px 20px rgba(255, 64, 129, 0.4);
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
           .footer {
             padding: 40px 0 20px;

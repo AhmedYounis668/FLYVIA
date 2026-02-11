@@ -16,6 +16,15 @@ export const CustomNavbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
+  // 🔥 التأكد أن أي صفحة جديدة تفتح من أولها
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'instant'
+    });
+  }, [location.pathname]);
+  
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -68,6 +77,7 @@ export const CustomNavbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [scrolled]);
 
+  // 🔥 تحديد العنصر النشط بناءً على الـ path
   useEffect(() => {
     const path = location.pathname;
     
@@ -75,6 +85,7 @@ export const CustomNavbar = () => {
     else if (path === '/Aboutuspage') setActiveItem('about');
     else if (path === '/ourservicepage') setActiveItem('services');
     else if (path === '/MainBlogsCardspage') setActiveItem('blog');
+    else setActiveItem(''); // لو مش من القائمة، مفيش active
   }, [location]);
 
   const toggleMenu = () => {
@@ -102,7 +113,7 @@ export const CustomNavbar = () => {
           if (contactSection) {
             contactSection.scrollIntoView({ behavior: 'smooth' });
           }
-        }, 100);
+        }, 300);
       }
     } else {
       navigate(path);
@@ -136,7 +147,8 @@ export const CustomNavbar = () => {
       <Navbar 
         expand="lg" 
         fixed="top"
-        className={`simple-navbar ${scrolled ? 'scrolled' : ''} ${currentLang === 'ar' ? 'rtl' : 'ltr'}`}
+        className={`simple-navbar ${scrolled ? 'scrolled' : ''}`}
+        dir={currentLang === 'ar' ? 'rtl' : 'ltr'}
         style={{
           marginTop: '20px',
           marginLeft: '20px',
@@ -145,7 +157,6 @@ export const CustomNavbar = () => {
         }}
       >
         <Container fluid className="nav-container">
-          {/* اللوجو */}
           <Navbar.Brand 
             className="nav-logo" 
             onClick={() => handleNavigation('/', 'home')}
@@ -158,14 +169,15 @@ export const CustomNavbar = () => {
             />
           </Navbar.Brand>
           
-          {/* Desktop Navigation */}
           <Navbar.Collapse id="navbar-nav">
             <Nav className="nav-desktop-menu">
               {navItems.map((item) => (
                 <Nav.Link
                   key={item.id}
                   href="#"
-                  className={`nav-link ${activeItem === item.id ? 'active' : ''}`}
+                  // 🔥🔥🔥 الحل السحري: منع bootstrap من إضافة active class
+                  active={false}
+                  className={`nav-link ${activeItem === item.id ? 'custom-active' : ''}`}
                   onClick={(e) => {
                     e.preventDefault();
                     handleNavigation(item.path, item.id);
@@ -187,7 +199,6 @@ export const CustomNavbar = () => {
             </Nav>
           </Navbar.Collapse>
           
-          {/* Mobile Toggle */}
           <button 
             className={`hamburger ${menuOpen ? 'active' : ''}`}
             onClick={toggleMenu}
@@ -200,12 +211,11 @@ export const CustomNavbar = () => {
         </Container>
       </Navbar>
       
-      {/* Mobile Offcanvas Menu */}
       {isMobile && (
         <Offcanvas
           show={menuOpen}
           onHide={() => setMenuOpen(false)}
-          placement={currentLang === 'ar' ? 'end' : 'start'}
+          placement={currentLang === 'ar' ? 'start' : 'end'}
           className="mobile-menu-offcanvas"
         >
           <Offcanvas.Header className="mobile-menu-header">
@@ -227,7 +237,9 @@ export const CustomNavbar = () => {
                 <Nav.Link
                   key={item.id}
                   href="#"
-                  className={`mobile-nav-link ${activeItem === item.id ? 'active' : ''}`}
+                  // 🔥🔥🔥 منع bootstrap من إضافة active class في الموبايل كمان
+                  active={false}
+                  className={`mobile-nav-link ${activeItem === item.id ? 'custom-active' : ''}`}
                   onClick={(e) => {
                     e.preventDefault();
                     handleNavigation(item.path, item.id);
@@ -253,7 +265,6 @@ export const CustomNavbar = () => {
       )}
 
       <style>{`
-        /* Navbar الأساسي */
         .simple-navbar {
           height: 70px !important;
           background: transparent !important;
@@ -275,7 +286,6 @@ export const CustomNavbar = () => {
           backdrop-filter: blur(2px) !important;
         }
         
-        /* الحاوية - هنا المساواة */
         .nav-container {
           max-width: 1400px;
           margin: 0 auto;
@@ -283,11 +293,10 @@ export const CustomNavbar = () => {
           height: 100%;
           display: flex;
           align-items: center;
-          justify-content: space-between; /* هنا space between */
+          justify-content: space-between !important;
           width: 100%;
         }
         
-        /* اللوجو */
         .nav-logo {
           padding: 0 !important;
           margin: 0 !important;
@@ -310,9 +319,8 @@ export const CustomNavbar = () => {
           transform: scale(1.05);
         }
         
-        /* قائمة التنقل للديسكتوب */
         .navbar-collapse {
-          flex-grow: 0 !important; /* مهم: لا تأخذ كل المساحة */
+          flex-grow: 0 !important;
         }
         
         .nav-desktop-menu {
@@ -322,19 +330,7 @@ export const CustomNavbar = () => {
           height: 100%;
         }
         
-        /* الإنجليزية: اللينكات على اليمين */
-        .simple-navbar:not(.rtl) .nav-desktop-menu {
-          justify-content: flex-end;
-          flex-direction: row;
-        }
-        
-        /* العربية: اللينكات على اليسار */
-        .simple-navbar.rtl .nav-desktop-menu {
-          justify-content: flex-start;
-          flex-direction: row;
-        }
-        
-        /* الروابط */
+        /* 🔥🔥🔥 التعديل الجوهري - استخدام custom-active بدل active */
         .nav-link {
           text-decoration: none;
           color: var(--nav-link-color, white);
@@ -354,38 +350,40 @@ export const CustomNavbar = () => {
           transform: translateY(-1px);
         }
         
-        /* العنصر النشط فقط يكون تحته خط */
-        .nav-link.active {
+        /* 🔥 استخدام custom-active بدل active */
+        .nav-link.custom-active {
           color: #e83e8c !important;
           font-weight: 600;
         }
         
-        .nav-link.active::after {
+        .nav-link.custom-active::after {
           content: '';
           position: absolute;
-          bottom: 0;
+          bottom: -2px;
           left: 0;
           right: 0;
           height: 2px;
           background: #e83e8c;
-          transform: scaleX(1);
+          border-radius: 2px;
         }
         
-        /* العناصر غير النشطة بدون خط */
-        .nav-link:not(.active)::after {
-          display: none;
+        /* 🔥 منع bootstrap من إظهار أي active class */
+        .nav-link.active,
+        .nav-link[aria-current="page"] {
+          color: var(--nav-link-color, white) !important;
+          background: transparent !important;
         }
         
-        /* زر اللغة */
+        .nav-link.active::after,
+        .nav-link[aria-current="page"]::after {
+          display: none !important;
+          content: none !important;
+        }
+        
         .language-selector {
           display: flex;
           align-items: center;
-          margin-left: 20px;
-        }
-        
-        .simple-navbar.rtl .language-selector {
-          margin-left: 0;
-          margin-right: 20px;
+          margin-inline-start: 20px;
         }
         
         .lang-btn {
@@ -409,7 +407,6 @@ export const CustomNavbar = () => {
           transform: translateY(-2px);
         }
         
-        /* زر الهامبرجر */
         .hamburger {
           display: flex;
           flex-direction: column;
@@ -431,7 +428,6 @@ export const CustomNavbar = () => {
           transition: all 0.3s ease;
         }
         
-        /* Mobile Offcanvas */
         .mobile-menu-offcanvas {
           width: 85% !important;
           max-width: 320px !important;
@@ -475,10 +471,6 @@ export const CustomNavbar = () => {
           margin: 0 !important;
         }
         
-        .mobile-close-btn:hover {
-          color: #e83e8c !important;
-        }
-        
         .mobile-menu-body {
           padding: 20px 0 !important;
         }
@@ -487,7 +479,7 @@ export const CustomNavbar = () => {
           padding: 15px 25px !important;
           border-bottom: 1px solid #f0f0f0 !important;
           font-family: ${currentLang === 'ar' ? "'Cairo', 'Noto Sans Arabic', sans-serif" : "'Nunito', sans-serif"};
-          text-align: ${currentLang === 'ar' ? 'right' : 'left'};
+          text-align: start;
           font-size: 16px !important;
           display: flex !important;
           align-items: center !important;
@@ -505,14 +497,13 @@ export const CustomNavbar = () => {
           color: #e83e8c !important;
         }
         
-        /* العنصر النشط فقط يكون له مؤشر - الخط أسفل العنصر النشط فقط */
-        .mobile-nav-link.active {
+        /* 🔥 استخدام custom-active في الموبايل */
+        .mobile-nav-link.custom-active {
           color: #e83e8c !important;
           font-weight: 600 !important;
         }
         
-        /* الخط أسفل العنصر النشط فقط */
-        .mobile-nav-link.active::before {
+        .mobile-nav-link.custom-active::before {
           content: '';
           position: absolute;
           bottom: 0;
@@ -523,12 +514,18 @@ export const CustomNavbar = () => {
           border-radius: 2px;
         }
         
-        .simple-navbar.rtl .mobile-nav-link.active::before {
-          left: 25px;
-          right: 25px;
+        /* 🔥 منع bootstrap من التأثير */
+        .mobile-nav-link.active,
+        .mobile-nav-link[aria-current="page"] {
+          color: #333 !important;
+          background: transparent !important;
         }
         
-        /* المؤشر البسيط بدل السهم */
+        .mobile-nav-link.active::before,
+        .mobile-nav-link[aria-current="page"]::before {
+          display: none !important;
+        }
+        
         .mobile-nav-indicator {
           color: #e83e8c;
           font-size: 14px;
@@ -536,7 +533,7 @@ export const CustomNavbar = () => {
           transition: opacity 0.3s ease;
         }
         
-        .mobile-nav-link.active .mobile-nav-indicator {
+        .mobile-nav-link.custom-active .mobile-nav-indicator {
           opacity: 1;
         }
         
@@ -566,12 +563,6 @@ export const CustomNavbar = () => {
           box-shadow: 0 4px 15px rgba(232, 62, 140, 0.2) !important;
         }
         
-        .mobile-lang-btn:hover {
-          transform: translateY(-2px) !important;
-          box-shadow: 0 6px 20px rgba(232, 62, 140, 0.3) !important;
-        }
-        
-        /* CSS Variables */
         .simple-navbar:not(.scrolled) {
           --nav-link-color: white;
           --lang-btn-bg: rgba(255, 255, 255, 0.2);
@@ -590,7 +581,6 @@ export const CustomNavbar = () => {
           --hamburger-color: #333;
         }
         
-        /* Desktop Styles */
         @media (min-width: 769px) {
           .simple-navbar {
             margin-top: 5px !important;
@@ -600,48 +590,11 @@ export const CustomNavbar = () => {
             display: none !important;
           }
           
-          /* المحاذاة الأساسية: space between */
-          .nav-container {
-            justify-content: space-between !important;
-          }
-          
-          /* الإنجليزية: اللوجو على اليسار، اللينكات على اليمين */
-          .simple-navbar:not(.rtl) .nav-logo {
-            /* تلقائياً على اليسار بسبب space-between */
-          }
-          
-          .simple-navbar:not(.rtl) .navbar-collapse {
-            /* تلقائياً على اليمين بسبب space-between */
-          }
-          
-          .simple-navbar:not(.rtl) .nav-desktop-menu {
-            justify-content: flex-end;
-          }
-          
-          /* العربية: اللينكات على اليسار، اللوجو على اليمين */
-          .simple-navbar.rtl .nav-container {
-            flex-direction: row;
-          }
-          
-          .simple-navbar.rtl .nav-logo {
-            order: 2; /* اللوجو يأتي في النهاية (اليمين) */
-          }
-          
-          .simple-navbar.rtl .navbar-collapse {
-            order: 1; /* القائمة تأتي في البداية (اليسار) */
-          }
-          
-          .simple-navbar.rtl .nav-desktop-menu {
-            justify-content: flex-start;
-          }
-          
-          /* إخفاء القائمة المتنقلة على الديسكتوب */
-          .mobile-menu-offcanvas {
-            display: none !important;
+          .navbar-collapse {
+            display: flex !important;
           }
         }
         
-        /* Mobile Styles */
         @media (max-width: 768px) {
           .simple-navbar {
             margin-top: 15px !important;
@@ -658,7 +611,6 @@ export const CustomNavbar = () => {
             padding: 0 15px !important;
           }
           
-          /* تعديل مهم: اللوجو على الجنب (اليسار) بدل المنتصف */
           .nav-logo {
             position: static !important;
             transform: none !important;
@@ -667,12 +619,6 @@ export const CustomNavbar = () => {
             flex-shrink: 0;
           }
           
-          .simple-navbar.rtl .nav-logo {
-            position: static !important;
-            transform: none !important;
-          }
-          
-          /* مسافة بين اللوجو وزر الهامبرجر */
           .nav-container {
             gap: 20px;
           }
@@ -682,7 +628,6 @@ export const CustomNavbar = () => {
             max-width: 240px !important;
           }
           
-          /* تحسينات إضافية للشاشات الصغيرة جداً */
           @media (max-width: 480px) {
             .simple-navbar {
               margin-left: 10px !important;
@@ -703,86 +648,26 @@ export const CustomNavbar = () => {
             .nav-logo {
               max-width: 220px;
             }
-            
-            .hamburger {
-              padding: 3px !important;
-            }
-            
-            .hamburger span {
-              width: 20px;
-            }
-            
-            .mobile-menu-header {
-              padding: 12px 15px !important;
-            }
-            
-            .mobile-logo-img {
-              height: 105px !important;
-              max-width: 250px !important;
-            }
-            
-            .mobile-nav-link {
-              padding: 12px 20px !important;
-              font-size: 15px !important;
-            }
           }
           
-          /* تحسينات للشاشات متوسطة الحجم */
           @media (min-width: 481px) and (max-width: 768px) {
             .logo-img {
-              height: 75px !important;
-              max-width: 160px !important;
+              height: 105px !important;
+              max-width: 200px !important;
             }
             
             .nav-logo {
-              max-width: 160px;
-            }
-            
-            .mobile-menu-header {
-              padding: 15px 25px !important;
-            }
-            
-            .mobile-logo-img {
-              height: 75px !important;
-              max-width: 180px !important;
+              max-width: 200px;
             }
           }
         }
         
-        /* تحسين التمرير */
-        .mobile-nav-link {
-          user-select: none;
-          -webkit-tap-highlight-color: transparent;
-        }
-        
-        /* تحسين الظهور للقائمة المتنقلة */
-        .mobile-menu-offcanvas.showing,
-        .mobile-menu-offcanvas.show {
-          transition: transform 0.3s ease-out !important;
-        }
-        
-        /* تحسينات للعربية */
-        .simple-navbar.rtl .mobile-menu-header {
-          flex-direction: row-reverse;
-        }
-        
-        .simple-navbar.rtl .mobile-nav-link {
+        [dir="rtl"] .mobile-nav-link {
           text-align: right;
-          flex-direction: row;
         }
         
-        .simple-navbar.rtl .mobile-language-selector {
-          text-align: center;
-        }
-        
-        /* إزالة الخطوط الافتراضية من جميع العناصر */
-        .mobile-nav-link {
-          border-bottom: 1px solid #f0f0f0 !important;
-        }
-        
-        /* التأكد من أن الخط أسفل العنصر النشط فقط */
-        .mobile-nav-link:not(.active)::before {
-          display: none !important;
+        [dir="rtl"] .mobile-menu-header {
+          flex-direction: row-reverse;
         }
       `}</style>
     </>

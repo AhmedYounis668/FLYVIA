@@ -1,26 +1,27 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
-import { FaStar, FaChevronLeft, FaChevronRight, FaQuoteLeft } from 'react-icons/fa';
-import gsap from 'gsap';
-import ScrollTrigger from 'gsap/ScrollTrigger';
+import { FaStar, FaQuoteLeft } from 'react-icons/fa';
 import { useLanguage } from './LanguageProvider';
 
-gsap.registerPlugin(ScrollTrigger);
+// استيراد Swiper بشكل مبسط
+import { Swiper, SwiperSlide } from 'swiper/react';
+
+// استيراد CSS فقط
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
 
 export const ClientOpinion = () => {
   const { currentLang, isInitialized } = useLanguage();
   
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [animate, setAnimate] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const sectionRef = useRef(null);
   const titleRef = useRef(null);
   const subtitleRef = useRef(null);
-  const testimonialsRef = useRef([]);
 
-  // الترجمات المحسنة مع معالجة الأخطاء
+  // الترجمات
   const translations = {
-    EN: {
+    en: {
       sectionTitle: "What Our Clients Say",
       sectionSubtitle: "Don't just take our word for it - hear from some of our satisfied clients who have experienced success with FLYVIA",
       sarahJohnson: "Sarah Johnson",
@@ -43,7 +44,7 @@ export const ClientOpinion = () => {
       robertText: "The expertise and dedication of FLYVIA's team are remarkable. They helped us implement cutting-edge solutions that put us ahead of our competitors.",
       trustedCompanies: "Trusted by Leading Companies"
     },
-    AR: {
+    ar: {
       sectionTitle: "ماذا يقول عملاؤنا",
       sectionSubtitle: "لا تأخذ كلمتنا فقط - استمع إلى بعض عملائنا الراضين الذين حققوا النجاح مع FLYVIA",
       sarahJohnson: "سارة جونسون",
@@ -68,25 +69,15 @@ export const ClientOpinion = () => {
     }
   };
 
-  // دالة الترجمة المحسنة
   const t = (key) => {
     try {
-      // تحويل currentLang إلى أحرف كبيرة مع fallback
-      const langKey = currentLang?.toUpperCase?.() || 'EN';
-      const translation = translations[langKey]?.[key];
-      
-      if (!translation) {
-        return translations.EN[key] || key;
-      }
-      
-      return translation;
+      const langKey = currentLang || 'en';
+      return translations[langKey]?.[key] || translations.en[key] || key;
     } catch (error) {
-      console.error('Translation error:', error);
-      return translations.EN[key] || key;
+      return translations.en[key] || key;
     }
   };
 
-  // استخدام useMemo لـ testimonials لتجنب إعادة التصيير اللانهائي
   const testimonials = useMemo(() => [
     {
       id: 1,
@@ -136,336 +127,220 @@ export const ClientOpinion = () => {
       text: t('robertText'),
       avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80"
     }
-  ], [currentLang, t]);
-
-  const testimonialsPerView = 3;
-
-  const handlePrev = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1);
-      setAnimate(true);
-    }
-  };
-
-  const handleNext = () => {
-    if (currentIndex < testimonials.length - testimonialsPerView) {
-      setCurrentIndex(prev => prev + 1);
-      setAnimate(true);
-    }
-  };
-
-  const handleDotClick = (index) => {
-    setCurrentIndex(index);
-    setAnimate(true);
-  };
+  ], [currentLang]);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // GSAP Animations - مع التحقق من التحميل الكامل
-  useEffect(() => {
-    if (!isInitialized || !isMounted) return;
-
-    // تنظيف أي animations سابقة
-    ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    gsap.killTweensOf('*');
-
-    // تأخير بسيط لضمان تحميل DOM
-    setTimeout(() => {
-      // جعل القسم مرئياً أولاً
-      if (sectionRef.current) {
-        sectionRef.current.style.opacity = '1';
-        sectionRef.current.style.visibility = 'visible';
-      }
-
-      // Section animation
-      if (sectionRef.current) {
-        gsap.fromTo(sectionRef.current,
-          {
-            opacity: 0,
-            y: 50
-          },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 1,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: 'top 80%',
-              end: 'top 50%',
-              toggleActions: 'play none none reverse'
-            }
-          }
-        );
-      }
-
-      // Title animation
-      if (titleRef.current) {
-        titleRef.current.style.opacity = '1';
-        titleRef.current.style.visibility = 'visible';
-        
-        gsap.fromTo(titleRef.current,
-          {
-            y: 60,
-            opacity: 0,
-            scale: 0.8
-          },
-          {
-            y: 0,
-            opacity: 1,
-            scale: 1,
-            duration: 1,
-            ease: 'back.out(1.7)',
-            scrollTrigger: {
-              trigger: titleRef.current,
-              start: 'top 85%',
-              end: 'top 60%',
-              toggleActions: 'play none none reverse'
-            }
-          }
-        );
-      }
-
-      // Subtitle animation
-      if (subtitleRef.current) {
-        subtitleRef.current.style.opacity = '1';
-        subtitleRef.current.style.visibility = 'visible';
-        
-        gsap.fromTo(subtitleRef.current,
-          {
-            y: 40,
-            opacity: 0
-          },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.8,
-            delay: 0.3,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: subtitleRef.current,
-              start: 'top 80%',
-              end: 'top 50%',
-              toggleActions: 'play none none reverse'
-            }
-          }
-        );
-      }
-
-      // تحديث refs للـ testimonials
-      testimonialsRef.current = testimonialsRef.current.slice(0, testimonials.length);
-
-      // Testimonials animation
-      testimonialsRef.current.forEach((card, index) => {
-        if (card) {
-          card.style.opacity = '1';
-          card.style.visibility = 'visible';
-          
-          gsap.fromTo(card,
-            {
-              y: 80,
-              opacity: 0,
-              rotationY: 15,
-              scale: 0.9
-            },
-            {
-              y: 0,
-              opacity: 1,
-              rotationY: 0,
-              scale: 1,
-              duration: 0.8,
-              delay: index * 0.2,
-              ease: 'back.out(1.7)',
-              scrollTrigger: {
-                trigger: card,
-                start: 'top 85%',
-                end: 'top 60%',
-                toggleActions: 'play none none reverse'
-              }
-            }
-          );
-        }
-      });
-    }, 100);
-
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, [currentLang, testimonials, isInitialized, isMounted]);
-
-  // Handle slide animation
-  useEffect(() => {
-    if (animate) {
-      const track = document.querySelector('.testimonial-track');
-      if (track) {
-        gsap.to(track, {
-          x: -currentIndex * (100 / testimonialsPerView) + '%',
-          duration: 0.5,
-          ease: 'power2.out',
-          onComplete: () => setAnimate(false)
-        });
-      }
-    }
-  }, [currentIndex, animate, testimonialsPerView]);
-
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, index) => (
       <FaStar 
         key={index} 
-        className={`star ${index < rating ? '' : 'empty'}`}
+        style={{ 
+          color: index < rating ? '#ffc107' : '#e0e0e0',
+          fontSize: '1rem',
+          marginRight: '2px'
+        }}
       />
     ));
   };
 
-  // إذا لم يكن المكون جاهزاً بعد
   if (!isMounted || !isInitialized) {
     return (
-      <section className="client-opinion-section" id="testimonials" style={{ opacity: 1, visibility: 'visible' }}>
+      <section style={{ padding: '80px 0', background: '#f8f9fa' }} id="testimonials">
         <Container fluid="lg">
           <Row className="justify-content-center">
-            <Col xl={10} lg={11} md={12} className="text-center">
-              <h2 className="client-opinion-title" style={{ opacity: 1 }}>
-                {t('sectionTitle')}
-              </h2>
-              <p className="client-opinion-subtitle" style={{ opacity: 1 }}>
-                {t('sectionSubtitle')}
-              </p>
+            <Col className="text-center">
+              <h2 style={{ fontSize: '2.5rem', fontWeight: 800 }}>{t('sectionTitle')}</h2>
+              <p style={{ fontSize: '1.1rem', color: '#666' }}>{t('sectionSubtitle')}</p>
             </Col>
           </Row>
-
-          <div className="testimonial-container" style={{ opacity: 1 }}>
-            <div className="testimonial-track" style={{ transform: 'none' }}>
-              {testimonials.slice(0, 3).map((testimonial) => (
-                <div key={testimonial.id} className="testimonial-card" style={{ opacity: 1 }}>
-                  <div className="testimonial-rating">
-                    {renderStars(testimonial.rating)}
-                  </div>
-                  <p className="testimonial-text">
-                    {testimonial.text}
-                  </p>
-                  <div className="testimonial-author">
-                    <div className="author-avatar">
-                      <img src={testimonial.avatar} alt={testimonial.name} />
-                    </div>
-                    <div className="author-info">
-                      <h4>{testimonial.name}</h4>
-                      <p>{testimonial.position}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="testimonial-nav">
-            <button className="nav-btn" onClick={handlePrev} disabled={currentIndex === 0}>
-              <FaChevronLeft />
-            </button>
-            
-            <div className="testimonial-dots">
-              {Array.from({ length: testimonials.length - testimonialsPerView + 1 }, (_, index) => (
-                <div 
-                  key={index}
-                  className={`dot ${index === currentIndex ? 'active' : ''}`}
-                  onClick={() => handleDotClick(index)}
-                />
-              ))}
-            </div>
-            
-            <button className="nav-btn" onClick={handleNext} disabled={currentIndex >= testimonials.length - testimonialsPerView}>
-              <FaChevronRight />
-            </button>
-          </div>
         </Container>
       </section>
     );
   }
 
   return (
-    <section className="client-opinion-section" ref={sectionRef} id="testimonials">
-      <style>{`
-        .client-opinion-section {
-          opacity: 1 !important;
-          visibility: visible !important;
-        }
-        
-        .testimonial-card {
-          opacity: 1 !important;
-          visibility: visible !important;
-        }
-      `}</style>
-      
+    <section 
+      ref={sectionRef} 
+      id="testimonials"
+      style={{
+        padding: '80px 0',
+        background: 'linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)',
+        position: 'relative',
+        overflow: 'hidden',
+        direction: currentLang === 'ar' ? 'rtl' : 'ltr'
+      }}
+    >
       <Container fluid="lg">
         <Row className="justify-content-center">
           <Col xl={10} lg={11} md={12} className="text-center">
-            <h2 className="client-opinion-title" ref={titleRef}>
+            <h2 style={{
+              fontSize: '2.5rem',
+              fontWeight: 800,
+              marginBottom: '1.5rem',
+              color: '#1a1a1a',
+              position: 'relative',
+              display: 'inline-block',
+              fontFamily: currentLang === 'ar' ? "'Cairo', sans-serif" : "'Poppins', sans-serif"
+            }}>
               {t('sectionTitle')}
+              <span style={{
+                position: 'absolute',
+                bottom: '-10px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '80px',
+                height: '4px',
+                background: 'linear-gradient(90deg, #2196F3, #4CAF50)',
+                borderRadius: '2px'
+              }}></span>
             </h2>
-            <p className="client-opinion-subtitle" ref={subtitleRef}>
+            <p style={{
+              fontSize: '1.1rem',
+              color: '#666',
+              maxWidth: '700px',
+              margin: '0 auto 50px',
+              lineHeight: 1.8,
+              fontFamily: currentLang === 'ar' ? "'Cairo', sans-serif" : "'Poppins', sans-serif"
+            }}>
               {t('sectionSubtitle')}
             </p>
           </Col>
         </Row>
 
-        {/* Testimonials Slider */}
-        <div className="testimonial-container">
-          <div className="testimonial-track">
-            {testimonials.map((testimonial, index) => (
-              <div 
-                key={testimonial.id}
-                className="testimonial-card"
-                ref={el => testimonialsRef.current[index] = el}
+        {/* Swiper Slider - بدون modules معقدة */}
+        <Swiper
+          spaceBetween={30}
+          slidesPerView={1}
+          centeredSlides={true}
+          loop={true}
+          speed={800}
+          autoplay={{
+            delay: 4000,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true
+          }}
+          pagination={{
+            clickable: true,
+            dynamicBullets: true
+          }}
+          breakpoints={{
+            640: {
+              slidesPerView: 2,
+              spaceBetween: 20,
+            },
+            1024: {
+              slidesPerView: 3,
+              spaceBetween: 30,
+            },
+          }}
+          style={{
+            padding: '30px 15px 60px',
+            margin: '0 -15px'
+          }}
+        >
+          {testimonials.map((testimonial) => (
+            <SwiperSlide key={testimonial.id}>
+              <div style={{
+                background: 'white',
+                borderRadius: '20px',
+                padding: '30px 25px',
+                boxShadow: '0 10px 40px rgba(0, 0, 0, 0.08)',
+                transition: 'all 0.3s ease',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                position: 'relative',
+                border: '1px solid rgba(255, 255, 255, 0.8)',
+                backdropFilter: 'blur(10px)',
+                margin: '10px 0',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-10px)';
+                e.currentTarget.style.boxShadow = '0 20px 60px rgba(33, 150, 243, 0.15)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 10px 40px rgba(0, 0, 0, 0.08)';
+              }}
               >
-                <div className="testimonial-rating">
+                <FaQuoteLeft style={{
+                  position: 'absolute',
+                  top: '20px',
+                  [currentLang === 'ar' ? 'left' : 'right']: '20px',
+                  color: 'rgba(33, 150, 243, 0.1)',
+                  fontSize: '2.5rem'
+                }} />
+                
+                <div style={{ display: 'flex', gap: '5px', marginBottom: '20px' }}>
                   {renderStars(testimonial.rating)}
                 </div>
-                <p className="testimonial-text">
+                
+                <p style={{
+                  fontSize: '0.95rem',
+                  lineHeight: 1.8,
+                  color: '#555',
+                  marginBottom: '25px',
+                  flex: 1,
+                  fontFamily: currentLang === 'ar' ? "'Cairo', sans-serif" : "'Poppins', sans-serif",
+                  fontStyle: 'italic'
+                }}>
                   {testimonial.text}
                 </p>
-                <div className="testimonial-author">
-                  <div className="author-avatar">
-                    <img src={testimonial.avatar} alt={testimonial.name} />
+                
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '15px',
+                  borderTop: '1px solid rgba(0, 0, 0, 0.05)',
+                  paddingTop: '20px',
+                  marginTop: 'auto'
+                }}>
+                  <div style={{
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '50%',
+                    overflow: 'hidden',
+                    border: '3px solid white',
+                    boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)'
+                  }}>
+                    <img 
+                      src={testimonial.avatar} 
+                      alt={testimonial.name}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                      }}
+                    />
                   </div>
-                  <div className="author-info">
-                    <h4>{testimonial.name}</h4>
-                    <p>{testimonial.position}</p>
+                  <div style={{ flex: 1 }}>
+                    <h4 style={{
+                      fontSize: '1.1rem',
+                      fontWeight: 700,
+                      marginBottom: '5px',
+                      color: '#1a1a1a',
+                      fontFamily: currentLang === 'ar' ? "'Cairo', sans-serif" : "'Poppins', sans-serif"
+                    }}>
+                      {testimonial.name}
+                    </h4>
+                    <p style={{
+                      fontSize: '0.85rem',
+                      color: '#666',
+                      margin: 0,
+                      fontFamily: currentLang === 'ar' ? "'Cairo', sans-serif" : "'Poppins', sans-serif"
+                    }}>
+                      {testimonial.position}
+                    </p>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Navigation Controls */}
-        <div className="testimonial-nav">
-          <button 
-            className="nav-btn" 
-            onClick={handlePrev}
-            disabled={currentIndex === 0}
-          >
-            <FaChevronLeft />
-          </button>
-          
-          <div className="testimonial-dots">
-            {Array.from({ length: testimonials.length - testimonialsPerView + 1 }, (_, index) => (
-              <div 
-                key={index}
-                className={`dot ${index === currentIndex ? 'active' : ''}`}
-                onClick={() => handleDotClick(index)}
-              />
-            ))}
-          </div>
-          
-          <button 
-            className="nav-btn" 
-            onClick={handleNext}
-            disabled={currentIndex >= testimonials.length - testimonialsPerView}
-          >
-            <FaChevronRight />
-          </button>
-        </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
       </Container>
     </section>
   );

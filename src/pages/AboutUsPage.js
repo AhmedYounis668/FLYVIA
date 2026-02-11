@@ -41,7 +41,7 @@ export const AboutUsPage = ({
   visibleSections = ['story', 'mission', 'team', 'whyChooseUs', 'contact'],
   hiddenSections = ['values', 'process']
 }) => {
-  const { currentLang, isInitialized } = useLanguage();
+  const { currentLang, isInitialized } = useLanguage(); // currentLang = 'en' or 'ar' (lowercase)
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -53,9 +53,9 @@ export const AboutUsPage = ({
   const [isMounted, setIsMounted] = useState(false);
   const [swiperLoaded, setSwiperLoaded] = useState(false);
 
-  // الترجمات
+  // الترجمات الكاملة - باستخدام lowercase للغات
   const translations = {
-    EN: {
+    en: {
       pageTitle: "About FLYVIA",
       backToHome: "Back to Home",
       heroTitle: "Pioneering Digital Excellence",
@@ -129,10 +129,18 @@ export const AboutUsPage = ({
         "Competitive pricing"
       ],
       getInTouch: "Ready to Transform Your Business?",
-      contactDescription: "Let's discuss how we can help you achieve your digital goals"
+      contactDescription: "Let's discuss how we can help you achieve your digital goals",
+      provenTrackRecord: "Proven Track Record",
+      industryExpertise: "Industry Expertise",
+      startYourJourney: "Start Your Journey Now",
+      slideCustomSolutions: "Customized Solutions",
+      slideTransparent: "Transparent Communication",
+      slideSupport: "Ongoing Support",
+      slidePricing: "Competitive Pricing",
+      loadingMessage: "Loading About Us..."
     },
-    AR: {
-      pageTitle: "من نحن",
+    ar: {
+      pageTitle: "من نحن - FLYVIA",
       backToHome: "العودة للرئيسية",
       heroTitle: "الريادة في التميز الرقمي",
       heroSubtitle: "تحويل الأعمال من خلال حلول رقمية مبتكرة وشراكات استراتيجية",
@@ -205,14 +213,22 @@ export const AboutUsPage = ({
         "أسعار تنافسية"
       ],
       getInTouch: "مستعد لتحويل عملك؟",
-      contactDescription: "دعنا نناقش كيف يمكننا مساعدتك في تحقيق أهدافك الرقمية"
+      contactDescription: "دعنا نناقش كيف يمكننا مساعدتك في تحقيق أهدافك الرقمية",
+      provenTrackRecord: "سجل حافل بالنجاحات",
+      industryExpertise: "خبرة رائدة في المجال",
+      startYourJourney: "ابدأ رحلتك الآن",
+      slideCustomSolutions: "حلول مخصصة",
+      slideTransparent: "تواصل شفاف",
+      slideSupport: "دعم مستمر",
+      slidePricing: "أسعار تنافسية",
+      loadingMessage: "جاري تحميل صفحة من نحن..."
     }
   };
 
   // دالة محسنة للترجمة مع القيمة الافتراضية
   const t = (key) => {
-    const translation = translations[currentLang] || translations.EN;
-    return translation[key] !== undefined ? translation[key] : translations.EN[key];
+    const translation = translations[currentLang] || translations.en;
+    return translation[key] !== undefined ? translation[key] : translations.en[key];
   };
 
   // دالة مساعدة للتعامل مع المصفوفات بشكل آمن
@@ -368,7 +384,7 @@ export const AboutUsPage = ({
           }} />
           <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
           <Typography variant="h6" sx={{ color: 'text.secondary' }}>
-            Loading About Us...
+            {t('loadingMessage')}
           </Typography>
         </Box>
       </Box>
@@ -381,10 +397,10 @@ export const AboutUsPage = ({
       bgcolor: 'background.default',
       opacity: 1,
       visibility: 'visible',
-      direction: currentLang === 'ar' ? 'rtl' : 'ltr'
+      direction: currentLang === 'ar' ? 'rtl' : 'ltr' // مهم جداً: استخدم 'ar' وليس 'AR'
     }} ref={pageRef}>
       
-      {/* Hero Section - المعدل */}
+      {/* Hero Section */}
       <Box
         sx={{
           height: { xs: 'calc(100vh - 140px)', md: '75vh' },
@@ -787,7 +803,7 @@ export const AboutUsPage = ({
             <Box sx={{ position: 'relative', py: 2 }}>
               <div className="swiper why-choose-us-swiper">
                 <div className="swiper-wrapper">
-                  {/* Swiper slides here - نفس المحتوى السابق */}
+                  {/* Slide 1 - Proven Track Record */}
                   <div className="swiper-slide">
                     <Card sx={{ 
                       height: '320px',
@@ -805,7 +821,7 @@ export const AboutUsPage = ({
                         <TrendingUp sx={{ fontSize: 35 }} />
                       </Box>
                       <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
-                        {currentLang === 'ar' ? 'سجل حافل' : 'Proven Track Record'}
+                        {t('provenTrackRecord')}
                       </Typography>
                       <Typography variant="body1" sx={{ opacity: 0.9, lineHeight: 1.7 }}>
                         {safeArray('benefits')[0]}
@@ -813,7 +829,7 @@ export const AboutUsPage = ({
                     </Card>
                   </div>
 
-                  {/* Add other slides similarly */}
+                  {/* Slide 2 - Industry Expertise */}
                   <div className="swiper-slide">
                     <Card sx={{ 
                       height: '320px',
@@ -831,7 +847,7 @@ export const AboutUsPage = ({
                         <StarIcon sx={{ fontSize: 35 }} />
                       </Box>
                       <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
-                        {currentLang === 'ar' ? 'خبرة رائدة' : 'Industry Expertise'}
+                        {t('industryExpertise')}
                       </Typography>
                       <Typography variant="body1" sx={{ opacity: 0.9, lineHeight: 1.7 }}>
                         {safeArray('benefits')[1]}
@@ -839,7 +855,109 @@ export const AboutUsPage = ({
                     </Card>
                   </div>
 
-                  {/* Add more slides as needed */}
+                  {/* Slide 3 - Customized Solutions */}
+                  <div className="swiper-slide">
+                    <Card sx={{ 
+                      height: '320px',
+                      p: 4,
+                      borderRadius: 3,
+                      background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                      color: 'white',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textAlign: 'center'
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 70, height: 70, borderRadius: '50%', bgcolor: 'rgba(255, 255, 255, 0.2)', mb: 3 }}>
+                        <SettingsIcon sx={{ fontSize: 35 }} />
+                      </Box>
+                      <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
+                        {t('slideCustomSolutions')}
+                      </Typography>
+                      <Typography variant="body1" sx={{ opacity: 0.9, lineHeight: 1.7 }}>
+                        {safeArray('benefits')[2]}
+                      </Typography>
+                    </Card>
+                  </div>
+
+                  {/* Slide 4 - Transparent Communication */}
+                  <div className="swiper-slide">
+                    <Card sx={{ 
+                      height: '320px',
+                      p: 4,
+                      borderRadius: 3,
+                      background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                      color: 'white',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textAlign: 'center'
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 70, height: 70, borderRadius: '50%', bgcolor: 'rgba(255, 255, 255, 0.2)', mb: 3 }}>
+                        <ChatIcon sx={{ fontSize: 35 }} />
+                      </Box>
+                      <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
+                        {t('slideTransparent')}
+                      </Typography>
+                      <Typography variant="body1" sx={{ opacity: 0.9, lineHeight: 1.7 }}>
+                        {safeArray('benefits')[3]}
+                      </Typography>
+                    </Card>
+                  </div>
+
+                  {/* Slide 5 - Ongoing Support */}
+                  <div className="swiper-slide">
+                    <Card sx={{ 
+                      height: '320px',
+                      p: 4,
+                      borderRadius: 3,
+                      background: 'linear-gradient(135deg, #5f2c82 0%, #49a09d 100%)',
+                      color: 'white',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textAlign: 'center'
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 70, height: 70, borderRadius: '50%', bgcolor: 'rgba(255, 255, 255, 0.2)', mb: 3 }}>
+                        <SupportIcon sx={{ fontSize: 35 }} />
+                      </Box>
+                      <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
+                        {t('slideSupport')}
+                      </Typography>
+                      <Typography variant="body1" sx={{ opacity: 0.9, lineHeight: 1.7 }}>
+                        {safeArray('benefits')[4]}
+                      </Typography>
+                    </Card>
+                  </div>
+
+                  {/* Slide 6 - Competitive Pricing */}
+                  <div className="swiper-slide">
+                    <Card sx={{ 
+                      height: '320px',
+                      p: 4,
+                      borderRadius: 3,
+                      background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+                      color: 'white',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textAlign: 'center'
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 70, height: 70, borderRadius: '50%', bgcolor: 'rgba(255, 255, 255, 0.2)', mb: 3 }}>
+                        <AttachMoneyIcon sx={{ fontSize: 35 }} />
+                      </Box>
+                      <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
+                        {t('slidePricing')}
+                      </Typography>
+                      <Typography variant="body1" sx={{ opacity: 0.9, lineHeight: 1.7 }}>
+                        {safeArray('benefits')[5]}
+                      </Typography>
+                    </Card>
+                  </div>
                 </div>
                 
                 <div className="swiper-pagination"></div>
@@ -864,7 +982,7 @@ export const AboutUsPage = ({
                   transition: 'all 0.3s ease'
                 }}
               >
-                {currentLang === 'ar' ? 'ابدأ رحلتك الآن' : 'Start Your Journey Now'}
+                {t('startYourJourney')}
                 <RocketIcon sx={{ ml: 1, fontSize: 20 }} />
               </Button>
             </Box>
@@ -872,42 +990,44 @@ export const AboutUsPage = ({
         )}
 
         {/* Contact CTA */}
-        <Box sx={{ 
-          textAlign: 'center', 
-          mt: 10,
-          p: 6,
-          borderRadius: 3,
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white'
-        }}>
-          <Typography variant="h3" sx={{ fontWeight: 700, mb: 2 }}>
-            {t('getInTouch')}
-          </Typography>
-          <Typography variant="h6" sx={{ mb: 4, opacity: 0.9 }}>
-            {t('contactDescription')}
-          </Typography>
-          <Button
-            variant="contained"
-            size="large"
-            onClick={() => navigate('/contact')}
-            sx={{
-              px: 6,
-              py: 1.5,
-              borderRadius: '25px',
-              fontWeight: 600,
-              bgcolor: 'white',
-              color: 'primary.main',
-              '&:hover': {
-                bgcolor: 'rgba(255, 255, 255, 0.9)',
-                transform: 'translateY(-3px)',
-                boxShadow: '0 12px 35px rgba(255, 255, 255, 0.4)',
-              },
-              transition: 'all 0.3s ease'
-            }}
-          >
-            {t('backToHome')}
-          </Button>
-        </Box>
+        {shouldShowSection('contact') && (
+          <Box sx={{ 
+            textAlign: 'center', 
+            mt: 10,
+            p: 6,
+            borderRadius: 3,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white'
+          }}>
+            <Typography variant="h3" sx={{ fontWeight: 700, mb: 2, fontSize: { xs: '1.8rem', md: '2.5rem' } }}>
+              {t('getInTouch')}
+            </Typography>
+            <Typography variant="h6" sx={{ mb: 4, opacity: 0.9, fontSize: { xs: '1rem', md: '1.25rem' } }}>
+              {t('contactDescription')}
+            </Typography>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={() => navigate('/contact')}
+              sx={{
+                px: 6,
+                py: 1.5,
+                borderRadius: '25px',
+                fontWeight: 600,
+                bgcolor: 'white',
+                color: 'primary.main',
+                '&:hover': {
+                  bgcolor: 'rgba(255, 255, 255, 0.9)',
+                  transform: 'translateY(-3px)',
+                  boxShadow: '0 12px 35px rgba(255, 255, 255, 0.4)',
+                },
+                transition: 'all 0.3s ease'
+              }}
+            >
+              {t('backToHome')}
+            </Button>
+          </Box>
+        )}
       </Container>
     </Box>
   );

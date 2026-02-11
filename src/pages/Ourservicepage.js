@@ -21,20 +21,20 @@ import { useLanguage } from '../component/LanguageProvider';
 // بيانات الخدمات لكل دولة مع دعم اللغات
 const getServicesData = (lang) => ({
   spain: {
-    title: lang === 'AR' ? 'إسبانيا' : 'Spain',
-    subtitle: lang === 'AR' ? 'السوق الأوروبي المتميز' : 'Premium European Market',
-    description: lang === 'AR' 
+    title: lang === 'ar' ? 'إسبانيا' : 'Spain',
+    subtitle: lang === 'ar' ? 'السوق الأوروبي المتميز' : 'Premium European Market',
+    description: lang === 'ar' 
       ? 'حلول أعمال متكاملة مصممة خصيصًا للسوق الإسباني النابض بالحياة'
       : 'Integrated business solutions tailored for the vibrant Spanish market',
     icon: <LocationOn />,
     color: "#2196F3",
     services: [
       {
-        title: lang === 'AR' ? 'التحول الرقمي' : 'Digital Transformation',
-        description: lang === 'AR' 
+        title: lang === 'ar' ? 'التحول الرقمي' : 'Digital Transformation',
+        description: lang === 'ar' 
           ? 'نقدم حلولاً رقمية شاملة لتحديث وتطوير عمليات أعمالك في السوق الإسباني، بما في ذلك تطوير أنظمة التجارة الإلكترونية المتقدمة، هجرة البنية التحتية إلى السحابة، دمج تقنيات الذكاء الاصطناعي، وأتمتة العمليات لتحسين الكفاءة والإنتاجية.'
           : 'We provide comprehensive digital solutions to modernize and develop your business operations in the Spanish market, including advanced e-commerce systems development, cloud infrastructure migration, AI technology integration, and process automation to improve efficiency and productivity.',
-        features: lang === 'AR' 
+        features: lang === 'ar' 
           ? [
             "تطوير أنظمة التجارة الإلكترونية المتقدمة",
             "هجرة البنية التحتية إلى السحابة الآمنة", 
@@ -53,11 +53,11 @@ const getServicesData = (lang) => ({
           ]
       },
       {
-        title: lang === 'AR' ? 'استشارات الأعمال' : 'Business Consulting',
-        description: lang === 'AR'
+        title: lang === 'ar' ? 'استشارات الأعمال' : 'Business Consulting',
+        description: lang === 'ar'
           ? 'نوفر خدمات استشارية استراتيجية متخصصة تساعدك على التوسع والنمو في السوق الإسباني، من خلال تحليل السوق الدقيق، وضع استراتيجيات الأعمال الفعالة، التخطيط المالي المحكم، وإدارة المخاطر بطريقة احترافية.'
           : 'We provide specialized strategic consulting services to help you expand and grow in the Spanish market, through accurate market analysis, effective business strategies, meticulous financial planning, and professional risk management.',
-        features: lang === 'AR'
+        features: lang === 'ar'
           ? [
             "تحليل السوق والمنافسة الشامل",
             "تطوير استراتيجيات الأعمال والتوسع",
@@ -76,11 +76,11 @@ const getServicesData = (lang) => ({
           ]
       },
       {
-        title: lang === 'AR' ? 'تطوير العلامات التجارية الفاخرة' : 'Luxury Brand Development',
-        description: lang === 'AR'
+        title: lang === 'ar' ? 'تطوير العلامات التجارية الفاخرة' : 'Luxury Brand Development',
+        description: lang === 'ar'
           ? 'نساعدك على رفع مكانة علامتك التجارية في سوق إسبانيا التنافسي للسلع الفاخرة، من خلال تطوير هوية علامة تجارية مميزة، استراتيجيات تسويقية مبتكرة، تجارب عملاء VIP استثنائية، وتميز في تجربة التجزئة.'
           : 'We help elevate your brand presence in Spain\'s competitive luxury market, through distinctive brand identity development, innovative marketing strategies, exceptional VIP customer experiences, and retail excellence.',
-        features: lang === 'AR'
+        features: lang === 'ar'
           ? [
             "تطوير هوية العلامة التجارية الفاخرة",
             "استراتيجيات التسويق الراقي والمبتكر",
@@ -99,11 +99,11 @@ const getServicesData = (lang) => ({
           ]
       },
       {
-        title: lang === 'AR' ? 'حلول الضيافة' : 'Hospitality Solutions',
-        description: lang === 'AR'
+        title: lang === 'ar' ? 'حلول الضيافة' : 'Hospitality Solutions',
+        description: lang === 'ar'
           ? 'نقدم حلولاً متميزة ومتكاملة لصناعة الضيافة العالمية في إسبانيا، تشمل إدارة الفنادق والمنتجعات، تحسين تجربة الضيوف، تحسين الإيرادات، وتطبيق حلول الاستدامة البيئية.'
           : 'We provide premium integrated solutions for Spain\'s world-class hospitality industry, including hotel and resort management, guest experience enhancement, revenue optimization, and environmental sustainability solutions.',
-        features: lang === 'AR'
+        features: lang === 'ar'
           ? [
             "إدارة الفنادق والمنتجعات الشاملة",
             "تحسين تجربة الضيوف والخدمات",
@@ -124,20 +124,20 @@ const getServicesData = (lang) => ({
     ]
   },
   uae: {
-    title: lang === 'AR' ? 'الإمارات العربية المتحدة' : 'United Arab Emirates',
-    subtitle: lang === 'AR' ? 'مركز الأعمال العالمي' : 'Global Business Hub',
-    description: lang === 'AR' 
+    title: lang === 'ar' ? 'الإمارات العربية المتحدة' : 'United Arab Emirates',
+    subtitle: lang === 'ar' ? 'مركز الأعمال العالمي' : 'Global Business Hub',
+    description: lang === 'ar' 
       ? 'حلول مبتكرة ومتطورة للسوق الإماراتي الديناميكي والمتنامي، مصممة لتحقيق النجاح في قلب العالم'
       : 'Innovative and advanced solutions for the dynamic and growing UAE market, designed for success at the heart of the world',
     icon: <LocationOn />,
     color: "#00BCD4",
     services: [
       {
-        title: lang === 'AR' ? 'حلول المدن الذكية' : 'Smart City Solutions',
-        description: lang === 'AR'
+        title: lang === 'ar' ? 'حلول المدن الذكية' : 'Smart City Solutions',
+        description: lang === 'ar'
           ? 'نطور حلولاً تكنولوجية متقدمة لمبادرات المدن الذكية في الإمارات، تشمل دمج أنظمة إنترنت الأشياء، تطوير البنية التحتية الذكية، تطبيقات الذكاء الاصطناعي، وتحليلات البيانات المتقدمة.'
           : 'We develop advanced technology solutions for smart city initiatives in the UAE, including IoT system integration, smart infrastructure development, AI applications, and advanced data analytics.',
-        features: lang === 'AR'
+        features: lang === 'ar'
           ? [
             "دمج أنظمة إنترنت الأشياء المتكاملة",
             "تطوير البنية التحتية الذكية",
@@ -156,11 +156,11 @@ const getServicesData = (lang) => ({
           ]
       },
       {
-        title: lang === 'AR' ? 'التجزئة الفاخرة' : 'Luxury Retail',
-        description: lang === 'AR'
+        title: lang === 'ar' ? 'التجزئة الفاخرة' : 'Luxury Retail',
+        description: lang === 'ar'
           ? 'نقدم حلول تجزئة حصرية ومبتكرة للسوق الفاخر في الإمارات، من استراتيجيات التجزئة الفاخرة إلى إدارة علاقات العملاء VIP والتجارب الرقمية المتطورة.'
           : 'We provide exclusive and innovative retail solutions for the UAE\'s luxury market, from luxury retail strategies to VIP customer relationship management and advanced digital experiences.',
-        features: lang === 'AR'
+        features: lang === 'ar'
           ? [
             "استراتيجيات التجزئة الفاخرة المخصصة",
             "إدارة علاقات العملاء VIP",
@@ -179,11 +179,11 @@ const getServicesData = (lang) => ({
           ]
       },
       {
-        title: lang === 'AR' ? 'إعداد الأعمال' : 'Business Setup',
-        description: lang === 'AR'
+        title: lang === 'ar' ? 'إعداد الأعمال' : 'Business Setup',
+        description: lang === 'ar'
           ? 'نوفر خدمات كاملة وشاملة لإعداد الأعمال والتراخيص في الإمارات، بدءاً من تأسيس الشركات وخدمات PRO إلى الاستشارات القانونية والدعم المصرفي.'
           : 'We provide comprehensive business setup and licensing services in the UAE, from company formation and PRO services to legal consultations and banking support.',
-        features: lang === 'AR'
+        features: lang === 'ar'
           ? [
             "تأسيس الشركات بكافة أنواعها",
             "خدمات PRO والإجراءات الحكومية",
@@ -202,11 +202,11 @@ const getServicesData = (lang) => ({
           ]
       },
       {
-        title: lang === 'AR' ? 'تكنولوجيا العقارات' : 'Real Estate Technology',
-        description: lang === 'AR'
+        title: lang === 'ar' ? 'تكنولوجيا العقارات' : 'Real Estate Technology',
+        description: lang === 'ar'
           ? 'نطور حلول تكنولوجية متقدمة لقطاع العقارات المزدهر في الإمارات، تشمل حلول Proptech، الجولات الافتراضية، عقود البلوكشين، وتكنولوجيا المنازل الذكية.'
           : 'We develop advanced technology solutions for the booming real estate sector in the UAE, including PropTech solutions, virtual tours, blockchain contracts, and smart home technology.',
-        features: lang === 'AR'
+        features: lang === 'ar'
           ? [
             "حلول Proptech المتكاملة",
             "جولات افتراضية ثلاثية الأبعاد",
@@ -227,20 +227,20 @@ const getServicesData = (lang) => ({
     ]
   },
   saudi: {
-    title: lang === 'AR' ? 'المملكة العربية السعودية' : 'Saudi Arabia',
-    subtitle: lang === 'AR' ? 'قلب رؤية 2030' : 'Heart of Vision 2030',
-    description: lang === 'AR' 
+    title: lang === 'ar' ? 'المملكة العربية السعودية' : 'Saudi Arabia',
+    subtitle: lang === 'ar' ? 'قلب رؤية 2030' : 'Heart of Vision 2030',
+    description: lang === 'ar' 
       ? 'شراكات استراتيجية ومشاريع مبتكرة لدعم مبادرات التحول الوطني السعودي وتحقيق أهداف رؤية 2030'
       : 'Strategic partnerships and innovative projects to support Saudi Arabia\'s national transformation initiatives and achieve Vision 2030 goals',
     icon: <LocationOn />,
     color: "#FF5722",
     services: [
       {
-        title: lang === 'AR' ? 'مشاريع رؤية 2030' : 'Vision 2030 Projects',
-        description: lang === 'AR'
+        title: lang === 'ar' ? 'مشاريع رؤية 2030' : 'Vision 2030 Projects',
+        description: lang === 'ar'
           ? 'نشارك في شراكات استراتيجية لمبادرات رؤية 2030 في السعودية، بما في ذلك مشاريع نيوم العملاقة، تطوير البحر الأحمر، مدينة القدية الترفيهية، ومدينة روشن الاقتصادية.'
           : 'We participate in strategic partnerships for Saudi Arabia\'s Vision 2030 initiatives, including the giant NEOM projects, Red Sea development, Qiddiya entertainment city, and ROSEN economic city.',
-        features: lang === 'AR'
+        features: lang === 'ar'
           ? [
             "شراكات مشاريع نيوم العملاقة",
             "تطوير مشاريع البحر الأحمر",
@@ -259,11 +259,11 @@ const getServicesData = (lang) => ({
           ]
       },
       {
-        title: lang === 'AR' ? 'الطاقة والاستدامة' : 'Energy & Sustainability',
-        description: lang === 'AR'
+        title: lang === 'ar' ? 'الطاقة والاستدامة' : 'Energy & Sustainability',
+        description: lang === 'ar'
           ? 'نقدم حلول الطاقة المستدامة والمتجددة للسوق السعودي المتطور، مع التركيز على تقليل البصمة الكربونية والتحول نحو الطاقة النظيفة.'
           : 'We provide sustainable and renewable energy solutions for Saudi Arabia\'s evolving market, focusing on carbon footprint reduction and transition to clean energy.',
-        features: lang === 'AR'
+        features: lang === 'ar'
           ? [
             "حلول الطاقة الشمسية والمتجددة",
             "برامج تقليل الانبعاثات الكربونية",
@@ -282,11 +282,11 @@ const getServicesData = (lang) => ({
           ]
       },
       {
-        title: lang === 'AR' ? 'تطوير السياحة' : 'Tourism Development',
-        description: lang === 'AR'
+        title: lang === 'ar' ? 'تطوير السياحة' : 'Tourism Development',
+        description: lang === 'ar'
           ? 'نطور حلولاً شاملة ومتكاملة للسياحة والضيافة في السعودية، بدءاً من استراتيجيات السياحة الوطنية إلى تطوير الفنادق والوجهات السياحية.'
           : 'We develop comprehensive tourism and hospitality solutions in Saudi Arabia, from national tourism strategies to hotel and destination development.',
-        features: lang === 'AR'
+        features: lang === 'ar'
           ? [
             "استراتيجيات السياحة الوطنية والإقليمية",
             "تطوير الفنادق والمنتجعات",
@@ -305,11 +305,11 @@ const getServicesData = (lang) => ({
           ]
       },
       {
-        title: lang === 'AR' ? 'ابتكار الرعاية الصحية' : 'Healthcare Innovation',
-        description: lang === 'AR'
+        title: lang === 'ar' ? 'ابتكار الرعاية الصحية' : 'Healthcare Innovation',
+        description: lang === 'ar'
           ? 'نطور حلول رعاية صحية متقدمة ومبتكرة للقطاع الصحي المتنامي في السعودية، مع التركيز على الطب عن بعد والإدارة الذكية للمستشفيات.'
           : 'We develop advanced and innovative healthcare solutions for Saudi Arabia\'s growing healthcare sector, focusing on telemedicine and smart hospital management.',
-        features: lang === 'AR'
+        features: lang === 'ar'
           ? [
             "حلول الطب عن بعد والاستشارات الطبية",
             "أنظمة إدارة المستشفيات الذكية",
@@ -335,25 +335,25 @@ const getServicesData = (lang) => ({
 const getStatsData = (lang) => [
   { 
     value: '200+', 
-    label: lang === 'AR' ? 'عميل عالمي' : 'Global Clients', 
+    label: lang === 'ar' ? 'عميل عالمي' : 'Global Clients', 
     icon: <Group />, 
     color: '#2196F3' 
   },
   { 
     value: '15+', 
-    label: lang === 'AR' ? 'سنوات خبرة' : 'Years Experience', 
+    label: lang === 'ar' ? 'سنوات خبرة' : 'Years Experience', 
     icon: <TrendingUp />, 
     color: '#4CAF50' 
   },
   { 
     value: '50+', 
-    label: lang === 'AR' ? 'دولة نخدمها' : 'Countries Served', 
+    label: lang === 'ar' ? 'دولة نخدمها' : 'Countries Served', 
     icon: <LocationOn />, 
     color: '#FF9800' 
   },
   { 
     value: '99%', 
-    label: lang === 'AR' ? 'رضا العملاء' : 'Client Satisfaction', 
+    label: lang === 'ar' ? 'رضا العملاء' : 'Client Satisfaction', 
     icon: <CheckCircle />, 
     color: '#E91E63' 
   }
@@ -545,16 +545,16 @@ const CountryServiceSection = ({ countryData, index, currentLang }) => {
                   borderBottom: `3px solid ${alpha(countryData.color, 0.3)}`,
                   pb: 1,
                   flexGrow: 1,
-                  textAlign: currentLang === 'AR' ? 'right' : 'left',
-                  direction: currentLang === 'AR' ? 'rtl' : 'ltr',
+                  textAlign: currentLang === 'ar' ? 'right' : 'left',
+                  direction: currentLang === 'ar' ? 'rtl' : 'ltr',
                   position: 'relative',
                   overflow: 'hidden',
                   '&::after': {
                     content: '""',
                     position: 'absolute',
                     bottom: 0,
-                    left: currentLang === 'AR' ? 'auto' : 0,
-                    right: currentLang === 'AR' ? 0 : 'auto',
+                    left: currentLang === 'ar' ? 'auto' : 0,
+                    right: currentLang === 'ar' ? 0 : 'auto',
                     width: isVisible ? '100%' : '0%',
                     height: '3px',
                     backgroundColor: countryData.color,
@@ -574,8 +574,8 @@ const CountryServiceSection = ({ countryData, index, currentLang }) => {
                 fontSize: '1.1rem',
                 lineHeight: 1.8,
                 mb: 4,
-                textAlign: currentLang === 'AR' ? 'right' : 'left',
-                direction: currentLang === 'AR' ? 'rtl' : 'ltr'
+                textAlign: currentLang === 'ar' ? 'right' : 'left',
+                direction: currentLang === 'ar' ? 'rtl' : 'ltr'
               }}
             >
               {service.description}
@@ -584,7 +584,7 @@ const CountryServiceSection = ({ countryData, index, currentLang }) => {
             {/* المميزات على شكل قائمة */}
             <Box sx={{ 
               mb: 4,
-              direction: currentLang === 'AR' ? 'rtl' : 'ltr'
+              direction: currentLang === 'ar' ? 'rtl' : 'ltr'
             }}>
               <Typography
                 variant="h6"
@@ -595,17 +595,17 @@ const CountryServiceSection = ({ countryData, index, currentLang }) => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 1,
-                  flexDirection: currentLang === 'AR' ? 'row-reverse' : 'row',
-                  justifyContent: currentLang === 'AR' ? 'flex-end' : 'flex-start'
+                  flexDirection: currentLang === 'ar' ? 'row-reverse' : 'row',
+                  justifyContent: currentLang === 'ar' ? 'flex-end' : 'flex-start'
                 }}
               >
-                {currentLang === 'AR' ? 'الخدمات المقدمة' : 'Services Offered'}
+                {currentLang === 'ar' ? 'الخدمات المقدمة' : 'Services Offered'}
               </Typography>
               
               <Box sx={{ 
-                pl: currentLang === 'AR' ? 0 : 2,
-                pr: currentLang === 'AR' ? 2 : 0,
-                direction: currentLang === 'AR' ? 'rtl' : 'ltr',
+                pl: currentLang === 'ar' ? 0 : 2,
+                pr: currentLang === 'ar' ? 2 : 0,
+                direction: currentLang === 'ar' ? 'rtl' : 'ltr',
               }}>
                 {service.features.map((feature, featureIdx) => (
                   <Box 
@@ -613,8 +613,8 @@ const CountryServiceSection = ({ countryData, index, currentLang }) => {
                     sx={{ 
                       py: 2,
                       px: 3,
-                      borderLeft: currentLang === 'AR' ? 'none' : `3px solid ${alpha(countryData.color, 0.2)}`,
-                      borderRight: currentLang === 'AR' ? `3px solid ${alpha(countryData.color, 0.2)}` : 'none',
+                      borderLeft: currentLang === 'ar' ? 'none' : `3px solid ${alpha(countryData.color, 0.2)}`,
+                      borderRight: currentLang === 'ar' ? `3px solid ${alpha(countryData.color, 0.2)}` : 'none',
                       mb: 1.5,
                       backgroundColor: alpha(countryData.color, 0.03),
                       borderRadius: 2,
@@ -624,7 +624,7 @@ const CountryServiceSection = ({ countryData, index, currentLang }) => {
                       '@keyframes fadeIn': {
                         'from': {
                           opacity: 0,
-                          transform: currentLang === 'AR' ? 'translateX(20px)' : 'translateX(-20px)'
+                          transform: currentLang === 'ar' ? 'translateX(20px)' : 'translateX(-20px)'
                         },
                         'to': {
                           opacity: 1,
@@ -633,9 +633,9 @@ const CountryServiceSection = ({ countryData, index, currentLang }) => {
                       },
                       '&:hover': {
                         backgroundColor: alpha(countryData.color, 0.08),
-                        transform: currentLang === 'AR' ? 'translateX(-5px)' : 'translateX(5px)',
-                        borderLeft: currentLang === 'AR' ? 'none' : `3px solid ${countryData.color}`,
-                        borderRight: currentLang === 'AR' ? `3px solid ${countryData.color}` : 'none',
+                        transform: currentLang === 'ar' ? 'translateX(-5px)' : 'translateX(5px)',
+                        borderLeft: currentLang === 'ar' ? 'none' : `3px solid ${countryData.color}`,
+                        borderRight: currentLang === 'ar' ? `3px solid ${countryData.color}` : 'none',
                         boxShadow: `0 5px 15px ${alpha(countryData.color, 0.1)}`
                       },
                       display: 'flex',
@@ -671,8 +671,8 @@ const CountryServiceSection = ({ countryData, index, currentLang }) => {
                         color: '#555555',
                         fontSize: '1rem',
                         lineHeight: 1.6,
-                        textAlign: currentLang === 'AR' ? 'right' : 'left',
-                        direction: currentLang === 'AR' ? 'rtl' : 'ltr'
+                        textAlign: currentLang === 'ar' ? 'right' : 'left',
+                        direction: currentLang === 'ar' ? 'rtl' : 'ltr'
                       }}
                     >
                       {feature}
@@ -700,21 +700,21 @@ const CountryServiceSection = ({ countryData, index, currentLang }) => {
         }}
       >
         <Typography variant="h5" sx={{ color: '#1a1a1a', mb: 2, fontWeight: 600 }}>
-          {currentLang === 'AR' 
+          {currentLang === 'ar' 
             ? `مستعد للتوسع في ${countryData.title}؟`
             : `Ready to Expand in ${countryData.title}?`
           }
         </Typography>
         <Typography variant="body1" sx={{ color: '#666666', mb: 3, maxWidth: '600px', mx: 'auto' }}>
-          {currentLang === 'AR'
+          {currentLang === 'ar'
             ? 'احصل على استشارة مجانية ومخصصة لاحتياجات عملك في هذه السوق.'
             : 'Get a free, personalized consultation for your business needs in this market.'}
         </Typography>
         <Button
           variant="contained"
           size="medium"
-          endIcon={currentLang === 'AR' ? null : <ArrowForward />}
-          startIcon={currentLang === 'AR' ? <ArrowForward sx={{ transform: 'rotate(180deg)' }} /> : null}
+          endIcon={currentLang === 'ar' ? null : <ArrowForward />}
+          startIcon={currentLang === 'ar' ? <ArrowForward sx={{ transform: 'rotate(180deg)' }} /> : null}
           sx={{
             background: `linear-gradient(45deg, ${countryData.color}, ${alpha(countryData.color, 0.7)})`,
             borderRadius: 2,
@@ -743,7 +743,7 @@ const CountryServiceSection = ({ countryData, index, currentLang }) => {
             transition: 'all 0.3s'
           }}
         >
-          {currentLang === 'AR' ? 'احصل على استشارة مجانية' : 'Get Free Consultation'}
+          {currentLang === 'ar' ? 'احصل على استشارة مجانية' : 'Get Free Consultation'}
         </Button>
       </Box>
     </Box>
@@ -843,7 +843,7 @@ export const Ourservicepage = () => {
     <Box sx={{ 
       minHeight: '100vh', 
       bgcolor: '#ffffff',
-      direction: currentLang === 'AR' ? 'rtl' : 'ltr'
+      direction: currentLang === 'ar' ? 'rtl' : 'ltr'
     }}>
       {/* Hero Section */}
       <Box
@@ -888,7 +888,7 @@ export const Ourservicepage = () => {
                 textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
               }}
             >
-              {currentLang === 'AR' ? 'خدماتنا العالمية' : 'Our Global Services'}
+              {currentLang === 'ar' ? 'خدماتنا العالمية' : 'Our Global Services'}
             </Typography>
             
             <Typography
@@ -907,7 +907,7 @@ export const Ourservicepage = () => {
                 textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
               }}
             >
-              {currentLang === 'AR' 
+              {currentLang === 'ar' 
                 ? 'حلول أعمال متميزة مصممة خصيصًا للأسواق الدولية الرئيسية'
                 : 'Premium business solutions specifically designed for key international markets'}
             </Typography>
@@ -933,7 +933,7 @@ export const Ourservicepage = () => {
               fontWeight: 700
             }}
           >
-            {currentLang === 'AR' ? 'استكشف خدماتنا حسب الدولة' : 'Explore Our Services by Country'}
+            {currentLang === 'ar' ? 'استكشف خدماتنا حسب الدولة' : 'Explore Our Services by Country'}
           </Typography>
           
           <Box sx={{ 
@@ -1022,7 +1022,7 @@ export const Ourservicepage = () => {
               transition: 'opacity 0.8s ease, transform 0.8s ease'
             }}
           >
-            {currentLang === 'AR' ? 'أرقامنا في العالم' : 'Our Global Numbers'}
+            {currentLang === 'ar' ? 'أرقامنا في العالم' : 'Our Global Numbers'}
           </Typography>
           <Box sx={{ 
             display: 'flex', 
@@ -1141,7 +1141,7 @@ export const Ourservicepage = () => {
               }
             }}
           >
-            {currentLang === 'AR' ? 'خدماتنا في مختلف الدول' : 'Our Services Across Countries'}
+            {currentLang === 'ar' ? 'خدماتنا في مختلف الدول' : 'Our Services Across Countries'}
           </Typography>
           <Typography
             variant="h6"
@@ -1153,7 +1153,7 @@ export const Ourservicepage = () => {
               lineHeight: 1.6
             }}
           >
-            {currentLang === 'AR'
+            {currentLang === 'ar'
               ? 'اكتشف كيف نقدم حلولاً مخصصة لكل سوق دولي نعمل فيه'
               : 'Discover how we deliver tailored solutions for every international market we serve'}
           </Typography>
